@@ -97,14 +97,14 @@
   },
 
   // Настройки оформления и интерфейса (для совместимости с Cursor)
-  "workbench.colorTheme": "Default Light+",
+  // Используется Atom One Light - популярная приглушенная светлая тема
+  "workbench.colorTheme": "Atom One Light",
   "workbench.iconTheme": "vs-seti",
   "workbench.startupEditor": "welcomePage",
   "workbench.editor.enablePreview": true,
   "workbench.editor.enablePreviewFromQuickOpen": true,
   "workbench.sideBar.location": "left",
   "workbench.panel.defaultLocation": "bottom",
-  "workbench.activityBar.visible": true,
   "workbench.statusBar.visible": true,
   "workbench.menuBar.visibility": "default",
 
@@ -139,7 +139,7 @@
   "breadcrumbs.symbolPath": "on",
 
   // Настройки вкладок редактора
-  "workbench.editor.showTabs": true,
+  "workbench.editor.showTabs": "multiple",
   "workbench.editor.tabSizing": "fit",
   "workbench.editor.tabCloseButton": "right",
   "workbench.editor.wrapTabs": false,
@@ -165,7 +165,7 @@
   // Настройки работы с несколькими курсорами
   "editor.multiCursorModifier": "ctrlCmd",
   "editor.selectionHighlight": true,
-  "editor.occurrencesHighlight": true,
+  "editor.occurrencesHighlight": "singleFile",
   "editor.selectionClipboard": true,
 
   // Настройки автодополнения
@@ -224,6 +224,7 @@
   "workbench.editor.enablePreviewFromCodeNavigation": true,
 
   // Язык интерфейса (если поддерживается)
-  "locale": "ru"
+  "locale": "ru",
+  "workbench.editor.tabActionLocation": "right"
 }
 
