@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" :data-bs-theme="theme">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -54,14 +54,10 @@
     <!-- Vue.js 3 -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 
-    <!-- UI функциональность -->
-    <script src="ui.js"></script>
-
     <script>
         const { createApp } = Vue;
 
-        // Создать конфигурацию Vue приложения
-        const appConfig = {
+        createApp({
             data() {
                 return {
                     vueVersion: '3.x',
@@ -72,17 +68,36 @@
                 // Проверка версии Vue
                 this.vueVersion = Vue.version || '3.x';
 
+                // Загрузить сохраненную тему из localStorage
+                const savedTheme = localStorage.getItem('theme');
+                if (savedTheme) {
+                    this.theme = savedTheme;
+                }
+
+                // Применить тему к элементу <html>
+                this.applyTheme();
+
                 console.log('Vue.js загружен:', this.vueVersion);
                 console.log('Bootstrap загружен');
                 console.log('Font Awesome загружен');
+            },
+            watch: {
+                theme(newTheme) {
+                    this.applyTheme();
+                }
+            },
+            methods: {
+                applyTheme() {
+                    // Применить тему к элементу <html>
+                    document.documentElement.setAttribute('data-bs-theme', this.theme);
+                },
+                toggleTheme() {
+                    this.theme = this.theme === 'light' ? 'dark' : 'light';
+                    // Сохранить выбор в localStorage
+                    localStorage.setItem('theme', this.theme);
+                }
             }
-        };
-
-        // Инициализировать UI функциональность
-        const appWithUI = initThemeToggle(appConfig);
-
-        // Создать и монтировать приложение
-        createApp(appWithUI).mount('#app');
+        }).mount('#app');
     </script>
 </body>
 </html>
