@@ -3,10 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>BOT - Statistics/ToDo</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+
+    <style>
+        /* Дополнительные стили приложения */
+        body {
+            min-height: 100vh;
+        }
+    </style>
 </head>
 <body>
-    
+    <div id="app">
+        <div class="container-fluid py-4">
+            <header class="mb-4">
+                <h1 class="display-4">BOT</h1>
+                <p class="lead">Statistics/ToDo Application</p>
+            </header>
+
+            <main>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Добро пожаловать!</h5>
+                                <p class="card-text">Приложение готово к работе.</p>
+                                <p class="text-muted">Vue.js: <span class="badge bg-success">{{ vueVersion }}</span></p>
+                                <p class="text-muted">Bootstrap: <span class="badge bg-primary">5.3.2</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle (включает Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+    <!-- Vue.js 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    vueVersion: '3.x'
+                }
+            },
+            mounted() {
+                // Проверка версии Vue
+                this.vueVersion = Vue.version || '3.x';
+                console.log('Vue.js загружен:', this.vueVersion);
+                console.log('Bootstrap загружен');
+            }
+        }).mount('#app');
+    </script>
 </body>
 </html>
-
