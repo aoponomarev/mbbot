@@ -1,0 +1,229 @@
+{
+  // Настройки проекта для совместимости между Cursor и VS Code
+  // Эти настройки синхронизируются с настройками Cursor для максимальной совместимости
+
+  // Кодировка файлов
+  "files.encoding": "utf8",
+  "files.eol": "\n",
+  "files.insertFinalNewline": true,
+  "files.trimTrailingWhitespace": true,
+
+  // Настройки терминала
+  "terminal.integrated.defaultProfile.windows": "Git Bash",
+  "terminal.integrated.profiles.windows": {
+    "Git Bash": {
+      "path": "C:\\Program Files\\Git\\bin\\bash.exe"
+    }
+  },
+  "terminal.integrated.cursorBlinking": true,
+  "terminal.integrated.cursorStyle": "line",
+  "terminal.integrated.fontSize": 14,
+  "terminal.integrated.fontFamily": "Consolas, 'Courier New', monospace",
+  "terminal.integrated.copyOnSelection": false,
+  "terminal.integrated.rightClickBehavior": "default",
+
+  // Настройки для HTML
+  "html.format.enable": true,
+  "html.format.wrapLineLength": 120,
+  "html.format.wrapAttributes": "auto",
+  "html.suggest.html5": true,
+  "html.autoClosingTags": true,
+  "html.autoCreateQuotes": true,
+  "html.completion.attributeDefaultValue": "doublequotes",
+
+  // Настройки Emmet для HTML
+  "emmet.includeLanguages": {
+    "html": "html"
+  },
+  "emmet.triggerExpansionOnTab": true,
+  "emmet.showExpandedAbbreviation": "always",
+
+  // Настройки редактора
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  "editor.formatOnSave": false,
+  "editor.formatOnPaste": false,
+  "editor.wordWrap": "off",
+  "editor.wordWrapColumn": 120,
+  "editor.wrappingIndent": "none",
+  "editor.autoClosingBrackets": "always",
+  "editor.autoClosingQuotes": "always",
+  "editor.autoSurround": "languageDefined",
+  "editor.suggestSelection": "first",
+  "editor.quickSuggestions": {
+    "other": "on",
+    "comments": "off",
+    "strings": "off"
+  },
+  "editor.suggestOnTriggerCharacters": true,
+  "editor.acceptSuggestionOnCommitCharacter": true,
+  "editor.acceptSuggestionOnEnter": "on",
+  "editor.tabCompletion": "on",
+  "editor.snippetSuggestions": "top",
+  "editor.bracketPairColorization.enabled": true,
+  "editor.guides.bracketPairs": "active",
+  "editor.inlineSuggest.enabled": true,
+
+  // Настройки файлов
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true
+  },
+  "files.autoSave": "off",
+  "files.autoSaveDelay": 1000,
+  "files.hotExit": "onExit",
+  "files.restoreUndoStack": true,
+  "files.associations": {},
+  "files.defaultLanguage": "html",
+
+  // Настройки поиска
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/.git": true
+  },
+  "search.useIgnoreFiles": true,
+  "search.useGlobalIgnoreFiles": true,
+  "search.smartCase": true,
+  "search.useReplacePreview": true,
+  "search.showLineNumbers": true,
+
+  // Настройки поиска в файлах
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/**": true,
+    "**/.DS_Store": true
+  },
+
+  // Настройки оформления и интерфейса (для совместимости с Cursor)
+  "workbench.colorTheme": "Default Light+",
+  "workbench.iconTheme": "vs-seti",
+  "workbench.startupEditor": "welcomePage",
+  "workbench.editor.enablePreview": true,
+  "workbench.editor.enablePreviewFromQuickOpen": true,
+  "workbench.sideBar.location": "left",
+  "workbench.panel.defaultLocation": "bottom",
+  "workbench.activityBar.visible": true,
+  "workbench.statusBar.visible": true,
+  "workbench.menuBar.visibility": "default",
+
+  // Настройки мини-карты и нумерации строк
+  "editor.minimap.enabled": true,
+  "editor.minimap.maxColumn": 120,
+  "editor.minimap.renderCharacters": true,
+  "editor.lineNumbers": "on",
+  "editor.rulers": [],
+  "editor.renderWhitespace": "selection",
+  "editor.renderLineHighlight": "line",
+  "editor.cursorBlinking": "smooth",
+  "editor.cursorSmoothCaretAnimation": "on",
+
+  // Настройки шрифта
+  "editor.fontFamily": "Consolas, 'Courier New', monospace",
+  "editor.fontSize": 14,
+  "editor.fontLigatures": false,
+  "editor.fontWeight": "normal",
+  "editor.lineHeight": 0,
+
+  // Настройки панелей и элементов интерфейса
+  "explorer.confirmDelete": true,
+  "explorer.confirmDragAndDrop": true,
+  "explorer.compactFolders": true,
+  "explorer.decorations.colors": true,
+  "explorer.decorations.badges": true,
+
+  // Настройки breadcrumbs (навигационная цепочка)
+  "breadcrumbs.enabled": true,
+  "breadcrumbs.filePath": "on",
+  "breadcrumbs.symbolPath": "on",
+
+  // Настройки вкладок редактора
+  "workbench.editor.showTabs": true,
+  "workbench.editor.tabSizing": "fit",
+  "workbench.editor.tabCloseButton": "right",
+  "workbench.editor.wrapTabs": false,
+  "workbench.editor.scrollToSwitchTabs": false,
+
+  // Настройки зон (split editors)
+  "workbench.editor.splitInGroupLayout": "vertical",
+
+  // Настройки Git
+  "git.enabled": true,
+  "git.autofetch": false,
+  "git.confirmSync": true,
+  "git.enableSmartCommit": false,
+  "git.suggestSmartCommit": false,
+  "git.autoRepositoryDetection": true,
+  "git.decorations.enabled": true,
+  "git.mergeEditor": true,
+  "git.branchProtection": [],
+  "git.timeline.enabled": true,
+  "scm.diffDecorations": "all",
+  "scm.diffDecorationsGutterVisibility": "always",
+
+  // Настройки работы с несколькими курсорами
+  "editor.multiCursorModifier": "ctrlCmd",
+  "editor.selectionHighlight": true,
+  "editor.occurrencesHighlight": true,
+  "editor.selectionClipboard": true,
+
+  // Настройки автодополнения
+  "editor.suggest.localityBonus": true,
+  "editor.suggest.shareSuggestSelections": true,
+  "editor.suggest.snippetsPreventQuickSuggestions": false,
+  "editor.suggest.showWords": true,
+  "editor.suggest.showKeywords": true,
+  "editor.suggest.showSnippets": true,
+
+  // Настройки линтера (если будут добавлены)
+  "problems.showCurrentInStatus": true,
+  "problems.decorations.enabled": true,
+
+  // Настройки работы с кодом
+  "editor.codeActionsOnSave": {},
+  "editor.codeLens": true,
+  "editor.colorDecorators": true,
+  "editor.folding": true,
+  "editor.foldingStrategy": "auto",
+  "editor.showFoldingControls": "mouseover",
+  "editor.unfoldOnClickAfterEndOfLine": false,
+
+  // Настройки проверки орфографии
+  "cSpell.enabled": true,
+  "cSpell.enableFiletypes": [
+    "html",
+    "markdown",
+    "plaintext",
+    "text"
+  ],
+  "cSpell.language": "en,ru",
+  "cSpell.words": [],
+  "cSpell.userWords": [],
+  "cSpell.customDictionaries": {
+    "project-words": {
+      "name": "Project Words",
+      "path": "${workspaceFolder}/.vscode/cspell-dict.txt",
+      "addWords": true
+    }
+  },
+  "cSpell.ignorePaths": [
+    "node_modules/**",
+    ".git/**",
+    "**/*.min.js",
+    "**/*.min.css"
+  ],
+  "cSpell.showStatus": true,
+  "cSpell.diagnosticLevel": "Hint",
+
+  // Настройки работы с файлами
+  "workbench.editor.closeOnFileDelete": false,
+  "workbench.editor.revealIfOpen": true,
+  "workbench.editor.openPositioning": "right",
+  "workbench.editor.focusRecentEditorAfterClose": true,
+  "workbench.editor.enablePreviewFromCodeNavigation": true,
+
+  // Язык интерфейса (если поддерживается)
+  "locale": "ru"
+}
+
