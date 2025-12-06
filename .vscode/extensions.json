@@ -15,10 +15,10 @@
 
     // Проверка орфографии
     "streetsidesoftware.code-spell-checker",
-    "streetsidesoftware.code-spell-checker-russian",
+    "streetsidesoftware.code-spell-checker-russian"
 
-    // Тема оформления
-    "akamud.vscode-theme-onelight" // Atom One Light - популярная приглушенная светлая тема
+    // Тема оформления (опционально)
+    // "akamud.vscode-theme-onelight" // Atom One Light - популярная приглушенная светлая тема (отключена, используется дефолтная)
   ]
 }
 

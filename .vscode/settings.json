@@ -97,8 +97,8 @@
   },
 
   // Настройки оформления и интерфейса (для совместимости с Cursor)
-  // Используется Atom One Light - популярная приглушенная светлая тема
-  "workbench.colorTheme": "Atom One Light",
+  // Используется дефолтная светлая тема
+  "workbench.colorTheme": "Default Light+",
   "workbench.iconTheme": "vs-seti",
   "workbench.startupEditor": "welcomePage",
   "workbench.editor.enablePreview": true,
