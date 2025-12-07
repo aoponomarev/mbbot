@@ -22,7 +22,8 @@
     window.cmpTheme && window.cmpTheme(defaults),
     window.cmpPerplexitySettings && window.cmpPerplexitySettings(defaults, models),
     window.cmpChat && window.cmpChat(),
-    window.cmpImportExport && window.cmpImportExport()
+    window.cmpImportExport && window.cmpImportExport(),
+    window.cmpCoinGecko && window.cmpCoinGecko()
   ].filter(Boolean);
 
   const baseData = { vueVersion: '3.5.25' };

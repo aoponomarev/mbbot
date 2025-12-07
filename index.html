@@ -196,6 +196,74 @@
                         </div>
                     </div>
 
+                    <!-- Виджет CoinGecko -->
+                    <div class="col-12 mb-4">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-chart-line me-2"></i>Топ-10 (CoinGecko)
+                                </h5>
+                                <div class="d-flex align-items-center gap-2">
+                                    <small class="text-muted" v-if="cgLastUpdated">Обновлено: {{ cgLastUpdated }}</small>
+                                    <button class="btn btn-sm btn-outline-primary" @click="fetchCoinGecko" :disabled="cgIsLoading">
+                                        <span v-if="cgIsLoading" class="spinner-border spinner-border-sm me-1" role="status"></span>
+                                        Обновить
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div v-if="cgError" class="alert alert-danger" role="alert">
+                                    <small><i class="fas fa-exclamation-circle me-1"></i>{{ cgError }}</small>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-sm align-middle">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Монета</th>
+                                                <th class="text-end">Цена</th>
+                                                <th class="text-end">1h %</th>
+                                                <th class="text-end">24h %</th>
+                                                <th class="text-end">7d %</th>
+                                                <th class="text-end">30d %</th>
+                                                <th class="text-end">60d %</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-if="cgIsLoading">
+                                                <td colspan="8" class="text-center text-muted">
+                                                    <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                                    Загрузка данных с CoinGecko...
+                                                </td>
+                                            </tr>
+                                            <tr v-else-if="cgCoins.length === 0">
+                                                <td colspan="8" class="text-center text-muted">Нет данных</td>
+                                            </tr>
+                                            <tr v-else v-for="(coin, idx) in cgCoins" :key="coin.id">
+                                                <td>{{ idx + 1 }}</td>
+                                                <td>
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <img v-if="coin.image" :src="coin.image" :alt="coin.symbol" width="20" height="20">
+                                                        <div>
+                                                            <div class="fw-semibold">{{ coin.name }}</div>
+                                                            <small class="text-muted text-uppercase">{{ coin.symbol }}</small>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="text-end">{{ cgFormatPrice(coin.current_price) }}</td>
+                                                <td class="text-end" :class="cgChangeClass(coin.price_change_percentage_1h_in_currency)">{{ cgFormatPercent(coin.price_change_percentage_1h_in_currency) }}</td>
+                                                <td class="text-end" :class="cgChangeClass(coin.price_change_percentage_24h_in_currency)">{{ cgFormatPercent(coin.price_change_percentage_24h_in_currency) }}</td>
+                                                <td class="text-end" :class="cgChangeClass(coin.price_change_percentage_7d_in_currency)">{{ cgFormatPercent(coin.price_change_percentage_7d_in_currency) }}</td>
+                                                <td class="text-end" :class="cgChangeClass(coin.price_change_percentage_30d_in_currency)">{{ cgFormatPercent(coin.price_change_percentage_30d_in_currency) }}</td>
+                                                <td class="text-end" :class="cgChangeClass(coin.price_change_percentage_60d_in_currency)">{{ cgFormatPercent(coin.price_change_percentage_60d_in_currency) }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Информационная карточка -->
                     <div class="col-12">
                         <div class="card">
@@ -223,6 +291,7 @@
     <script src="./cmp-perplexity-settings.js"></script>
     <script src="./cmp-chat.js"></script>
     <script src="./cmp-import-export.js"></script>
+    <script src="./cmp-coingecko.js"></script>
     <script src="./app.js"></script>
 </body>
 </html>
