@@ -10,5 +10,6 @@ window.appConfig = {
     { value: 'sonar', label: 'sonar' },
     { value: 'llama-3.1-sonar-small-128k-online', label: 'llama-3.1-sonar-small-128k-online' },
     { value: 'llama-3.1-sonar-large-128k-online', label: 'llama-3.1-sonar-large-128k-online' }
-  ]
+  ],
+  lastCommitMessage: 'Add lastCommitMessage display and update commit rules'
 };

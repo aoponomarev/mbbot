@@ -26,7 +26,10 @@
     window.cmpCoinGecko && window.cmpCoinGecko()
   ].filter(Boolean);
 
-  const baseData = { vueVersion: '3.5.25' };
+  const baseData = {
+    vueVersion: '3.5.25',
+    lastCommitMessage: (cfg.lastCommitMessage || '').trim()
+  };
   const data = Object.assign(baseData, ...parts.map(p => p.data || {}));
   const methods = Object.assign({}, ...parts.map(p => p.methods || {}));
   const watch = Object.assign({}, ...parts.map(p => p.watch || {}));
