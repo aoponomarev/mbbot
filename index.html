@@ -286,20 +286,7 @@
     <!-- Bootstrap 5 JS Bundle (включает Popper) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 
-    <!-- Vue.js 3 (глобальный скрипт) -->
-    <script src="https://unpkg.com/vue@3.5.25/dist/vue.global.prod.js"></script>
-    <!-- Компоненты и приложение (обычные скрипты, совместимо с file://) -->
-    <script src="./core/security/u-sec-obfuscate.js"></script>
-    <script src="./core/cfg-app.js"></script>
-    <script src="./ui/components/c-ui-theme.js"></script>
-    <script src="./ui/components/c-ui-splash.js"></script>
-    <script src="./ui/components/c-ui-perplexity-settings.js"></script>
-    <script src="./ui/components/c-ui-chat.js"></script>
-    <script src="./ui/components/c-ui-import-export.js"></script>
-    <script src="./ui/components/c-ui-coingecko.js"></script>
-    <script src="./app/app-ui-root.js"></script>
-
-    <!-- X-Template для компонента сплэш-экрана -->
+    <!-- X-Template для компонента сплэш-экрана (должен быть ДО загрузки Vue и компонентов) -->
     <script type="text/x-template" id="splash-template">
         <div v-if="showSplash" id="splash-screen" class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="background: rgba(0, 0, 0, 0.95); z-index: 9999;" data-bs-theme="dark">
             <div class="text-center" style="max-width: 400px; width: 90%;">
@@ -351,5 +338,18 @@
             </div>
         </div>
     </script>
+
+    <!-- Vue.js 3 (глобальный скрипт) -->
+    <script src="https://unpkg.com/vue@3.5.25/dist/vue.global.prod.js"></script>
+    <!-- Компоненты и приложение (обычные скрипты, совместимо с file://) -->
+    <script src="./core/security/u-sec-obfuscate.js"></script>
+    <script src="./core/cfg-app.js"></script>
+    <script src="./ui/components/c-ui-theme.js"></script>
+    <script src="./ui/components/c-ui-splash.js"></script>
+    <script src="./ui/components/c-ui-perplexity-settings.js"></script>
+    <script src="./ui/components/c-ui-chat.js"></script>
+    <script src="./ui/components/c-ui-import-export.js"></script>
+    <script src="./ui/components/c-ui-coingecko.js"></script>
+    <script src="./app/app-ui-root.js"></script>
 </body>
 </html>

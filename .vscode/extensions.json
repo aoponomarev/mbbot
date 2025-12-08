@@ -1,24 +1,6 @@
 {
-  // Рекомендуемые расширения для проекта
-  // Эти расширения будут предложены при открытии проекта в VS Code
   "recommendations": [
-    // HTML/CSS/JS поддержка
-    "vscode.html-language-features",
-    "vscode.css-language-features",
-    "vscode.javascript-language-features",
-
-    // Git поддержка
-    "eamodio.gitlens",
-
-    // Форматирование
-    "esbenp.prettier-vscode",
-
-    // Проверка орфографии
-    "streetsidesoftware.code-spell-checker",
-    "streetsidesoftware.code-spell-checker-russian"
-
-    // Тема оформления (опционально)
-    // "akamud.vscode-theme-onelight" // Atom One Light - популярная приглушенная светлая тема (отключена, используется дефолтная)
+    "mhutchie.git-graph",
+    "eamodio.gitlens"
   ]
 }
-
