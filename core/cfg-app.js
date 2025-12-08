@@ -11,5 +11,5 @@ window.appConfig = {
     { value: 'llama-3.1-sonar-small-128k-online', label: 'llama-3.1-sonar-small-128k-online' },
     { value: 'llama-3.1-sonar-large-128k-online', label: 'llama-3.1-sonar-large-128k-online' }
   ],
-  lastCommitMessage: 'Update commit rules: no immediate hash in log, no amend'
+  lastCommitMessage: 'Add password-protected splash screen'
 };

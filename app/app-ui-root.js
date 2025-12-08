@@ -20,6 +20,7 @@
 
   const parts = [
     window.cmpTheme && window.cmpTheme(defaults),
+    window.cmpSplash && window.cmpSplash(),
     window.cmpPerplexitySettings && window.cmpPerplexitySettings(defaults, models),
     window.cmpChat && window.cmpChat(),
     window.cmpImportExport && window.cmpImportExport(),
