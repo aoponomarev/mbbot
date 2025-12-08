@@ -2,25 +2,25 @@
 // Vue компонент с x-template шаблоном
 window.cmpSplash = {
   template: '#splash-template',
-  
+
   props: {
     lastCommitMessage: {
       type: String,
       default: ''
     }
   },
-  
+
   data() {
     const DEFAULT_PIN = '2211';
     const PIN_LENGTH = DEFAULT_PIN.length;
     const STORAGE_KEY_PIN = 'app-pin';
     const STORAGE_KEY_API = 'perplexity-api-key';
-    
+
     // Инициализация глобальной переменной разблокировки
     if (typeof window.appUnlocked === 'undefined') {
       window.appUnlocked = false;
     }
-    
+
     return {
       showSplash: true,
       passwordInput: '',
@@ -116,14 +116,14 @@ window.cmpSplash = {
       }
     }
   },
-  
+
   mounted() {
     this.passwordError = false;
     this.initDefaultPin();
     this.loadApiKey();
     this.focusInput();
   },
-  
+
   watch: {
     showSplash(newValue) {
       if (newValue) {
