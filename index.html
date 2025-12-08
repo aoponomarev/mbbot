@@ -13,56 +13,8 @@
 </head>
 <body class="min-vh-100">
     <div id="app">
-        <!-- Сплэш-экран с защитой паролем -->
-        <div v-if="showSplash" id="splash-screen" class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="background: rgba(0, 0, 0, 0.95); z-index: 9999;" data-bs-theme="dark">
-            <div class="text-center" style="max-width: 400px; width: 90%;">
-                <h3 class="text-white mb-4">Code SMS</h3>
-                <div class="mb-3">
-                    <input
-                        type="text"
-                        class="form-control form-control-lg text-center bg-dark text-white border-secondary"
-                        ref="passwordField"
-                        name="splash-pin"
-                        autocomplete="off"
-                        autocorrect="off"
-                        autocapitalize="off"
-                        spellcheck="false"
-                        v-model="passwordInput"
-                        @input="handlePinInput"
-                        :maxlength="4"
-                    >
-                </div>
-                <p v-if="lastCommitMessage" class="text-muted small mb-3" style="opacity:0.8;">{{ lastCommitMessage }}</p>
-
-                <!-- API Key настройка -->
-                <div class="border-top border-secondary pt-3 mt-3">
-                    <label class="text-white small mb-2">Perplexity API Key (optional):</label>
-                    <div class="input-group mb-2">
-                        <input
-                            type="password"
-                            class="form-control form-control-sm bg-dark text-white border-secondary"
-                            v-model="apiKeyPerplexity"
-                            placeholder="pplx-..."
-                            autocomplete="off"
-                        >
-                    </div>
-                    <button
-                        @click="saveApiKey"
-                        class="btn btn-sm btn-outline-light w-100"
-                        :disabled="!apiKeyPerplexity.trim()"
-                    >
-                        <i class="fas fa-save me-1"></i>Сохранить ключ
-                    </button>
-                    <div v-if="apiKeyPerplexitySaved" class="alert alert-success mt-2 mb-0 py-1">
-                        <small><i class="fas fa-check-circle me-1"></i>Ключ сохранен</small>
-                    </div>
-                </div>
-
-                <div v-if="passwordError" class="alert alert-danger mt-3 mb-0">
-                    <small>Неверный код</small>
-                </div>
-            </div>
-        </div>
+        <!-- Компонент сплэш-экрана -->
+        <splash-screen :last-commit-message="lastCommitMessage"></splash-screen>
 
         <div class="container-fluid py-4">
             <!-- Кнопка переключения темы -->
@@ -346,5 +298,58 @@
     <script src="./ui/components/c-ui-import-export.js"></script>
     <script src="./ui/components/c-ui-coingecko.js"></script>
     <script src="./app/app-ui-root.js"></script>
+
+    <!-- X-Template для компонента сплэш-экрана -->
+    <script type="text/x-template" id="splash-template">
+        <div v-if="showSplash" id="splash-screen" class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="background: rgba(0, 0, 0, 0.95); z-index: 9999;" data-bs-theme="dark">
+            <div class="text-center" style="max-width: 400px; width: 90%;">
+                <h3 class="text-white mb-4">Code SMS</h3>
+                <div class="mb-3">
+                    <input
+                        type="text"
+                        class="form-control form-control-lg text-center bg-dark text-white border-secondary"
+                        ref="passwordField"
+                        name="splash-pin"
+                        autocomplete="off"
+                        autocorrect="off"
+                        autocapitalize="off"
+                        spellcheck="false"
+                        v-model="passwordInput"
+                        @input="handlePinInput"
+                        :maxlength="4"
+                    >
+                </div>
+                <p v-if="lastCommitMessage" class="text-muted small mb-3" style="opacity:0.8;">{{ lastCommitMessage }}</p>
+
+                <!-- API Key настройка -->
+                <div class="border-top border-secondary pt-3 mt-3">
+                    <label class="text-white small mb-2">Perplexity API Key (optional):</label>
+                    <div class="input-group mb-2">
+                        <input
+                            type="password"
+                            class="form-control form-control-sm bg-dark text-white border-secondary"
+                            v-model="apiKeyPerplexity"
+                            placeholder="pplx-..."
+                            autocomplete="off"
+                        >
+                    </div>
+                    <button
+                        @click="saveApiKey"
+                        class="btn btn-sm btn-outline-light w-100"
+                        :disabled="!apiKeyPerplexity.trim()"
+                    >
+                        <i class="fas fa-save me-1"></i>Сохранить ключ
+                    </button>
+                    <div v-if="apiKeyPerplexitySaved" class="alert alert-success mt-2 mb-0 py-1">
+                        <small><i class="fas fa-check-circle me-1"></i>Ключ сохранен</small>
+                    </div>
+                </div>
+
+                <div v-if="passwordError" class="alert alert-danger mt-3 mb-0">
+                    <small>Неверный код</small>
+                </div>
+            </div>
+        </div>
+    </script>
 </body>
 </html>

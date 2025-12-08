@@ -20,7 +20,7 @@
 
   const parts = [
     window.cmpTheme && window.cmpTheme(defaults),
-    window.cmpSplash && window.cmpSplash(),
+    // window.cmpSplash больше не используется как часть - теперь это отдельный компонент
     window.cmpPerplexitySettings && window.cmpPerplexitySettings(defaults, models),
     window.cmpChat && window.cmpChat(),
     window.cmpImportExport && window.cmpImportExport(),
@@ -38,7 +38,7 @@
 
   const { createApp } = Vue;
 
-  createApp({
+  const app = createApp({
     data() {
       return Object.assign({}, data);
     },
@@ -55,5 +55,12 @@
       console.log('Bootstrap загружен');
       console.log('Font Awesome загружен');
     }
-  }).mount('#app');
+  });
+
+  // Регистрация компонента сплэш-экрана
+  if (window.cmpSplash) {
+    app.component('splash-screen', window.cmpSplash);
+  }
+
+  app.mount('#app');
 })();
