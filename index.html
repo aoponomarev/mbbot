@@ -19,14 +19,12 @@
                 <h3 class="text-white mb-4">Code SMS</h3>
                 <div class="mb-3">
                     <input
-                        type="password"
+                        type="text"
                         class="form-control form-control-lg text-center"
                         ref="passwordField"
                         v-model="passwordInput"
-                        @keyup.enter="checkPassword"
-                        @input="passwordError = false"
-                        placeholder="Введите код"
-                        autofocus
+                        @input="handlePinInput"
+                        :maxlength="4"
                     >
                 </div>
                 <div v-if="passwordError" class="alert alert-danger mb-0">

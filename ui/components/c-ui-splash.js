@@ -1,6 +1,7 @@
 // Сплэш-экран с защитой паролем
 window.cmpSplash = function () {
   const PASSWORD = '2211';
+  const PIN_LENGTH = PASSWORD.length;
   window.appUnlocked = false;
 
   return {
@@ -10,6 +11,12 @@ window.cmpSplash = function () {
       passwordError: false
     },
     methods: {
+      handlePinInput(event) {
+        this.passwordInput = event.target.value;
+        if (this.passwordInput.length >= PIN_LENGTH) {
+          this.checkPassword();
+        }
+      },
       focusInput() {
         this.$nextTick(() => {
           const input = this.$refs.passwordField;
@@ -23,6 +30,9 @@ window.cmpSplash = function () {
           return;
         }
 
+        if (this.passwordInput.length < PIN_LENGTH) {
+          return;
+        }
         if (this.passwordInput === PASSWORD) {
           this.passwordError = false;
           const splashElement = document.getElementById('splash-screen');
