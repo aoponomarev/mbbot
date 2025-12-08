@@ -10,6 +10,14 @@ window.cmpSplash = function () {
       passwordError: false
     },
     methods: {
+      focusInput() {
+        this.$nextTick(() => {
+          const input = this.$refs.passwordField;
+          if (input) {
+            input.focus();
+          }
+        });
+      },
       checkPassword() {
         if (!this.passwordInput.trim()) {
           return;
@@ -38,6 +46,14 @@ window.cmpSplash = function () {
     },
     mounted() {
       this.passwordError = false;
+      this.focusInput();
+    },
+    watch: {
+      showSplash(newValue) {
+        if (newValue) {
+          this.focusInput();
+        }
+      }
     }
   };
 };

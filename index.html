@@ -21,6 +21,7 @@
                     <input
                         type="password"
                         class="form-control form-control-lg text-center"
+                        ref="passwordField"
                         v-model="passwordInput"
                         @keyup.enter="checkPassword"
                         @input="passwordError = false"
