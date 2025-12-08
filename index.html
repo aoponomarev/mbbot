@@ -14,14 +14,19 @@
 <body class="min-vh-100">
     <div id="app">
         <!-- Сплэш-экран с защитой паролем -->
-        <div v-if="showSplash" id="splash-screen" class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="background: rgba(0, 0, 0, 0.95); z-index: 9999;">
+        <div v-if="showSplash" id="splash-screen" class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="background: rgba(0, 0, 0, 0.95); z-index: 9999;" data-bs-theme="dark">
             <div class="text-center" style="max-width: 400px; width: 90%;">
                 <h3 class="text-white mb-4">Code SMS</h3>
                 <div class="mb-3">
                     <input
                         type="text"
-                        class="form-control form-control-lg text-center"
+                        class="form-control form-control-lg text-center bg-dark text-white border-secondary"
                         ref="passwordField"
+                        name="splash-pin"
+                        autocomplete="off"
+                        autocorrect="off"
+                        autocapitalize="off"
+                        spellcheck="false"
                         v-model="passwordInput"
                         @input="handlePinInput"
                         :maxlength="4"
