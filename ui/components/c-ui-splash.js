@@ -32,9 +32,9 @@ window.cmpSplash = {
       apiKeyPerplexity: '',
       apiKeyPerplexitySaved: false,
       quote: '',
-      quoteAuthor: '',
       quoteLoading: false,
       quoteError: false,
+      showApiKeyTemporarily: false,
       DEFAULT_PIN,
       PIN_LENGTH,
       STORAGE_KEY_PIN,
@@ -44,99 +44,148 @@ window.cmpSplash = {
   methods: {
     // Инициализация PIN по умолчанию (если не установлен)
     initDefaultPin() {
-      if (!window.securityObfuscate.hasSecure(this.STORAGE_KEY_PIN)) {
-        window.securityObfuscate.saveSecure(this.STORAGE_KEY_PIN, this.DEFAULT_PIN);
+      if (!window.securityObfuscate) {
+        console.warn('securityObfuscate not loaded yet');
+        return;
+      }
+      
+      try {
+        if (!window.securityObfuscate.hasSecure(this.STORAGE_KEY_PIN)) {
+          window.securityObfuscate.saveSecure(this.STORAGE_KEY_PIN, this.DEFAULT_PIN);
+        }
+      } catch (error) {
+        console.error('Ошибка при инициализации PIN:', error);
+        // Не блокируем работу компонента
       }
     },
 
     // Загрузка сохраненного API-ключа
     loadApiKey() {
-      const savedKey = window.securityObfuscate.loadSecure(this.STORAGE_KEY_API);
-      if (savedKey) {
-        this.apiKeyPerplexity = savedKey;
-        this.apiKeyPerplexitySaved = true;
-        // После загрузки ключа запрашиваем цитату для проверки Perplexity
-        this.fetchQuote();
+      // Безопасная проверка наличия securityObfuscate
+      if (!window.securityObfuscate) {
+        console.warn('securityObfuscate not loaded yet');
+        return;
+      }
+      
+      try {
+        const savedKey = window.securityObfuscate.loadSecure(this.STORAGE_KEY_API);
+        if (savedKey) {
+          this.apiKeyPerplexity = savedKey;
+          this.apiKeyPerplexitySaved = true;
+          // После загрузки ключа запрашиваем цитату для проверки Perplexity
+          // Используем $nextTick чтобы убедиться, что props загружены
+          this.$nextTick(() => {
+            if (this.lastCommitMessage && this.lastCommitMessage.trim()) {
+              this.fetchQuote();
+            }
+          });
+        }
+      } catch (error) {
+        console.error('Ошибка при загрузке API ключа:', error);
+        // Не блокируем работу компонента
       }
     },
 
-    // Запрос цитаты из классических произведений для проверки работы Perplexity
+    // Генерация псевдо-философского высказывания как продолжение коммита
     async fetchQuote() {
-      if (!this.apiKeyPerplexity || !this.lastCommitMessage) {
+      // Безопасная проверка перед запросом
+      if (!this.apiKeyPerplexity || !this.lastCommitMessage || !this.lastCommitMessage.trim()) {
         return;
       }
 
       this.quoteLoading = true;
       this.quoteError = false;
+      this.quote = '';
+      this.quoteAuthor = '';
+
+      const apiHeaders = {
+        'Authorization': `Bearer ${this.apiKeyPerplexity}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      };
+
+      const model = this.perplexityModel || 'sonar-pro';
 
       try {
-        const prompt = `Найди в классических произведениях (литература, философия, медицина, политика, финансы, etc...) остроумную цитату, которая продолжает или дополняет смысл следующего текста: "${this.lastCommitMessage}". Ответ должен быть в формате: сначала цитата в кавычках, затем через тире автор. Пример: "Текст цитаты" — Автор. Цитата должна быть короткой (1-2 предложения) и действительно остроумно дополнять смысл.`;
+        // Генерируем псевдо-философское высказывание (одно длинное предложение) как продолжение коммита
+        const quotePrompt = `Create a pseudo-philosophical statement (one longer sentence, more extended than usual) that interprets, develops, or philosophically expands the meaning of the following text: "${this.lastCommitMessage}".
 
-        const response = await fetch('https://api.perplexity.ai/chat/completions', {
+CRITICAL REQUIREMENTS:
+- Your response must contain EXACTLY one sentence
+- The sentence should be longer than usual (more extended, with multiple clauses or phrases)
+- DO NOT repeat or quote the original text - develop the idea philosophically instead
+- DO NOT start with the same words as the original text
+- Interpret, expand, or create a philosophical narrative that relates to the original meaning
+- Start with a capital letter
+- End with a period
+- Without quotation marks, without any additional explanations
+- It should read as a philosophical continuation that develops the underlying idea, not a literal repetition
+
+Example: If the original text is "Add feature to app", your response should be something like "For in the pursuit of understanding, we often discover that the path itself becomes the destination, and in this discovery we find ourselves questioning whether the journey was ever truly about reaching an end, or if the very act of seeking transforms us in ways we never anticipated."`;
+
+        const quoteResponse = await fetch('https://api.perplexity.ai/chat/completions', {
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${this.apiKeyPerplexity}`,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
+          headers: apiHeaders,
           body: JSON.stringify({
-            model: this.perplexityModel || 'sonar-pro',
+            model: model,
             messages: [
               {
                 role: 'user',
-                content: prompt
+                content: quotePrompt
               }
             ]
           })
         });
 
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
+        if (!quoteResponse.ok) {
+          throw new Error(`HTTP ${quoteResponse.status}`);
         }
 
-        const data = await response.json();
+        const quoteData = await quoteResponse.json();
 
-        if (data.choices && data.choices.length > 0) {
-          const answer = data.choices[0].message.content.trim();
-          
-          // Парсим ответ: ищем цитату в кавычках и автора после тире
-          // Поддерживаем разные форматы: "цитата" — Автор или "цитата" - Автор
-          const quoteMatch = answer.match(/"([^"]+)"/);
-          const authorMatch = answer.match(/[—–-]\s*([^—–-\n]+?)(?:\.|$)/);
-          
-          if (quoteMatch) {
-            this.quote = quoteMatch[1].trim();
-            if (authorMatch) {
-              this.quoteAuthor = authorMatch[1].trim().replace(/\.$/, '');
-            } else {
-              // Пытаемся найти автора после кавычек
-              const afterQuote = answer.substring(answer.indexOf('"') + quoteMatch[0].length);
-              const authorMatch2 = afterQuote.match(/[—–-]\s*([^—–-\n]+?)(?:\.|$)/);
-              if (authorMatch2) {
-                this.quoteAuthor = authorMatch2[1].trim().replace(/\.$/, '');
-              }
-            }
-          } else {
-            // Если формат не распознан, пытаемся извлечь цитату и автора другим способом
-            const parts = answer.split(/[—–-]/);
-            if (parts.length >= 2) {
-              this.quote = parts[0].replace(/"/g, '').trim();
-              this.quoteAuthor = parts[1].trim().replace(/\.$/, '');
-            } else {
-              // Используем весь ответ как цитату
-              this.quote = answer.replace(/"/g, '').trim();
-            }
-          }
+        if (!quoteData.choices || quoteData.choices.length === 0) {
+          throw new Error('Empty response from API');
+        }
+
+        const quoteAnswer = quoteData.choices[0].message.content.trim();
+        
+        // Убираем кавычки если они есть, берем весь текст
+        let cleanQuote = quoteAnswer.replace(/^["']|["']$/g, '').trim();
+        
+        // Убеждаемся, что цитата начинается с большой буквы
+        if (cleanQuote && cleanQuote.length > 0) {
+          cleanQuote = cleanQuote.charAt(0).toUpperCase() + cleanQuote.slice(1);
+        }
+        
+        // Убеждаемся, что цитата заканчивается точкой
+        if (cleanQuote && !cleanQuote.endsWith('.')) {
+          cleanQuote = cleanQuote + '.';
+        }
+        
+        if (cleanQuote && cleanQuote.length > 10) {
+          this.quote = cleanQuote;
         } else {
-          throw new Error('Пустой ответ от API');
+          throw new Error('Failed to extract quote from response');
         }
       } catch (error) {
-        console.error('Ошибка при запросе цитаты:', error);
+        console.error('fetchQuote: Error', error);
         this.quoteError = true;
+        this.quote = '';
         // Не блокируем вход, просто не показываем цитату
       } finally {
         this.quoteLoading = false;
       }
+    },
+
+    // Обработка вставки текста в поле API ключа - временно показываем текст
+    handleApiKeyPaste(event) {
+      // Временно показываем текст после вставки
+      this.showApiKeyTemporarily = true;
+      
+      // Через 2 секунды скрываем обратно
+      setTimeout(() => {
+        this.showApiKeyTemporarily = false;
+      }, 2000);
     },
 
     // Сохранение API-ключа с обфускацией
@@ -151,7 +200,9 @@ window.cmpSplash = {
         }
 
         // После сохранения ключа запрашиваем цитату для проверки Perplexity
-        this.fetchQuote();
+        if (this.lastCommitMessage && this.lastCommitMessage.trim()) {
+          this.fetchQuote();
+        }
 
         setTimeout(() => {
           this.apiKeyPerplexitySaved = false;
@@ -210,10 +261,19 @@ window.cmpSplash = {
   },
 
   mounted() {
-    this.passwordError = false;
-    this.initDefaultPin();
-    this.loadApiKey();
-    this.focusInput();
+    try {
+      // Гарантируем, что сплэш показывается при монтировании
+      this.showSplash = true;
+      this.passwordError = false;
+      this.initDefaultPin();
+      this.loadApiKey();
+      this.focusInput();
+      console.log('Splash screen mounted, showSplash:', this.showSplash);
+    } catch (error) {
+      console.error('Ошибка при монтировании сплэша:', error);
+      // Гарантируем, что сплэш показывается даже при ошибке
+      this.showSplash = true;
+    }
   },
 
   watch: {

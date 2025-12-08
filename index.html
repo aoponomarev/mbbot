@@ -307,17 +307,11 @@
                     >
                 </div>
                 <p v-if="lastCommitMessage" class="text-muted small mb-3" style="opacity:0.8;">
-                    {{ lastCommitMessage }}.
+                    {{ lastCommitMessage }}. <span v-if="quote && !quoteLoading">{{ quote }}</span>
                 </p>
                 <div v-if="quoteLoading" class="text-muted small mb-3" style="opacity:0.6;">
                     <i class="fas fa-spinner fa-spin me-1"></i>Ищем цитату...
                 </div>
-                <blockquote v-if="quote && !quoteLoading" class="text-muted small mb-3" style="opacity:0.8; border-left: 2px solid rgba(255,255,255,0.3); padding-left: 10px; font-style: italic;">
-                    "{{ quote }}"
-                    <footer v-if="quoteAuthor" class="mt-1" style="font-size: 0.85em; opacity: 0.7;">
-                        — {{ quoteAuthor }}
-                    </footer>
-                </blockquote>
                 <div v-if="quoteError && !quoteLoading" class="text-warning small mb-3" style="opacity:0.7;">
                     <i class="fas fa-exclamation-triangle me-1"></i>Не удалось загрузить цитату
                 </div>
@@ -327,22 +321,26 @@
                     <label class="text-white small mb-2">Perplexity API Key (optional):</label>
                     <div class="input-group mb-2">
                         <input
-                            type="password"
-                            class="form-control form-control-sm bg-dark text-white border-secondary"
+                            :type="showApiKeyTemporarily ? 'text' : 'password'"
+                            class="form-control form-control-sm bg-dark text-white border-secondary text-center"
                             v-model="apiKeyPerplexity"
                             placeholder="pplx-..."
                             autocomplete="off"
+                            @paste="handleApiKeyPaste"
+                            style="text-align: center;"
                         >
                     </div>
-                    <button
-                        @click="saveApiKey"
-                        class="btn btn-sm btn-outline-light w-100"
-                        :disabled="!apiKeyPerplexity.trim()"
-                    >
-                        <i class="fas fa-save me-1"></i>Сохранить ключ
-                    </button>
-                    <div v-if="apiKeyPerplexitySaved" class="alert alert-success mt-2 mb-0 py-1">
-                        <small><i class="fas fa-check-circle me-1"></i>Ключ сохранен</small>
+                    <div class="d-flex justify-content-center align-items-center gap-3" style="min-height: 32px;">
+                        <button
+                            @click="saveApiKey"
+                            class="btn p-0 border-0 bg-transparent text-white"
+                            :disabled="!apiKeyPerplexity.trim()"
+                            :style="{ opacity: apiKeyPerplexity.trim() ? '1' : '0.5', cursor: apiKeyPerplexity.trim() ? 'pointer' : 'not-allowed' }"
+                            title="Сохранить ключ"
+                        >
+                            <i class="fas fa-save" style="font-size: 1.5em;"></i>
+                        </button>
+                        <i v-if="apiKeyPerplexitySaved" class="fas fa-check-circle text-success" style="font-size: 1.5em;"></i>
                     </div>
                 </div>
 

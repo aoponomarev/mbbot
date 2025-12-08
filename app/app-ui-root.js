@@ -59,7 +59,14 @@
 
   // Регистрация компонента сплэш-экрана
   if (window.cmpSplash) {
-    app.component('splash-screen', window.cmpSplash);
+    try {
+      app.component('splash-screen', window.cmpSplash);
+      console.log('Splash screen component registered');
+    } catch (error) {
+      console.error('Ошибка при регистрации компонента сплэша:', error);
+    }
+  } else {
+    console.warn('window.cmpSplash not found');
   }
 
   app.mount('#app');
