@@ -1,6 +1,7 @@
 // Сплэш-экран с защитой паролем
 window.cmpSplash = function () {
   const PASSWORD = '2211';
+  window.appUnlocked = false;
 
   return {
     data: {
@@ -22,6 +23,8 @@ window.cmpSplash = function () {
             splashElement.style.transform = 'translateY(100%)';
             setTimeout(() => {
               this.showSplash = false;
+              window.appUnlocked = true;
+              window.dispatchEvent(new Event('app-unlocked'));
             }, 500);
           }
         } else {
@@ -35,17 +38,6 @@ window.cmpSplash = function () {
     },
     mounted() {
       this.passwordError = false;
-      const sessionAuth = sessionStorage.getItem('app_authenticated');
-      if (sessionAuth === 'true') {
-        this.showSplash = false;
-      }
-    },
-    watch: {
-      showSplash(newValue) {
-        if (!newValue) {
-          sessionStorage.setItem('app_authenticated', 'true');
-        }
-      }
     }
   };
 };

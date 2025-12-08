@@ -24,6 +24,9 @@ window.cmpCoinGecko = function () {
     },
     methods: {
       async fetchCoinGecko() {
+        if (!window.appUnlocked) {
+          return;
+        }
         if (this.cgIsLoading) return;
         this.cgError = null;
         this.cgIsLoading = true;
@@ -58,8 +61,17 @@ window.cmpCoinGecko = function () {
         return '';
       }
     },
-    mounted(app) {
-      app.fetchCoinGecko();
+    mounted() {
+      this.handleUnlock = () => {
+        this.fetchCoinGecko();
+      };
+      window.addEventListener('app-unlocked', this.handleUnlock);
+      if (window.appUnlocked) {
+        this.fetchCoinGecko();
+      }
+    },
+    beforeUnmount() {
+      window.removeEventListener('app-unlocked', this.handleUnlock);
     }
   };
 };
