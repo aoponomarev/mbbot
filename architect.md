@@ -4,6 +4,7 @@
 
 Слои
 - core/: конфиг, fetch-обёртка (таймауты/ретраи), абстракция хранения (localStorage/IndexedDB), общие расчётные хелперы, схемы валидации входящих данных.
+  - core/security/: утилиты обфускации, валидация ключей, безопасное хранение чувствительных данных (PIN-коды, API-ключи).
 - data-sources/: адаптеры провайдеров (coingecko, другие аналитические API), нормализация в общий формат.
 - domain/:
   - entities/: asset, metric, index, strategy, portfolio, history (таймсерии), correlation.
@@ -23,6 +24,8 @@
 
 Текущее размещение файлов
 - core/cfg-app.js — конфиг приложения (defaults, модели).
+- core/security/u-sec-obfuscate.js — утилиты обфускации для безопасного хранения PIN и API-ключей.
+- ui/components/c-ui-splash.js — сплэш-экран с защитой PIN-кодом и настройкой API-ключа.
 - ui/components/c-ui-theme.js — применение темы.
 - ui/components/c-ui-perplexity-settings.js — настройка ключа/модели Perplexity.
 - ui/components/c-ui-chat.js — чат Perplexity.
@@ -54,6 +57,6 @@ Fetch (data-sources) → Validate/Normalize (schemas) → Compute (calculator/in
 Именование файлов (префиксы)
 - Шаблон (обязателен для новых файлов): `<категория>-<сектор?>-<имя>.<ext>`. Сектор добавлять только при реальной привязке к UI/UX/MM.
 - Желаемый пул категорий: `c-` компоненты UI, `f-` фичи, `ds-` источники/адаптеры данных, `d-` доменные сущности, `svc-` сервисы/бизнес-логика, `u-` утилиты, `cfg-` конфиги, `app-` точка входа/композиция, `t-` тесты.
-- Секторы: `ui-`, `ux-`, `mm-` (опционально).
-- Примеры: `c-ui-modal.js`, `svc-mm-portfolio-builder.js`, `ds-market-coingecko.js`, `u-core-storage.js`, `cfg-app.js`, `app-ui-root.js`.
+- Секторы: `ui-`, `ux-`, `mm-`, `sec-` (security) (опционально).
+- Примеры: `c-ui-modal.js`, `svc-mm-portfolio-builder.js`, `ds-market-coingecko.js`, `u-core-storage.js`, `u-sec-obfuscate.js`, `cfg-sec-keys.js`, `cfg-app.js`, `app-ui-root.js`.
 - Расширение пула: при появлении новых типов файлов добавлять префикс в этот список и держать его в актуальном состоянии.

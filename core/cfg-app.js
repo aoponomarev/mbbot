@@ -1,8 +1,10 @@
 // Конфигурация приложения (обычные скрипты, совместимо с file://)
+// Примечание: API-ключи и PIN-коды хранятся обфусцированными через u-sec-obfuscate.js
 window.appConfig = {
   defaults: {
     theme: 'light',
     perplexityModel: 'sonar-pro',
+    // defaultApiKey используется как fallback, если пользователь не установил свой ключ
     defaultApiKey: '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'
   },
   models: [
@@ -11,5 +13,5 @@ window.appConfig = {
     { value: 'llama-3.1-sonar-small-128k-online', label: 'llama-3.1-sonar-small-128k-online' },
     { value: 'llama-3.1-sonar-large-128k-online', label: 'llama-3.1-sonar-large-128k-online' }
   ],
-  lastCommitMessage: 'Add mandatory checklist for commit workflow'
+  lastCommitMessage: 'Add security layer with obfuscation and API key field in splash'
 };

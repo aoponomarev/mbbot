@@ -32,8 +32,33 @@
                         :maxlength="4"
                     >
                 </div>
-                <p v-if="lastCommitMessage" class="text-muted small mb-0" style="opacity:0.8;">{{ lastCommitMessage }}</p>
-                <div v-if="passwordError" class="alert alert-danger mb-0">
+                <p v-if="lastCommitMessage" class="text-muted small mb-3" style="opacity:0.8;">{{ lastCommitMessage }}</p>
+
+                <!-- API Key настройка -->
+                <div class="border-top border-secondary pt-3 mt-3">
+                    <label class="text-white small mb-2">Perplexity API Key (optional):</label>
+                    <div class="input-group mb-2">
+                        <input
+                            type="password"
+                            class="form-control form-control-sm bg-dark text-white border-secondary"
+                            v-model="apiKeyPerplexity"
+                            placeholder="pplx-..."
+                            autocomplete="off"
+                        >
+                    </div>
+                    <button
+                        @click="saveApiKey"
+                        class="btn btn-sm btn-outline-light w-100"
+                        :disabled="!apiKeyPerplexity.trim()"
+                    >
+                        <i class="fas fa-save me-1"></i>Сохранить ключ
+                    </button>
+                    <div v-if="apiKeyPerplexitySaved" class="alert alert-success mt-2 mb-0 py-1">
+                        <small><i class="fas fa-check-circle me-1"></i>Ключ сохранен</small>
+                    </div>
+                </div>
+
+                <div v-if="passwordError" class="alert alert-danger mt-3 mb-0">
                     <small>Неверный код</small>
                 </div>
             </div>
@@ -312,6 +337,7 @@
     <!-- Vue.js 3 (глобальный скрипт) -->
     <script src="https://unpkg.com/vue@3.5.25/dist/vue.global.prod.js"></script>
     <!-- Компоненты и приложение (обычные скрипты, совместимо с file://) -->
+    <script src="./core/security/u-sec-obfuscate.js"></script>
     <script src="./core/cfg-app.js"></script>
     <script src="./ui/components/c-ui-theme.js"></script>
     <script src="./ui/components/c-ui-splash.js"></script>

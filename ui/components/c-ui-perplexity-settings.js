@@ -1,5 +1,7 @@
 // Настройки Perplexity: ключ, модель, список моделей
+// Примечание: API-ключ хранится обфусцированным через u-sec-obfuscate.js
 window.cmpPerplexitySettings = function (defaults, modelsList) {
+  const STORAGE_KEY_API = 'perplexity-api-key';
   const fallback = {
     model: 'sonar-pro',
     apiKey: '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'
@@ -20,9 +22,10 @@ window.cmpPerplexitySettings = function (defaults, modelsList) {
     methods: {
       saveApiKey() {
         if (this.perplexityApiKey) {
-          localStorage.setItem('perplexityApiKey', this.perplexityApiKey);
+          // Используем обфусцированное хранилище для безопасности
+          window.securityObfuscate.saveSecure(STORAGE_KEY_API, this.perplexityApiKey);
         } else {
-          localStorage.removeItem('perplexityApiKey');
+          window.securityObfuscate.removeSecure(STORAGE_KEY_API);
         }
       },
       toggleApiKeyVisibility() {
@@ -34,15 +37,16 @@ window.cmpPerplexitySettings = function (defaults, modelsList) {
       }
     },
     mounted(app) {
-      const savedApiKey = localStorage.getItem('perplexityApiKey');
+      // Загружаем API-ключ из обфусцированного хранилища
+      const savedApiKey = window.securityObfuscate.loadSecure(STORAGE_KEY_API);
       if (savedApiKey) {
         app.perplexityApiKey = savedApiKey;
       } else if (defaults && defaults.defaultApiKey) {
         app.perplexityApiKey = defaults.defaultApiKey;
-        localStorage.setItem('perplexityApiKey', defaults.defaultApiKey);
+        window.securityObfuscate.saveSecure(STORAGE_KEY_API, defaults.defaultApiKey);
       } else {
         app.perplexityApiKey = fallback.apiKey;
-        localStorage.setItem('perplexityApiKey', fallback.apiKey);
+        window.securityObfuscate.saveSecure(STORAGE_KEY_API, fallback.apiKey);
       }
 
       const savedModel = localStorage.getItem('perplexityModel');
