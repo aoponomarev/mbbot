@@ -14,7 +14,14 @@ __pycache__/
 *~
 
 # IDE
-.vscode/
+# Исключаем .vscode, но разрешаем конфигурационные файлы для синхронизации настроек
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/keybindings.json
+!.vscode/tasks.json
+!.vscode/cspell-dict.txt
+!.vscode/README.md
 .idea/
 *.sublime-project
 *.sublime-workspace

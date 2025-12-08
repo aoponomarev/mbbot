@@ -1,0 +1,7 @@
+[
+  {
+    "key": "ctrl+shift+s",
+    "command": "git.stageAll",
+    "when": "scmProvider == git"
+  }
+]
