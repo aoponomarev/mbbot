@@ -21,6 +21,16 @@
 - ui/: переиспользуемые компоненты (таблицы, карточки, формы, графики), layout, тема/токены (через Bootstrap-утилиты).
 - tests/: unit (расчёты), integration (сценарии сборки портфелей, импорт/экспорт).
 
+Текущее размещение файлов
+- core/cfg-app.js — конфиг приложения (defaults, модели).
+- ui/components/c-ui-theme.js — применение темы.
+- ui/components/c-ui-perplexity-settings.js — настройка ключа/модели Perplexity.
+- ui/components/c-ui-chat.js — чат Perplexity.
+- ui/components/c-ui-import-export.js — экспорт/импорт настроек.
+- ui/components/c-ui-coingecko.js — виджет CoinGecko.
+- app/app-ui-root.js — сборка и монтирование Vue-приложения.
+- index.html — корневой HTML, подключает скрипты через CDN + локальные.
+
 Ключевые сущности
 - Asset: {id, symbol, name}.
 - Metric: {assetId, period, kind, value}; источник — data-sources → calculator.
