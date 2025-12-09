@@ -372,15 +372,20 @@
                         <select 
                             v-model="selectedModel"
                             @change="switchModel(selectedModel)"
-                            class="form-select form-select-sm me-2 text-white"
+                            class="form-select form-select-sm"
                             style="
                                 background-color: rgba(255, 255, 255, 0.1);
                                 background-image: url('data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 16 16\'%3e%3cpath fill=\'none\' stroke=\'rgba(255,255,255,0.5)\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M2 5l6 6 6-6\'/%3e%3c/svg%3e');
                                 background-repeat: no-repeat;
                                 background-position: right 0.5rem center;
                                 background-size: 16px 12px;
-                                border-color: rgba(255, 255, 255, 0.2);
+                                border: 1px solid rgba(255, 255, 255, 0.2);
+                                color: #ffffff;
+                                width: auto;
+                                min-width: 120px;
                                 padding-right: 2rem;
+                                transition: background-color 0.2s;
+                                margin-right: 8px;
                                 appearance: none;
                             "
                             @mouseenter="$event.target.style.backgroundColor = 'rgba(255, 255, 255, 0.15)'"
@@ -466,27 +471,27 @@
                         <div class="d-none d-md-flex align-items-center justify-content-between">
                             <div class="d-flex align-items-center gap-1">
                                 <i class="fab fa-bitcoin" :style="{ color: btcDomColor }"></i>
-                                <span>BTC: {{ btcDom }}</span>
+                                <span>BTC: <span class="font-monospace" style="font-size: 1.05em;">{{ displayBTCDom }}</span></span>
                             </div>
                             <div class="d-flex align-items-center gap-1">
                                 <i class="fas fa-chart-line" :style="{ color: fgiColor }"></i>
-                                <span>FGI: {{ fgi }}</span>
+                                <span>FGI: <span class="font-monospace" style="font-size: 1.05em;">{{ displayFGI }}</span></span>
                             </div>
                             <div class="d-flex align-items-center gap-1">
                                 <i class="fas fa-wave-square" :style="{ color: vixColor }"></i>
-                                <span>VIX: {{ vix }}</span>
+                                <span>VIX: <span class="font-monospace" style="font-size: 1.05em;">{{ displayVIX }}</span></span>
                             </div>
                             <div class="d-flex align-items-center gap-1">
                                 <i class="fas fa-chart-bar" :style="{ color: oiColor }"></i>
-                                <span>OI: {{ oi }}</span>
+                                <span>OI: <span class="font-monospace" style="font-size: 1.05em;">{{ displayOI }}</span></span>
                             </div>
                             <div class="d-flex align-items-center gap-1">
                                 <i class="fas fa-percent" :style="{ color: frColor }"></i>
-                                <span>FR: {{ fr }}</span>
+                                <span>FR: <span class="font-monospace" style="font-size: 1.05em;">{{ displayFR }}</span></span>
                             </div>
                             <div class="d-flex align-items-center gap-1">
                                 <i class="fas fa-balance-scale" :style="{ color: lsrColor }"></i>
-                                <span>LSR: {{ lsr }}</span>
+                                <span>LSR: <span class="font-monospace" style="font-size: 1.05em;">{{ displayLSR }}</span></span>
                             </div>
                             <div class="d-flex align-items-center gap-1">
                                 <i class="fab fa-vuejs" style="color: #4FC08D;"></i>
@@ -504,27 +509,27 @@
                             <div class="d-flex align-items-center gap-3" style="min-width: max-content;">
                                 <div class="d-flex align-items-center gap-1">
                                     <i class="fab fa-bitcoin" :style="{ color: btcDomColor }"></i>
-                                    <span>BTC: {{ btcDom }}</span>
+                                    <span>BTC: <span class="font-monospace" style="font-size: 1.05em;">{{ displayBTCDom }}</span></span>
                                 </div>
                                 <div class="d-flex align-items-center gap-1">
                                     <i class="fas fa-chart-line" :style="{ color: fgiColor }"></i>
-                                    <span>FGI: {{ fgi }}</span>
+                                    <span>FGI: <span class="font-monospace" style="font-size: 1.05em;">{{ displayFGI }}</span></span>
                                 </div>
                                 <div class="d-flex align-items-center gap-1">
                                     <i class="fas fa-wave-square" :style="{ color: vixColor }"></i>
-                                    <span>VIX: {{ vix }}</span>
+                                    <span>VIX: <span class="font-monospace" style="font-size: 1.05em;">{{ displayVIX }}</span></span>
                                 </div>
                                 <div class="d-flex align-items-center gap-1">
                                     <i class="fas fa-chart-bar" :style="{ color: oiColor }"></i>
-                                    <span>OI: {{ oi }}</span>
+                                    <span>OI: <span class="font-monospace" style="font-size: 1.05em;">{{ displayOI }}</span></span>
                                 </div>
                                 <div class="d-flex align-items-center gap-1">
                                     <i class="fas fa-percent" :style="{ color: frColor }"></i>
-                                    <span>FR: {{ fr }}</span>
+                                    <span>FR: <span class="font-monospace" style="font-size: 1.05em;">{{ displayFR }}</span></span>
                                 </div>
                                 <div class="d-flex align-items-center gap-1">
                                     <i class="fas fa-balance-scale" :style="{ color: lsrColor }"></i>
-                                    <span>LSR: {{ lsr }}</span>
+                                    <span>LSR: <span class="font-monospace" style="font-size: 1.05em;">{{ displayLSR }}</span></span>
                                 </div>
                             </div>
                         </div>

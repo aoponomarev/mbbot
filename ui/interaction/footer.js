@@ -19,11 +19,42 @@ window.cmpFooter = {
       vixValue: null,
       btcDomValue: null,
       frValue: null,
-      lsrValue: null
+      lsrValue: null,
+      // Состояние загрузки метрик
+      isLoading: true,
+      loadingSpinnerIndex: 0,
+      loadingSpinnerInterval: null,
+      // Символы для анимации загрузки (олдскульные слеши)
+      loadingSpinnerChars: ['|', '/', '-', '\\']
     };
   },
 
   computed: {
+    // Текущий символ анимации загрузки
+    loadingSpinner() {
+      return this.loadingSpinnerChars[this.loadingSpinnerIndex];
+    },
+
+    // Отображаемые значения метрик (с анимацией загрузки)
+    displayFGI() {
+      return this.isLoading && this.fgi === '—' ? this.loadingSpinner : this.fgi;
+    },
+    displayVIX() {
+      return this.isLoading && this.vix === '—' ? this.loadingSpinner : this.vix;
+    },
+    displayBTCDom() {
+      return this.isLoading && this.btcDom === '—' ? this.loadingSpinner : this.btcDom;
+    },
+    displayOI() {
+      return this.isLoading && this.oi === '—' ? this.loadingSpinner : this.oi;
+    },
+    displayFR() {
+      return this.isLoading && this.fr === '—' ? this.loadingSpinner : this.fr;
+    },
+    displayLSR() {
+      return this.isLoading && this.lsr === '—' ? this.loadingSpinner : this.lsr;
+    },
+
     // Цвет иконки BTC: цветная если доминирует (>50%), серая если нет
     btcDomColor() {
       if (this.btcDomValue === null) return '#6c757d'; // серый по умолчанию
@@ -72,12 +103,33 @@ window.cmpFooter = {
   },
 
   methods: {
+    // Запуск анимации загрузки (вращающиеся слеши)
+    startLoadingSpinner() {
+      if (this.loadingSpinnerInterval) return; // Уже запущена
+      this.loadingSpinnerIndex = 0;
+      this.loadingSpinnerInterval = setInterval(() => {
+        this.loadingSpinnerIndex = (this.loadingSpinnerIndex + 1) % this.loadingSpinnerChars.length;
+      }, 150); // Обновление каждые 150мс для плавной анимации
+    },
+
+    // Остановка анимации загрузки
+    stopLoadingSpinner() {
+      if (this.loadingSpinnerInterval) {
+        clearInterval(this.loadingSpinnerInterval);
+        this.loadingSpinnerInterval = null;
+      }
+    },
+
     // Загрузка индексов рынка через модуль market-metrics
     async fetchMarketIndices() {
       if (!window.marketMetrics) {
         console.error('marketMetrics module not loaded');
         return;
       }
+
+      // Устанавливаем состояние загрузки и запускаем анимацию
+      this.isLoading = true;
+      this.startLoadingSpinner();
 
       try {
         const metrics = await window.marketMetrics.fetchAll();
@@ -108,8 +160,15 @@ window.cmpFooter = {
 
         // Long/Short Ratio: парсим напрямую
         this.lsrValue = metrics.lsr !== '—' ? parseFloat(metrics.lsr) : null;
+
+        // Останавливаем анимацию после загрузки
+        this.isLoading = false;
+        this.stopLoadingSpinner();
       } catch (error) {
         console.error('Market indices fetch error:', error);
+        // Останавливаем анимацию даже при ошибке
+        this.isLoading = false;
+        this.stopLoadingSpinner();
       }
     }
   },
@@ -141,6 +200,11 @@ window.cmpFooter = {
         this.fetchMarketIndices();
       }
     }, 5 * 60 * 1000);
+  },
+
+  beforeUnmount() {
+    // Очищаем интервал при размонтировании компонента
+    this.stopLoadingSpinner();
   }
 };
 
