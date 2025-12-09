@@ -307,27 +307,26 @@
                     >
                 </div>
                 <p v-if="lastCommitMessage" class="text-muted small mb-3" style="opacity:0.8;">
-                    {{ lastCommitMessage }}. <span v-if="quote && !quoteLoading">{{ quote }}</span>
+                    {{ lastCommitMessage }}<span v-if="quoteLoading">{{ loadingDotsString }}</span><span v-if="quote && !quoteLoading">. {{ quote }}</span>
                 </p>
-                <div v-if="quoteLoading" class="text-muted small mb-3" style="opacity:0.6;">
-                    <i class="fas fa-spinner fa-spin me-1"></i>Ищем цитату...
-                </div>
                 <div v-if="quoteError && !quoteLoading" class="text-warning small mb-3" style="opacity:0.7;">
                     <i class="fas fa-exclamation-triangle me-1"></i>Не удалось загрузить цитату
                 </div>
 
                 <!-- API Key настройка -->
-                <div class="border-top border-secondary pt-3 mt-3">
-                    <label class="text-white small mb-2">Perplexity API Key (optional):</label>
+                <div class="pt-3 mt-3">
+                    <label class="text-white small mb-2" title="Perplexity API Key">API:</label>
                     <div class="input-group mb-2">
                         <input
                             :type="showApiKeyTemporarily ? 'text' : 'password'"
-                            class="form-control form-control-sm bg-dark text-white border-secondary text-center"
+                            class="form-control form-control-sm text-white text-center"
                             v-model="apiKeyPerplexity"
                             placeholder="pplx-..."
                             autocomplete="off"
                             @paste="handleApiKeyPaste"
-                            style="text-align: center;"
+                            @focus="$event.target.style.opacity = '1'; $event.target.style.borderColor = 'var(--bs-secondary)'; $event.target.style.backgroundColor = 'var(--bs-dark)'"
+                            @blur="$event.target.style.opacity = '0.5'; $event.target.style.borderColor = 'transparent'; $event.target.style.backgroundColor = 'transparent'"
+                            :style="{ opacity: '0.5', textAlign: 'center', borderColor: 'transparent', backgroundColor: 'transparent' }"
                         >
                     </div>
                     <div class="d-flex justify-content-center align-items-center gap-3" style="min-height: 32px;">

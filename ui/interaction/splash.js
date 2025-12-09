@@ -35,6 +35,8 @@ window.cmpSplash = {
       quoteLoading: false,
       quoteError: false,
       showApiKeyTemporarily: false,
+      loadingDots: 1,
+      loadingDotsInterval: null,
       DEFAULT_PIN,
       PIN_LENGTH,
       STORAGE_KEY_PIN,
@@ -97,6 +99,7 @@ window.cmpSplash = {
       this.quoteError = false;
       this.quote = '';
       this.quoteAuthor = '';
+      this.startLoadingDots();
 
       const apiHeaders = {
         'Authorization': `Bearer ${this.apiKeyPerplexity}`,
@@ -108,11 +111,11 @@ window.cmpSplash = {
 
       try {
         // Генерируем псевдо-философское высказывание (одно длинное предложение) как продолжение коммита
-        const quotePrompt = `Create a pseudo-philosophical statement (one longer sentence, more extended than usual) that interprets, develops, or philosophically expands the meaning of the following text: "${this.lastCommitMessage}".
+        const quotePrompt = `Create a pseudo-philosophical statement (one longer sentence, approximately 30 words) that interprets, develops, or philosophically expands the meaning of the following text: "${this.lastCommitMessage}".
 
 CRITICAL REQUIREMENTS:
 - Your response must contain EXACTLY one sentence
-- The sentence should be longer than usual (more extended, with multiple clauses or phrases)
+- The sentence should be approximately 30 words (not less than 25, not more than 35)
 - DO NOT repeat or quote the original text - develop the idea philosophically instead
 - DO NOT start with the same words as the original text
 - Interpret, expand, or create a philosophical narrative that relates to the original meaning
@@ -174,6 +177,7 @@ Example: If the original text is "Add feature to app", your response should be s
         // Не блокируем вход, просто не показываем цитату
       } finally {
         this.quoteLoading = false;
+        this.stopLoadingDots();
       }
     },
 
@@ -226,6 +230,24 @@ Example: If the original text is "Add feature to app", your response should be s
       });
     },
 
+    // Индикатор загрузки из точек (1,2,3,4,5 циклично)
+    startLoadingDots() {
+      this.loadingDots = 1;
+      if (this.loadingDotsInterval) {
+        clearInterval(this.loadingDotsInterval);
+      }
+      this.loadingDotsInterval = setInterval(() => {
+        this.loadingDots = (this.loadingDots % 5) + 1;
+      }, 500); // Меняем каждые 500мс
+    },
+
+    stopLoadingDots() {
+      if (this.loadingDotsInterval) {
+        clearInterval(this.loadingDotsInterval);
+        this.loadingDotsInterval = null;
+      }
+    },
+
     checkPassword() {
       if (!this.passwordInput.trim()) {
         return;
@@ -276,11 +298,22 @@ Example: If the original text is "Add feature to app", your response should be s
     }
   },
 
+  computed: {
+    loadingDotsString() {
+      return '.'.repeat(this.loadingDots);
+    }
+  },
+
   watch: {
     showSplash(newValue) {
       if (newValue) {
         this.focusInput();
       }
     }
+  },
+
+  beforeUnmount() {
+    // Очищаем интервал при размонтировании компонента
+    this.stopLoadingDots();
   }
 };
