@@ -37,5 +37,10 @@
     "**/node_modules": true,
     "**/bower_components": true,
     "**/.git": true
+  },
+  
+  // Открывать Markdown файлы в режиме preview
+  "workbench.editorAssociations": {
+    "*.md": "vscode.markdown.preview.editor"
   }
 }
