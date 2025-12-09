@@ -13,5 +13,5 @@ window.appConfig = {
     { value: 'llama-3.1-sonar-small-128k-online', label: 'llama-3.1-sonar-small-128k-online' },
     { value: 'llama-3.1-sonar-large-128k-online', label: 'llama-3.1-sonar-large-128k-online' }
   ],
-  lastCommitMessage: 'Improve mobile dropdown styling: reduce padding, shorten label, add Material Design shadow'
+  lastCommitMessage: 'Move market-metrics to core/api and unify header select styles'
 };

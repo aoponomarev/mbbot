@@ -1,0 +1,8 @@
+/* Общие стили layout */
+
+/* Контейнер основного контента с учетом фиксированных хедера и футера */
+.app-main-container {
+    padding-top: 60px !important;
+    padding-bottom: 60px !important;
+}
+

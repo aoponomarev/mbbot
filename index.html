@@ -11,60 +11,14 @@
     <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     
-    <!-- Стили для скрытия scrollbar в мобильной версии футера и стилизации селектов -->
-    <style>
-        .footer-mobile-scroll::-webkit-scrollbar {
-            display: none;
-        }
-        
-        /* Стилизация селектов и dropdown кнопок */
-        .header-select {
-            width: auto !important;
-            max-width: 100%;
-        }
-        
-        /* Стилизация dropdown меню для мобильной версии */
-        @media (max-width: 767.98px) {
-            .header-select.dropdown-toggle::after {
-                margin-left: 0.5rem;
-            }
-            
-            /* Стилизация dropdown меню с учетом темы в стиле Material Design */
-            .dropdown-menu[data-bs-theme="dark"] {
-                background-color: #2b2b2b;
-                border: 1px solid rgba(255, 255, 255, 0.12);
-                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
-                border-radius: 4px;
-            }
-            
-            .dropdown-menu[data-bs-theme="dark"] .dropdown-item {
-                color: #ffffff;
-            }
-            
-            .dropdown-menu[data-bs-theme="dark"] .dropdown-item:hover,
-            .dropdown-menu[data-bs-theme="dark"] .dropdown-item.active {
-                background-color: rgba(255, 255, 255, 0.1);
-                color: #ffffff;
-            }
-            
-            .dropdown-menu[data-bs-theme="light"] {
-                background-color: #ffffff;
-                border: 1px solid rgba(0, 0, 0, 0.12);
-                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-                border-radius: 4px;
-            }
-            
-            .dropdown-menu[data-bs-theme="light"] .dropdown-item {
-                color: #212529;
-            }
-            
-            .dropdown-menu[data-bs-theme="light"] .dropdown-item:hover,
-            .dropdown-menu[data-bs-theme="light"] .dropdown-item.active {
-                background-color: rgba(0, 0, 0, 0.08);
-                color: #212529;
-            }
-        }
-    </style>
+    <!-- Стили компонентов приложения -->
+    <!-- Стили компонентов приложения -->
+    <link rel="stylesheet" href="ui/styles/layout.css">
+    <link rel="stylesheet" href="ui/styles/header.css">
+    <link rel="stylesheet" href="ui/styles/footer.css">
+    <link rel="stylesheet" href="ui/styles/dropdown.css">
+    <link rel="stylesheet" href="ui/styles/splash.css">
+    <link rel="stylesheet" href="ui/styles/chat.css">
 </head>
 <body class="min-vh-100">
     <div id="app">
@@ -77,7 +31,7 @@
         <!-- Компонент футера -->
         <app-footer></app-footer>
 
-        <div class="container-fluid py-4" style="padding-top: 60px !important; padding-bottom: 60px !important;">
+        <div class="container-fluid py-4 app-main-container">
 
             <header class="mb-4">
                 <h1 class="display-4">BOT</h1>
@@ -195,22 +149,22 @@
                                     <i class="fas fa-trash me-1"></i>Очистить
                                 </button>
                             </div>
-                            <div class="card-body d-flex flex-column" style="min-height: 400px;">
+                            <div class="card-body d-flex flex-column app-chat-card-body">
                                 <!-- История сообщений -->
-                                <div class="flex-grow-1 overflow-auto mb-3" style="max-height: 350px;" ref="messagesContainer">
+                                <div class="flex-grow-1 overflow-auto mb-3 app-chat-messages-container" ref="messagesContainer">
                                     <div v-if="messages.length === 0" class="text-center text-muted py-5">
                                         <i class="fas fa-comments fa-3x mb-3 d-block"></i>
                                         <p>Начните диалог с Perplexity AI</p>
                                     </div>
                                     <div v-for="(msg, index) in messages" :key="index" class="mb-3">
                                         <div v-if="msg.role === 'user'" class="d-flex justify-content-end">
-                                            <div class="bg-primary text-white rounded p-2" style="max-width: 80%;">
+                                            <div class="bg-primary text-white rounded p-2 app-chat-message-user">
                                                 <small class="d-block mb-1"><strong>Вы:</strong></small>
                                                 <div>{{ msg.content }}</div>
                                             </div>
                                         </div>
                                         <div v-else class="d-flex justify-content-start">
-                                            <div class="bg-light border rounded p-2" style="max-width: 80%;">
+                                            <div class="bg-light border rounded p-2 app-chat-message-assistant">
                                                 <small class="d-block mb-1 text-muted"><strong>Perplexity:</strong></small>
                                                 <div v-html="formatMessage(msg.content)"></div>
                                             </div>
@@ -338,8 +292,8 @@
 
     <!-- X-Template для компонента сплэш-экрана (должен быть ДО загрузки Vue и компонентов) -->
     <script type="text/x-template" id="splash-template">
-        <div v-if="showSplash" id="splash-screen" class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="background: rgba(0, 0, 0, 0.95); z-index: 9999;" data-bs-theme="dark">
-            <div class="text-center" style="max-width: 400px; width: 90%;">
+        <div v-if="showSplash" id="splash-screen" class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center app-splash-screen" data-bs-theme="dark">
+            <div class="text-center app-splash-container">
                 <h3 class="text-white mb-4">Code SMS</h3>
                 <div class="mb-3">
                     <input
@@ -356,10 +310,10 @@
                         :maxlength="4"
                     >
                 </div>
-                <p v-if="lastCommitMessage" class="text-muted small mb-3" style="opacity:0.8;">
+                <p v-if="lastCommitMessage" class="text-muted small mb-3 app-splash-commit-message">
                     {{ lastCommitMessage }}<span v-if="quoteLoading">{{ loadingDotsString }}</span><span v-if="quote && !quoteLoading">. {{ quote }}</span>
                 </p>
-                <div v-if="quoteError && !quoteLoading" class="text-warning small mb-3" style="opacity:0.7;">
+                <div v-if="quoteError && !quoteLoading" class="text-warning small mb-3 app-splash-quote-error">
                     <i class="fas fa-exclamation-triangle me-1"></i>Не удалось загрузить цитату
                 </div>
 
@@ -374,22 +328,20 @@
                             placeholder="pplx-..."
                             autocomplete="off"
                             @paste="handleApiKeyPaste"
-                            @focus="$event.target.style.opacity = '1'; $event.target.style.borderColor = 'var(--bs-secondary)'; $event.target.style.backgroundColor = 'var(--bs-dark)'"
-                            @blur="$event.target.style.opacity = '0.5'; $event.target.style.borderColor = 'transparent'; $event.target.style.backgroundColor = 'transparent'"
-                            :style="{ opacity: '0.5', textAlign: 'center', borderColor: 'transparent', backgroundColor: 'transparent' }"
+                            class="app-splash-api-field"
                         >
                     </div>
-                    <div class="d-flex justify-content-center align-items-center gap-3" style="min-height: 32px;">
+                    <div class="d-flex justify-content-center align-items-center gap-3 app-splash-api-actions">
                         <button
                             @click="saveApiKey"
                             class="btn p-0 border-0 bg-transparent text-white"
                             :disabled="!apiKeyPerplexity.trim()"
-                            :style="{ opacity: apiKeyPerplexity.trim() ? '1' : '0.5', cursor: apiKeyPerplexity.trim() ? 'pointer' : 'not-allowed' }"
+                            :class="{ 'app-splash-save-btn': !apiKeyPerplexity.trim(), 'disabled': !apiKeyPerplexity.trim() }"
                             title="Сохранить ключ"
                         >
-                            <i class="fas fa-save" style="font-size: 1.5em;"></i>
+                            <i class="fas fa-save app-splash-save-icon"></i>
                         </button>
-                        <i v-if="apiKeyPerplexitySaved" class="fas fa-check-circle text-success" style="font-size: 1.5em;"></i>
+                        <i v-if="apiKeyPerplexitySaved" class="fas fa-check-circle text-success app-splash-check-icon"></i>
                     </div>
                 </div>
 
@@ -402,19 +354,16 @@
 
     <!-- X-Template для компонента футера (должен быть ДО загрузки Vue и компонентов) -->
     <script type="text/x-template" id="header-template">
-        <header class="position-fixed top-0 start-0 w-100" style="z-index: 1050; background-color: #2b2b2b; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+        <header class="position-fixed top-0 start-0 w-100 app-header">
             <div class="container-fluid">
-                <div class="d-flex align-items-center" style="height: 50px;">
+                <div class="d-flex align-items-center app-header-container">
                     <!-- Секция 1: Гамбургер (тап зона во всю секцию) -->
                     <div 
                         @click="toggleMenu"
-                        class="d-flex align-items-center justify-content-center"
-                        style="width: 50px; height: 50px; cursor: pointer; transition: background-color 0.2s;"
-                        @mouseenter="$event.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'"
-                        @mouseleave="$event.target.style.backgroundColor = 'transparent'"
+                        class="d-flex align-items-center justify-content-center app-header-hamburger"
                         title="Меню"
                     >
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: block;">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <rect x="2" y="5" width="16" height="2" fill="#ffffff" rx="0.5"/>
                             <rect x="2" y="9" width="16" height="2" fill="#ffffff" rx="0.5"/>
                             <rect x="2" y="13" width="16" height="2" fill="#ffffff" rx="0.5"/>
@@ -427,69 +376,40 @@
                         <select 
                             v-model="selectedModel"
                             @change="switchModel(selectedModel)"
-                            class="form-select form-select-sm header-select header-select-model d-none d-md-block"
-                            style="
-                                background-color: rgba(255, 255, 255, 0.1);
-                                background-image: url('data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 16 16\'%3e%3cpath fill=\'none\' stroke=\'rgba(255,255,255,0.5)\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M2 5l6 6 6-6\'/%3e%3c/svg%3e');
-                                background-repeat: no-repeat;
-                                background-position: right 0.5rem center;
-                                background-size: 16px 12px;
-                                border: 1px solid rgba(255, 255, 255, 0.2);
-                                color: #ffffff;
-                                width: auto;
-                                max-width: 100%;
-                                padding-right: 2rem;
-                                transition: background-color 0.2s;
-                                margin-right: 8px;
-                                appearance: none;
-                            "
-                            @mouseenter="$event.target.style.backgroundColor = 'rgba(255, 255, 255, 0.15)'"
-                            @mouseleave="$event.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'"
+                            class="form-select form-select-sm header-select header-select-model d-none d-md-block app-header-select-model"
                         >
                             <option 
                                 v-for="model in mathModels"
                                 :key="model.id"
                                 :value="model.id"
-                                style="background-color: #2b2b2b; color: #ffffff;"
+                                class="app-header-select-option"
                             >
                                 {{ model.label }}
                             </option>
                         </select>
 
                         <!-- Dropdown математической модели: мобильная версия -->
-                        <div class="dropdown d-block d-md-none" style="margin-right: 8px;">
+                        <div class="dropdown d-block d-md-none app-header-dropdown-model">
                             <button 
-                                class="btn btn-sm dropdown-toggle header-select header-select-model"
+                                class="btn btn-sm dropdown-toggle header-select header-select-model app-header-dropdown-btn"
                                 type="button"
                                 :id="modelDropdownId"
                                 data-bs-toggle="dropdown"
                                 aria-expanded="false"
-                                style="
-                                    background-color: rgba(255, 255, 255, 0.1);
-                                    border: 1px solid rgba(255, 255, 255, 0.2);
-                                    color: #ffffff;
-                                    width: auto;
-                                    padding-right: 0.75rem;
-                                    transition: background-color 0.2s;
-                                "
-                                @mouseenter="$event.target.style.backgroundColor = 'rgba(255, 255, 255, 0.15)'"
-                                @mouseleave="$event.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'"
                             >
                                 {{ selectedModelLabel }}
                             </button>
                             <ul 
-                                class="dropdown-menu"
+                                class="dropdown-menu app-header-dropdown-menu"
                                 :aria-labelledby="modelDropdownId"
                                 :data-bs-theme="getCurrentTheme()"
-                                style="min-width: 120px;"
                             >
                                 <li v-for="model in mathModels" :key="model.id">
                                     <a 
-                                        class="dropdown-item"
+                                        class="dropdown-item app-header-dropdown-item"
                                         href="#"
                                         :class="{ 'active': selectedModel === model.id }"
                                         @click.prevent="switchModel(model.id)"
-                                        style="color: var(--bs-body-color);"
                                     >
                                         {{ model.label }}
                                     </a>
@@ -500,37 +420,25 @@
                         <!-- Dropdown вкладок отображения: мобильная версия -->
                         <div class="dropdown d-block d-md-none">
                             <button 
-                                class="btn btn-sm dropdown-toggle header-select header-select-tab"
+                                class="btn btn-sm dropdown-toggle header-select header-select-tab app-header-dropdown-btn"
                                 type="button"
                                 :id="tabDropdownId"
                                 data-bs-toggle="dropdown"
                                 aria-expanded="false"
-                                style="
-                                    background-color: rgba(255, 255, 255, 0.1);
-                                    border: 1px solid rgba(255, 255, 255, 0.2);
-                                    color: #ffffff;
-                                    width: auto;
-                                    padding-right: 0.75rem;
-                                    transition: background-color 0.2s;
-                                "
-                                @mouseenter="$event.target.style.backgroundColor = 'rgba(255, 255, 255, 0.15)'"
-                                @mouseleave="$event.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'"
                             >
                                 {{ selectedTabLabel }}
                             </button>
                             <ul 
-                                class="dropdown-menu"
+                                class="dropdown-menu app-header-dropdown-menu"
                                 :aria-labelledby="tabDropdownId"
                                 :data-bs-theme="getCurrentTheme()"
-                                style="min-width: 120px;"
                             >
                                 <li v-for="tab in displayTabs" :key="tab.id">
                                     <a 
-                                        class="dropdown-item"
+                                        class="dropdown-item app-header-dropdown-item"
                                         href="#"
                                         :class="{ 'active': activeTab === tab.id }"
                                         @click.prevent="switchTab(tab.id)"
-                                        style="color: var(--bs-body-color);"
                                     >
                                         {{ tab.label }}
                                     </a>
@@ -557,12 +465,7 @@
                                 class="btn btn-sm btn-outline-light"
                                 :class="{ 'rounded-start': index === 0, 'rounded-end': index === displayTabs.length - 1 }"
                                 :for="'tab-' + tab.id"
-                                :style="activeTab === tab.id ? 'color: #ffffff; border-color: rgba(255, 255, 255, 0.3); background-color: transparent;' : 'color: rgba(255, 255, 255, 0.5); border-color: rgba(255, 255, 255, 0.3); background-color: transparent;'"
-                                style="
-                                    transition: all 0.2s;
-                                "
-                                @mouseenter="$event.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'"
-                                @mouseleave="$event.target.style.backgroundColor = 'transparent'"
+                                :class="activeTab === tab.id ? 'app-header-tab app-header-tab-active' : 'app-header-tab app-header-tab-inactive'"
                             >
                                 {{ tab.label }}
                             </label>
@@ -574,24 +477,18 @@
                         <!-- Кнопка рефреша -->
                         <div
                             @click="refreshPage"
-                            class="d-flex align-items-center justify-content-center"
-                            style="width: 50px; height: 50px; cursor: pointer; transition: background-color 0.2s;"
-                            @mouseenter="$event.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'"
-                            @mouseleave="$event.target.style.backgroundColor = 'transparent'"
+                            class="d-flex align-items-center justify-content-center app-header-control-btn"
                             title="Обновить страницу"
                         >
-                            <i class="fas fa-sync-alt" style="color: #ffffff; font-size: 1.1rem;"></i>
+                            <i class="fas fa-sync-alt"></i>
                         </div>
                         <!-- Кнопка смены темы -->
                         <div
                             @click="toggleTheme"
-                            class="d-flex align-items-center justify-content-center"
-                            style="width: 50px; height: 50px; cursor: pointer; transition: background-color 0.2s;"
-                            @mouseenter="$event.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'"
-                            @mouseleave="$event.target.style.backgroundColor = 'transparent'"
+                            class="d-flex align-items-center justify-content-center app-header-control-btn"
                             :title="themeTitle"
                         >
-                            <i :class="themeIcon" style="color: #ffffff; font-size: 1.1rem;"></i>
+                            <i :class="themeIcon"></i>
                         </div>
                     </div>
                 </div>
@@ -600,35 +497,35 @@
     </script>
 
     <script type="text/x-template" id="footer-template">
-        <footer class="position-fixed bottom-0 start-0 w-100 bg-body" style="z-index: 1000; box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1), 0 -2px 4px -1px rgba(0, 0, 0, 0.06);">
+        <footer class="position-fixed bottom-0 start-0 w-100 bg-body app-footer">
             <div class="container-fluid">
-                <div class="p-md-2 text-muted" style="min-height: 6.25ex;">
+                <div class="p-md-2 text-muted app-footer-container">
                     <!-- Десктоп: все индикаторы равномерно распределены -->
                     <div class="d-none d-md-inline small">
                         <div class="d-none d-md-flex align-items-center justify-content-between">
                             <div class="d-flex align-items-center gap-1">
                                 <i class="fab fa-bitcoin" :style="{ color: btcDomColor }"></i>
-                                <span>BTC: <span class="font-monospace" style="font-size: 1.05em;">{{ displayBTCDom }}</span></span>
+                                <span>BTC: <span class="font-monospace app-footer-metric-value">{{ displayBTCDom }}</span></span>
                             </div>
                             <div class="d-flex align-items-center gap-1">
                                 <i class="fas fa-chart-line" :style="{ color: fgiColor }"></i>
-                                <span>FGI: <span class="font-monospace" style="font-size: 1.05em;">{{ displayFGI }}</span></span>
+                                <span>FGI: <span class="font-monospace app-footer-metric-value">{{ displayFGI }}</span></span>
                             </div>
                             <div class="d-flex align-items-center gap-1">
                                 <i class="fas fa-wave-square" :style="{ color: vixColor }"></i>
-                                <span>VIX: <span class="font-monospace" style="font-size: 1.05em;">{{ displayVIX }}</span></span>
+                                <span>VIX: <span class="font-monospace app-footer-metric-value">{{ displayVIX }}</span></span>
                             </div>
                             <div class="d-flex align-items-center gap-1">
                                 <i class="fas fa-chart-bar" :style="{ color: oiColor }"></i>
-                                <span>OI: <span class="font-monospace" style="font-size: 1.05em;">{{ displayOI }}</span></span>
+                                <span>OI: <span class="font-monospace app-footer-metric-value">{{ displayOI }}</span></span>
                             </div>
                             <div class="d-flex align-items-center gap-1">
                                 <i class="fas fa-percent" :style="{ color: frColor }"></i>
-                                <span>FR: <span class="font-monospace" style="font-size: 1.05em;">{{ displayFR }}</span></span>
+                                <span>FR: <span class="font-monospace app-footer-metric-value">{{ displayFR }}</span></span>
                             </div>
                             <div class="d-flex align-items-center gap-1">
                                 <i class="fas fa-balance-scale" :style="{ color: lsrColor }"></i>
-                                <span>LSR: <span class="font-monospace" style="font-size: 1.05em;">{{ displayLSR }}</span></span>
+                                <span>LSR: <span class="font-monospace app-footer-metric-value">{{ displayLSR }}</span></span>
                             </div>
                             <div class="d-flex align-items-center gap-1">
                                 <i class="fab fa-vuejs" style="color: #4FC08D;"></i>
@@ -641,32 +538,32 @@
                         </div>
                     </div>
                     <!-- Мобильные: только метрики рынка с горизонтальной прокруткой -->
-                    <div class="d-block d-md-none d-flex align-items-center" style="min-height: 6.25ex;">
-                        <div class="d-flex align-items-center overflow-x-auto w-100 footer-mobile-scroll" style="scrollbar-width: none; -ms-overflow-style: none; -webkit-overflow-scrolling: touch; overflow-y: hidden;">
+                    <div class="d-block d-md-none d-flex align-items-center app-footer-container">
+                        <div class="d-flex align-items-center overflow-x-auto w-100 footer-mobile-scroll app-footer-scroll">
                             <div class="d-flex align-items-center gap-3" style="min-width: max-content;">
                                 <div class="d-flex align-items-center gap-1">
                                     <i class="fab fa-bitcoin" :style="{ color: btcDomColor }"></i>
-                                    <span>BTC: <span class="font-monospace" style="font-size: 1.05em;">{{ displayBTCDom }}</span></span>
+                                    <span>BTC: <span class="font-monospace app-footer-metric-value">{{ displayBTCDom }}</span></span>
                                 </div>
                                 <div class="d-flex align-items-center gap-1">
                                     <i class="fas fa-chart-line" :style="{ color: fgiColor }"></i>
-                                    <span>FGI: <span class="font-monospace" style="font-size: 1.05em;">{{ displayFGI }}</span></span>
+                                    <span>FGI: <span class="font-monospace app-footer-metric-value">{{ displayFGI }}</span></span>
                                 </div>
                                 <div class="d-flex align-items-center gap-1">
                                     <i class="fas fa-wave-square" :style="{ color: vixColor }"></i>
-                                    <span>VIX: <span class="font-monospace" style="font-size: 1.05em;">{{ displayVIX }}</span></span>
+                                    <span>VIX: <span class="font-monospace app-footer-metric-value">{{ displayVIX }}</span></span>
                                 </div>
                                 <div class="d-flex align-items-center gap-1">
                                     <i class="fas fa-chart-bar" :style="{ color: oiColor }"></i>
-                                    <span>OI: <span class="font-monospace" style="font-size: 1.05em;">{{ displayOI }}</span></span>
+                                    <span>OI: <span class="font-monospace app-footer-metric-value">{{ displayOI }}</span></span>
                                 </div>
                                 <div class="d-flex align-items-center gap-1">
                                     <i class="fas fa-percent" :style="{ color: frColor }"></i>
-                                    <span>FR: <span class="font-monospace" style="font-size: 1.05em;">{{ displayFR }}</span></span>
+                                    <span>FR: <span class="font-monospace app-footer-metric-value">{{ displayFR }}</span></span>
                                 </div>
                                 <div class="d-flex align-items-center gap-1">
                                     <i class="fas fa-balance-scale" :style="{ color: lsrColor }"></i>
-                                    <span>LSR: <span class="font-monospace" style="font-size: 1.05em;">{{ displayLSR }}</span></span>
+                                    <span>LSR: <span class="font-monospace app-footer-metric-value">{{ displayLSR }}</span></span>
                                 </div>
                             </div>
                         </div>
@@ -683,7 +580,7 @@
     <script src="./core/cfg-app.js"></script>
     <script src="./ui/interaction/theme.js"></script>
     <script src="./ui/interaction/splash.js"></script>
-    <script src="./ui/api/market-metrics.js"></script>
+    <script src="./core/api/market-metrics.js"></script>
     <script src="./ui/interaction/header.js"></script>
     <script src="./ui/interaction/footer.js"></script>
     <script src="./ui/api/perplexity.js"></script>

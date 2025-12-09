@@ -1,0 +1,18 @@
+/* Стили для компонента чата */
+
+.app-chat-card-body {
+    min-height: 400px;
+}
+
+.app-chat-messages-container {
+    max-height: 350px;
+}
+
+.app-chat-message-user {
+    max-width: 80%;
+}
+
+.app-chat-message-assistant {
+    max-width: 80%;
+}
+

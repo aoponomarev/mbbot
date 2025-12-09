@@ -1,0 +1,171 @@
+/* Стили для компонента хедера */
+
+/* Хедер - фиксированный, темный фон */
+.app-header {
+    position: fixed;
+    top: 0;
+    start: 0;
+    width: 100%;
+    z-index: 1050;
+    background-color: #2b2b2b;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Контейнер хедера */
+.app-header-container {
+    height: 50px;
+}
+
+/* Гамбургер меню */
+.app-header-hamburger {
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.app-header-hamburger:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.app-header-hamburger svg {
+    display: block;
+}
+
+/* Унифицированные стили для селектов в хедере (десктоп и мобильная версия) */
+.app-header-select-model,
+.btn.app-header-dropdown-btn,
+.btn.dropdown-toggle.app-header-dropdown-btn {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    transition: background-color 0.2s;
+}
+
+.app-header-select-model:hover,
+.btn.app-header-dropdown-btn:hover,
+.btn.dropdown-toggle.app-header-dropdown-btn:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+}
+
+.app-header-select-model:focus,
+.btn.app-header-dropdown-btn:focus,
+.btn.dropdown-toggle.app-header-dropdown-btn:focus,
+.app-header-select-model:active,
+.btn.app-header-dropdown-btn:active,
+.btn.dropdown-toggle.app-header-dropdown-btn:active,
+.btn.app-header-dropdown-btn[aria-expanded="true"],
+.btn.dropdown-toggle.app-header-dropdown-btn[aria-expanded="true"] {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    box-shadow: none;
+}
+
+.btn.app-header-dropdown-btn[aria-expanded="true"]:hover,
+.btn.dropdown-toggle.app-header-dropdown-btn[aria-expanded="true"]:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+}
+
+/* Специфичные стили для десктопного селекта */
+.app-header-select-model {
+    background-image: url('data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 16 16\'%3e%3cpath fill=\'none\' stroke=\'rgba(255,255,255,0.5)\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M2 5l6 6 6-6\'/%3e%3c/svg%3e');
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-size: 16px 12px;
+    width: auto;
+    max-width: 100%;
+    padding-right: 2rem;
+    margin-right: 8px;
+    appearance: none;
+}
+
+.app-header-select-model option,
+.app-header-select-option {
+    background-color: #2b2b2b;
+    color: #ffffff;
+}
+
+/* Специфичные стили для мобильного dropdown */
+.app-header-dropdown-btn {
+    width: auto;
+    padding-right: 0.75rem;
+}
+
+.app-header-dropdown-model {
+    margin-right: 8px;
+}
+
+.app-header-dropdown-menu {
+    min-width: 120px;
+}
+
+.app-header-dropdown-item {
+    color: var(--bs-body-color);
+}
+
+/* Вкладки отображения (десктоп) */
+.btn-group .app-header-tab {
+    transition: background-color 0.2s;
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn-group .app-header-tab:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Активная вкладка */
+.btn-check:checked + .btn.app-header-tab-active,
+.btn-group .app-header-tab-active {
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.3);
+    background-color: transparent;
+}
+
+.btn-check:checked + .btn.app-header-tab-active:hover,
+.btn-group .app-header-tab-active:hover {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Неактивная вкладка */
+.btn-check:not(:checked) + .btn.app-header-tab-inactive,
+.btn-group .app-header-tab-inactive {
+    color: rgba(255, 255, 255, 0.5);
+    border-color: rgba(255, 255, 255, 0.3);
+    background-color: transparent;
+}
+
+.btn-check:not(:checked) + .btn.app-header-tab-inactive:hover,
+.btn-group .app-header-tab-inactive:hover {
+    color: rgba(255, 255, 255, 0.5);
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Кнопки управления (рефреш, тема) */
+.app-header-control-btn {
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.app-header-control-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.app-header-control-btn i {
+    color: #ffffff;
+    font-size: 1.1rem;
+}
+
