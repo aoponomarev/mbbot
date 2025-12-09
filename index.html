@@ -10,6 +10,13 @@
 
     <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <!-- Стили для скрытия scrollbar в мобильной версии футера -->
+    <style>
+        .footer-mobile-scroll::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
 </head>
 <body class="min-vh-100">
     <div id="app">
@@ -401,8 +408,40 @@
                             </option>
                         </select>
 
-                        <!-- Вкладки отображения (как Bootstrap радиокнопки) -->
-                        <div class="btn-group" role="group" aria-label="Display tabs">
+                        <!-- Вкладки отображения: мобильная версия (селект) -->
+                        <select 
+                            v-model="activeTab"
+                            @change="switchTab(activeTab)"
+                            class="form-select form-select-sm d-block d-md-none"
+                            style="
+                                background-color: rgba(255, 255, 255, 0.1);
+                                background-image: url('data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 16 16\'%3e%3cpath fill=\'none\' stroke=\'rgba(255,255,255,0.5)\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M2 5l6 6 6-6\'/%3e%3c/svg%3e');
+                                background-repeat: no-repeat;
+                                background-position: right 0.5rem center;
+                                background-size: 16px 12px;
+                                border: 1px solid rgba(255, 255, 255, 0.2);
+                                color: #ffffff;
+                                width: auto;
+                                min-width: 100px;
+                                padding-right: 2rem;
+                                transition: background-color 0.2s;
+                                appearance: none;
+                            "
+                            @mouseenter="$event.target.style.backgroundColor = 'rgba(255, 255, 255, 0.15)'"
+                            @mouseleave="$event.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'"
+                        >
+                            <option 
+                                v-for="tab in displayTabs"
+                                :key="tab.id"
+                                :value="tab.id"
+                                style="background-color: #2b2b2b; color: #ffffff;"
+                            >
+                                {{ tab.label }}
+                            </option>
+                        </select>
+
+                        <!-- Вкладки отображения: десктопная версия (Bootstrap радиокнопки) -->
+                        <div class="btn-group d-none d-md-flex" role="group" aria-label="Display tabs">
                             <input
                                 v-for="(tab, index) in displayTabs"
                                 :key="tab.id"
@@ -465,7 +504,7 @@
     <script type="text/x-template" id="footer-template">
         <footer class="position-fixed bottom-0 start-0 w-100 bg-body" style="z-index: 1000; box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1), 0 -2px 4px -1px rgba(0, 0, 0, 0.06);">
             <div class="container-fluid">
-                <div class="p-5 p-md-2 text-muted">
+                <div class="p-md-2 text-muted" style="min-height: 6.25ex;">
                     <!-- Десктоп: все индикаторы равномерно распределены -->
                     <div class="d-none d-md-inline small">
                         <div class="d-none d-md-flex align-items-center justify-content-between">
@@ -504,8 +543,8 @@
                         </div>
                     </div>
                     <!-- Мобильные: только метрики рынка с горизонтальной прокруткой -->
-                    <div class="d-block d-md-none">
-                        <div class="d-flex align-items-center overflow-x-auto" style="scrollbar-width: thin; -webkit-overflow-scrolling: touch;">
+                    <div class="d-block d-md-none d-flex align-items-center" style="min-height: 6.25ex;">
+                        <div class="d-flex align-items-center overflow-x-auto w-100 footer-mobile-scroll" style="scrollbar-width: none; -ms-overflow-style: none; -webkit-overflow-scrolling: touch; overflow-y: hidden;">
                             <div class="d-flex align-items-center gap-3" style="min-width: max-content;">
                                 <div class="d-flex align-items-center gap-1">
                                     <i class="fab fa-bitcoin" :style="{ color: btcDomColor }"></i>
