@@ -20,19 +20,26 @@
   - import-export: JSON экспорт/импорт настроек, стратегий, портфелей.
   - settings: тема, API-ключи, периодичность обновлений.
 - ui/: переиспользуемые компоненты (таблицы, карточки, формы, графики), layout, тема/токены (через Bootstrap-утилиты).
+  - ui/api/: компоненты для работы с внешними API (Perplexity, CoinGecko, импорт/экспорт).
+  - ui/interaction/: компоненты взаимодействия с пользователем (сплэш, тема, чат).
 - tests/: unit (расчёты), integration (сценарии сборки портфелей, импорт/экспорт).
 
 Текущее размещение файлов
 - core/cfg-app.js — конфиг приложения (defaults, модели).
 - core/security/u-sec-obfuscate.js — утилиты обфускации для безопасного хранения PIN и API-ключей.
-- ui/components/c-ui-splash.js — сплэш-экран с защитой PIN-кодом и настройкой API-ключа.
-- ui/components/c-ui-theme.js — применение темы.
-- ui/components/c-ui-perplexity-settings.js — настройка ключа/модели Perplexity.
-- ui/components/c-ui-chat.js — чат Perplexity.
-- ui/components/c-ui-import-export.js — экспорт/импорт настроек.
-- ui/components/c-ui-coingecko.js — виджет CoinGecko.
+- ui/api/import-export.js — экспорт/импорт настроек.
+- ui/api/perplexity.js — настройка ключа/модели Perplexity.
+- ui/api/coingecko.js — виджет CoinGecko.
+- ui/interaction/splash.js — сплэш-экран с защитой PIN-кодом и настройкой API-ключа.
+- ui/interaction/theme.js — применение темы.
+- ui/interaction/chat.js — чат Perplexity.
 - app/app-ui-root.js — сборка и монтирование Vue-приложения.
 - index.html — корневой HTML, подключает скрипты через CDN + локальные.
+
+Структура папок по специализации
+- Папки специализации (`<сектор>/<специализация>/`) создаются по мере накопления файлов родственного назначения.
+- Примеры: `ui/api/` (компоненты для работы с API), `ui/interaction/` (компоненты взаимодействия), `mm/` (математическая модель).
+- Имена файлов без префиксов — специализация понятна из пути папки.
 
 Ключевые сущности
 - Asset: {id, symbol, name}.
@@ -44,7 +51,7 @@
 - Correlation: матрицы между Asset/Portfolio на базе History.
 
 Поток данных
-Fetch (data-sources) → Validate/Normalize (schemas) → Compute (calculator/indices) → Build (portfolio-builder/strategy) → Persist (storage/IndexedDB) → Render (ui/components).
+Fetch (data-sources) → Validate/Normalize (schemas) → Compute (calculator/indices) → Build (portfolio-builder/strategy) → Persist (storage/IndexedDB) → Render (ui/api, ui/interaction).
 
 Хранение и оффлайн
 - Настройки и ключи: localStorage.
@@ -54,10 +61,3 @@ Fetch (data-sources) → Validate/Normalize (schemas) → Compute (calculator/in
 Библиотеки (при необходимости через CDN)
 - Vue (уже есть), Chart.js или Lightweight Charts для графиков, zod (или легковесная своя валидация) для схем, idb-keyval для удобной работы с IndexedDB.
 
-Именование файлов (префиксы)
-- Шаблон (обязателен для новых файлов): `<категория>-<сектор?>-<имя>.<ext>`. Сектор добавлять только при реальной привязке к UI/MM/Security.
-- Желаемый пул категорий: `c-` компоненты UI, `f-` фичи, `ds-` источники/адаптеры данных, `d-` доменные сущности, `svc-` сервисы/бизнес-логика, `u-` утилиты, `cfg-` конфиги, `app-` точка входа/композиция, `t-` тесты.
-- Секторы: `ui-` (интерфейс, включает оформление и взаимодействие/UX), `mm-` (математическая модель), `sec-` (security, безопасность) (опционально).
-- Примеры: `c-ui-modal.js`, `svc-mm-portfolio-builder.js`, `ds-market-coingecko.js`, `u-core-storage.js`, `u-sec-obfuscate.js`, `cfg-sec-keys.js`, `cfg-app.js`, `app-ui-root.js`.
-- Расширение пула: при появлении новых типов файлов добавлять префикс в этот список и держать его в актуальном состоянии.
-- **Примечание**: UX (User Experience) является неотъемлемой частью UI - веб-компоненты содержат и визуальное оформление, и логику взаимодействия одновременно. Поэтому используется единый префикс `ui-` вместо искусственного разделения на `ui-` и `ux-`.
