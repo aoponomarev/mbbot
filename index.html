@@ -16,31 +16,13 @@
         <!-- Компонент сплэш-экрана -->
         <splash-screen :last-commit-message="lastCommitMessage" :perplexity-model="perplexityModel"></splash-screen>
 
+        <!-- Компонент хэдера -->
+        <app-header></app-header>
+
         <!-- Компонент футера -->
         <app-footer></app-footer>
 
-        <div class="container-fluid py-4" style="padding-bottom: 60px !important;">
-            <!-- Кнопки управления -->
-            <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050;">
-                <div class="d-flex gap-2">
-                    <button
-                        @click="refreshPage"
-                        class="btn btn-outline-secondary rounded-circle"
-                        type="button"
-                        title="Обновить страницу"
-                    >
-                        <i class="fas fa-sync-alt"></i>
-                    </button>
-                    <button
-                        @click="toggleTheme"
-                        class="btn btn-outline-secondary rounded-circle"
-                        type="button"
-                        :title="theme === 'light' ? 'Переключить на темную тему' : 'Переключить на светлую тему'"
-                    >
-                        <i :class="theme === 'light' ? 'fas fa-moon' : 'fas fa-sun'"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="container-fluid py-4" style="padding-top: 60px !important; padding-bottom: 60px !important;">
 
             <header class="mb-4">
                 <h1 class="display-4">BOT</h1>
@@ -364,6 +346,117 @@
     </script>
 
     <!-- X-Template для компонента футера (должен быть ДО загрузки Vue и компонентов) -->
+    <script type="text/x-template" id="header-template">
+        <header class="position-fixed top-0 start-0 w-100" style="z-index: 1050; background-color: #2b2b2b; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+            <div class="container-fluid">
+                <div class="d-flex align-items-center" style="height: 50px;">
+                    <!-- Секция 1: Гамбургер (тап зона во всю секцию) -->
+                    <div 
+                        @click="toggleMenu"
+                        class="d-flex align-items-center justify-content-center"
+                        style="width: 50px; height: 50px; cursor: pointer; transition: background-color 0.2s;"
+                        @mouseenter="$event.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'"
+                        @mouseleave="$event.target.style.backgroundColor = 'transparent'"
+                        title="Меню"
+                    >
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: block;">
+                            <rect x="2" y="5" width="16" height="2" fill="#ffffff" rx="0.5"/>
+                            <rect x="2" y="9" width="16" height="2" fill="#ffffff" rx="0.5"/>
+                            <rect x="2" y="13" width="16" height="2" fill="#ffffff" rx="0.5"/>
+                        </svg>
+                    </div>
+
+                    <!-- Секция 2: Математическая модель и вкладки отображения (широкая секция) -->
+                    <div class="flex-grow-1 d-flex align-items-center justify-content-center px-3">
+                        <!-- Селект математической модели -->
+                        <select 
+                            v-model="selectedModel"
+                            @change="switchModel(selectedModel)"
+                            class="form-select form-select-sm me-2 text-white"
+                            style="
+                                background-color: rgba(255, 255, 255, 0.1);
+                                background-image: url('data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 16 16\'%3e%3cpath fill=\'none\' stroke=\'rgba(255,255,255,0.5)\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M2 5l6 6 6-6\'/%3e%3c/svg%3e');
+                                background-repeat: no-repeat;
+                                background-position: right 0.5rem center;
+                                background-size: 16px 12px;
+                                border-color: rgba(255, 255, 255, 0.2);
+                                padding-right: 2rem;
+                                appearance: none;
+                            "
+                            @mouseenter="$event.target.style.backgroundColor = 'rgba(255, 255, 255, 0.15)'"
+                            @mouseleave="$event.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'"
+                        >
+                            <option 
+                                v-for="model in mathModels"
+                                :key="model.id"
+                                :value="model.id"
+                                style="background-color: #2b2b2b; color: #ffffff;"
+                            >
+                                {{ model.label }}
+                            </option>
+                        </select>
+
+                        <!-- Вкладки отображения (как Bootstrap радиокнопки) -->
+                        <div class="btn-group" role="group" aria-label="Display tabs">
+                            <input
+                                v-for="(tab, index) in displayTabs"
+                                :key="tab.id"
+                                type="radio"
+                                class="btn-check"
+                                :id="'tab-' + tab.id"
+                                :name="'display-tabs'"
+                                :value="tab.id"
+                                :checked="activeTab === tab.id"
+                                @change="switchTab(tab.id)"
+                            >
+                            <label
+                                v-for="(tab, index) in displayTabs"
+                                :key="tab.id"
+                                class="btn btn-sm btn-outline-light"
+                                :class="{ 'rounded-start': index === 0, 'rounded-end': index === displayTabs.length - 1 }"
+                                :for="'tab-' + tab.id"
+                                :style="activeTab === tab.id ? 'color: #ffffff; border-color: rgba(255, 255, 255, 0.3); background-color: transparent;' : 'color: rgba(255, 255, 255, 0.5); border-color: rgba(255, 255, 255, 0.3); background-color: transparent;'"
+                                style="
+                                    transition: all 0.2s;
+                                "
+                                @mouseenter="$event.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'"
+                                @mouseleave="$event.target.style.backgroundColor = 'transparent'"
+                            >
+                                {{ tab.label }}
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Секция 3: Кнопки рефреша и смены темы (сдвоенная секция) -->
+                    <div class="d-flex align-items-center">
+                        <!-- Кнопка рефреша -->
+                        <div
+                            @click="refreshPage"
+                            class="d-flex align-items-center justify-content-center"
+                            style="width: 50px; height: 50px; cursor: pointer; transition: background-color 0.2s;"
+                            @mouseenter="$event.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'"
+                            @mouseleave="$event.target.style.backgroundColor = 'transparent'"
+                            title="Обновить страницу"
+                        >
+                            <i class="fas fa-sync-alt" style="color: #ffffff; font-size: 1.1rem;"></i>
+                        </div>
+                        <!-- Кнопка смены темы -->
+                        <div
+                            @click="toggleTheme"
+                            class="d-flex align-items-center justify-content-center"
+                            style="width: 50px; height: 50px; cursor: pointer; transition: background-color 0.2s;"
+                            @mouseenter="$event.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'"
+                            @mouseleave="$event.target.style.backgroundColor = 'transparent'"
+                            :title="themeTitle"
+                        >
+                            <i :class="themeIcon" style="color: #ffffff; font-size: 1.1rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+    </script>
+
     <script type="text/x-template" id="footer-template">
         <footer class="position-fixed bottom-0 start-0 w-100 bg-body" style="z-index: 1000; box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1), 0 -2px 4px -1px rgba(0, 0, 0, 0.06);">
             <div class="container-fluid">
@@ -449,6 +542,7 @@
     <script src="./ui/interaction/theme.js"></script>
     <script src="./ui/interaction/splash.js"></script>
     <script src="./ui/api/market-metrics.js"></script>
+    <script src="./ui/interaction/header.js"></script>
     <script src="./ui/interaction/footer.js"></script>
     <script src="./ui/api/perplexity.js"></script>
     <script src="./ui/interaction/chat.js"></script>

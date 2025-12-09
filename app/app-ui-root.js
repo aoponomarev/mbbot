@@ -69,6 +69,18 @@
     console.warn('window.cmpSplash not found');
   }
 
+  // Регистрация компонента хэдера
+  if (window.cmpHeader) {
+    try {
+      app.component('app-header', window.cmpHeader);
+      console.log('Header component registered');
+    } catch (error) {
+      console.error('Ошибка при регистрации компонента хэдера:', error);
+    }
+  } else {
+    console.warn('window.cmpHeader not found');
+  }
+
   // Регистрация компонента футера
   if (window.cmpFooter) {
     try {
@@ -81,5 +93,10 @@
     console.warn('window.cmpFooter not found');
   }
 
-  app.mount('#app');
+  // Сохраняем ссылку на приложение в window для доступа из компонентов
+  window.app = app;
+
+  // Монтируем приложение и сохраняем ссылку на корневой компонент
+  const rootInstance = app.mount('#app');
+  window.appRoot = rootInstance;
 })();
