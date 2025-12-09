@@ -119,7 +119,7 @@ window.cmpHeader = {
       if (modelDropdownBtn) {
         measureEl.textContent = this.selectedModelLabel;
         const textWidth = measureEl.offsetWidth;
-        modelDropdownBtn.style.width = (textWidth + 48) + 'px'; // +48px для padding и стрелки
+        modelDropdownBtn.style.width = (textWidth + 24) + 'px'; // +24px для padding и стрелки (уменьшено)
       }
 
       // Устанавливаем ширину для dropdown кнопки вкладок (мобильная версия)
@@ -127,7 +127,7 @@ window.cmpHeader = {
       if (tabDropdownBtn) {
         measureEl.textContent = this.selectedTabLabel;
         const textWidth = measureEl.offsetWidth;
-        tabDropdownBtn.style.width = (textWidth + 48) + 'px'; // +48px для padding и стрелки
+        tabDropdownBtn.style.width = (textWidth + 24) + 'px'; // +24px для padding и стрелки (уменьшено)
       }
 
       document.body.removeChild(measureEl);
@@ -160,7 +160,12 @@ window.cmpHeader = {
     // Текущая метка выбранной вкладки
     selectedTabLabel() {
       const tab = this.displayTabs.find(t => t.id === this.activeTab);
-      return tab ? tab.label : '%';
+      if (!tab) return '%';
+      // В мобильной версии "Компл. дельты" заменяем на "Дельты"
+      if (tab.id === 'complex-deltas') {
+        return 'Дельты';
+      }
+      return tab.label;
     }
   },
 

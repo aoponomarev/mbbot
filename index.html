@@ -29,10 +29,12 @@
                 margin-left: 0.5rem;
             }
             
-            /* Стилизация dropdown меню с учетом темы */
+            /* Стилизация dropdown меню с учетом темы в стиле Material Design */
             .dropdown-menu[data-bs-theme="dark"] {
                 background-color: #2b2b2b;
-                border-color: rgba(255, 255, 255, 0.2);
+                border: 1px solid rgba(255, 255, 255, 0.12);
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+                border-radius: 4px;
             }
             
             .dropdown-menu[data-bs-theme="dark"] .dropdown-item {
@@ -47,7 +49,9 @@
             
             .dropdown-menu[data-bs-theme="light"] {
                 background-color: #ffffff;
-                border-color: rgba(0, 0, 0, 0.15);
+                border: 1px solid rgba(0, 0, 0, 0.12);
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+                border-radius: 4px;
             }
             
             .dropdown-menu[data-bs-theme="light"] .dropdown-item {
@@ -56,7 +60,7 @@
             
             .dropdown-menu[data-bs-theme="light"] .dropdown-item:hover,
             .dropdown-menu[data-bs-theme="light"] .dropdown-item.active {
-                background-color: rgba(0, 0, 0, 0.1);
+                background-color: rgba(0, 0, 0, 0.08);
                 color: #212529;
             }
         }
@@ -465,7 +469,7 @@
                                     border: 1px solid rgba(255, 255, 255, 0.2);
                                     color: #ffffff;
                                     width: auto;
-                                    padding-right: 2rem;
+                                    padding-right: 0.75rem;
                                     transition: background-color 0.2s;
                                 "
                                 @mouseenter="$event.target.style.backgroundColor = 'rgba(255, 255, 255, 0.15)'"
@@ -477,11 +481,7 @@
                                 class="dropdown-menu"
                                 :aria-labelledby="modelDropdownId"
                                 :data-bs-theme="getCurrentTheme()"
-                                style="
-                                    background-color: var(--bs-dropdown-bg);
-                                    border: 1px solid rgba(255, 255, 255, 0.2);
-                                    min-width: 120px;
-                                "
+                                style="min-width: 120px;"
                             >
                                 <li v-for="model in mathModels" :key="model.id">
                                     <a 
@@ -510,7 +510,7 @@
                                     border: 1px solid rgba(255, 255, 255, 0.2);
                                     color: #ffffff;
                                     width: auto;
-                                    padding-right: 2rem;
+                                    padding-right: 0.75rem;
                                     transition: background-color 0.2s;
                                 "
                                 @mouseenter="$event.target.style.backgroundColor = 'rgba(255, 255, 255, 0.15)'"
@@ -522,11 +522,7 @@
                                 class="dropdown-menu"
                                 :aria-labelledby="tabDropdownId"
                                 :data-bs-theme="getCurrentTheme()"
-                                style="
-                                    background-color: var(--bs-dropdown-bg);
-                                    border: 1px solid rgba(255, 255, 255, 0.2);
-                                    min-width: 120px;
-                                "
+                                style="min-width: 120px;"
                             >
                                 <li v-for="tab in displayTabs" :key="tab.id">
                                     <a 
