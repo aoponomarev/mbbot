@@ -19,7 +19,8 @@ window.cmpHeader = {
       displayTabs: [
         { id: 'percent', label: '%' },
         { id: 'complex-deltas', label: 'Компл. дельты' },
-        { id: 'gradients-max', label: 'Градиенты MAX' },
+        { id: 'gradients', label: 'Градиенты' },
+        { id: 'max', label: 'MAX' },
         { id: 'min', label: 'min' },
         { id: 'balance-delta', label: 'Баланс Δ' }
       ]
