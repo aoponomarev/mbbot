@@ -25,6 +25,26 @@ window.cmpSplash = {
       window.appUnlocked = false;
     }
 
+    // Определяем язык системы
+    const systemLanguage = navigator.language || navigator.userLanguage || 'en';
+    const languageCode = systemLanguage.split('-')[0].toLowerCase(); // "ru" из "ru-RU"
+    
+    // Маппинг кодов языков на названия для промпта
+    const languageNames = {
+      'ru': 'Russian',
+      'en': 'English',
+      'de': 'German',
+      'fr': 'French',
+      'es': 'Spanish',
+      'it': 'Italian',
+      'pt': 'Portuguese',
+      'ja': 'Japanese',
+      'zh': 'Chinese',
+      'ko': 'Korean'
+    };
+    
+    const targetLanguage = languageNames[languageCode] || 'English';
+
     return {
       showSplash: true,
       passwordInput: '',
@@ -37,6 +57,8 @@ window.cmpSplash = {
       showApiKeyTemporarily: false,
       loadingDots: 1,
       loadingDotsInterval: null,
+      systemLanguage: languageCode,
+      targetLanguage: targetLanguage,
       DEFAULT_PIN,
       PIN_LENGTH,
       STORAGE_KEY_PIN,
@@ -110,21 +132,28 @@ window.cmpSplash = {
       const model = this.perplexityModel || 'sonar-pro';
 
       try {
-        // Генерируем псевдо-философское высказывание (одно длинное предложение) как продолжение коммита
-        const quotePrompt = `Create a pseudo-philosophical statement (one longer sentence, approximately 30 words) that interprets, develops, or philosophically expands the meaning of the following text: "${this.lastCommitMessage}".
+        // Генерируем одно предложение: начинается с философии, заканчивается предсказанием для пользователя
+        const quotePrompt = `Create ONE sentence in ${this.targetLanguage} (approximately 40 words, but prioritize beauty and meaning over strict word count) based on the following text: "${this.lastCommitMessage}".
+
+STRUCTURE REQUIREMENTS:
+- The sentence must START with a philosophical reflection that interprets, develops, or philosophically expands the meaning of the original text
+- The sentence must END with a personal prediction addressed directly to the user ("you", "your")
+- The prediction must relate to the original text's theme but apply it to a DIFFERENT life sphere: medicine, economics, relationships, education, career, health, family, personal growth, creativity, spirituality, or other meaningful life areas
+- The transition from philosophy to prediction should be smooth and logical
 
 CRITICAL REQUIREMENTS:
-- Your response must contain EXACTLY one sentence
-- The sentence should be approximately 30 words (not less than 25, not more than 35)
+- Your response must be written in ${this.targetLanguage}
+- Your response must contain EXACTLY ONE sentence
+- The sentence should be approximately 40 words, but can be slightly longer or shorter if it makes the statement more beautiful and meaningful
 - DO NOT repeat or quote the original text - develop the idea philosophically instead
 - DO NOT start with the same words as the original text
-- Interpret, expand, or create a philosophical narrative that relates to the original meaning
+- The prediction must be POSITIVE, inspiring, and give hope
 - Start with a capital letter
 - End with a period
 - Without quotation marks, without any additional explanations
-- It should read as a philosophical continuation that develops the underlying idea, not a literal repetition
+- Address the user directly in the prediction part (use "you", "your", "your life", etc.)
 
-Example: If the original text is "Add feature to app", your response should be something like "For in the pursuit of understanding, we often discover that the path itself becomes the destination, and in this discovery we find ourselves questioning whether the journey was ever truly about reaching an end, or if the very act of seeking transforms us in ways we never anticipated."`;
+Example structure: "For in the pursuit of understanding, we often discover that the path itself becomes the destination, and in this discovery you will find that your relationships will deepen in ways that mirror this same principle of growth through journey rather than destination."`;
 
         const quoteResponse = await fetch('https://api.perplexity.ai/chat/completions', {
           method: 'POST',
