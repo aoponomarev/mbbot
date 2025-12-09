@@ -5,7 +5,6 @@
 Слои
 - core/: конфиг, fetch-обёртка (таймауты/ретраи), абстракция хранения (localStorage/IndexedDB), общие расчётные хелперы, схемы валидации входящих данных.
   - core/security/: утилиты обфускации, валидация ключей, безопасное хранение чувствительных данных (PIN-коды, API-ключи).
-- data-sources/: адаптеры провайдеров (coingecko, другие аналитические API), нормализация в общий формат.
 - domain/:
   - entities/: asset, metric, index, strategy, portfolio, history (таймсерии), correlation.
   - services/: calculator (метрики/индексы), portfolio-builder (weights/стратегии), backtest, correlation.
@@ -30,6 +29,7 @@
 - **ui/api/import-export.js** — экспорт/импорт настроек.
 - **ui/api/perplexity.js** — настройка ключа/модели Perplexity.
 - **ui/api/coingecko.js** — виджет CoinGecko.
+- **ui/api/market-metrics.js** — утилита для получения метрик рынка (FGI, VIX, BTC Dominance, Open Interest, Funding Rate, Long/Short Ratio).
 - **ui/interaction/splash.js** — сплэш-экран с защитой PIN-кодом и настройкой API-ключа.
 - **ui/interaction/theme.js** — применение темы.
 - **ui/interaction/chat.js** — чат Perplexity.
@@ -51,7 +51,7 @@
 - Correlation: матрицы между Asset/Portfolio на базе History.
 
 Поток данных
-Fetch (data-sources) → Validate/Normalize (schemas) → Compute (calculator/indices) → Build (portfolio-builder/strategy) → Persist (storage/IndexedDB) → Render (ui/api, ui/interaction).
+Fetch (ui/api) → Validate/Normalize (schemas) → Compute (calculator/indices) → Build (portfolio-builder/strategy) → Persist (storage/IndexedDB) → Render (ui/api, ui/interaction).
 
 Хранение и оффлайн
 - Настройки и ключи: localStorage.

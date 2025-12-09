@@ -11,6 +11,11 @@ window.cmpTheme = function (defaults) {
       },
       toggleTheme() {
         this.theme = this.theme === 'light' ? 'dark' : 'light';
+      },
+      refreshPage() {
+        // Устанавливаем флаг, чтобы пропустить сплэш при перезагрузке
+        sessionStorage.setItem('skipSplash', 'true');
+        location.reload();
       }
     },
     mounted(app) {

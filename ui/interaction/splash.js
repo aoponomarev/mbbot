@@ -313,6 +313,17 @@ Example structure: "For in the pursuit of understanding, we often discover that 
 
   mounted() {
     try {
+      // Проверяем флаг пропуска сплэша (устанавливается при обновлении страницы через кнопку)
+      const skipSplash = sessionStorage.getItem('skipSplash');
+      if (skipSplash === 'true') {
+        // Пропускаем сплэш и сразу разблокируем приложение
+        this.showSplash = false;
+        window.appUnlocked = true;
+        sessionStorage.removeItem('skipSplash'); // Удаляем флаг после использования
+        console.log('Splash screen skipped (refresh flag)');
+        return;
+      }
+      
       // Гарантируем, что сплэш показывается при монтировании
       this.showSplash = true;
       this.passwordError = false;

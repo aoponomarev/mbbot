@@ -69,5 +69,17 @@
     console.warn('window.cmpSplash not found');
   }
 
+  // Регистрация компонента футера
+  if (window.cmpFooter) {
+    try {
+      app.component('app-footer', window.cmpFooter);
+      console.log('Footer component registered');
+    } catch (error) {
+      console.error('Ошибка при регистрации компонента футера:', error);
+    }
+  } else {
+    console.warn('window.cmpFooter not found');
+  }
+
   app.mount('#app');
 })();
