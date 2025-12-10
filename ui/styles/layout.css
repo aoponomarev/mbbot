@@ -51,3 +51,14 @@
     padding-bottom: 0.5rem !important;
 }
 
+/* Глобально: убираем зазор между низом таблицы и низом карточки */
+.card-body > .table-responsive:last-child,
+.card-body > .table:last-child {
+    margin-bottom: 0 !important;
+}
+
+.card-body > .table-responsive:last-child > .table,
+.card-body > .table:last-child {
+    margin-bottom: 0 !important;
+}
+
