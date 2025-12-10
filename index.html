@@ -358,16 +358,46 @@
     <script type="text/x-template" id="coingecko-template">
         <div class="col-12 mb-4">
             <div class="card avto-B7fN2kT">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-chart-line me-2"></i>Топ-10 (CoinGecko)
-                    </h5>
-                    <div class="d-flex align-items-center gap-2">
-                        <small class="text-muted" v-if="cgLastUpdated">Обновлено: {{ cgLastUpdated }}</small>
-                        <button class="btn btn-sm btn-outline-primary" @click="fetchCoinGecko" :disabled="cgIsLoading">
-                            <span v-if="cgIsLoading" class="spinner-border spinner-border-sm me-1" role="status"></span>
-                            Обновить
-                        </button>
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="flex-grow-1 me-3 position-relative">
+                            <input
+                                type="text"
+                                class="form-control form-control-sm"
+                                placeholder="Поиск монет по названию или тикеру..."
+                                v-model="cgSearchQuery"
+                                @focus="cgSearchResults.length > 0 ? null : searchCoins(cgSearchQuery)"
+                            >
+                            <!-- Выпадающий список результатов поиска -->
+                            <div v-if="cgSearchResults.length > 0" class="position-absolute w-100 bg-body border rounded shadow-sm" style="z-index: 1000; max-height: 300px; overflow-y: auto; top: 100%; margin-top: 4px;">
+                                <div 
+                                    v-for="result in cgSearchResults" 
+                                    :key="result.id"
+                                    class="p-2 border-bottom cursor-pointer"
+                                    style="cursor: pointer;"
+                                    @click="addCoin(result.id)"
+                                    :class="{'bg-light': cgSelectedCoins.includes(result.id)}"
+                                >
+                                    <div class="d-flex align-items-center gap-2">
+                                        <img v-if="result.thumb" :src="result.thumb" :alt="result.symbol" width="20" height="20">
+                                        <div class="flex-grow-1">
+                                            <div class="fw-semibold small">{{ result.name }}</div>
+                                            <small class="text-muted text-uppercase">{{ result.symbol }}</small>
+                                        </div>
+                                        <small v-if="cgSelectedCoins.includes(result.id)" class="text-success">
+                                            <i class="fas fa-check"></i>
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <small class="text-muted text-nowrap" v-if="cgLastUpdated">{{ cgLastUpdated }}</small>
+                            <button class="btn btn-sm btn-outline-primary" @click="fetchCoinGecko" :disabled="cgIsLoading">
+                                <span v-if="cgIsLoading" class="spinner-border spinner-border-sm me-1" role="status"></span>
+                                <i v-else class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div class="card-body">
@@ -378,28 +408,38 @@
                         <table class="table table-sm align-middle">
                             <thead>
                                 <tr>
-                                    <th>#</th>
+                                    <th style="width: 40px;"></th>
                                     <th>Монета</th>
                                     <th class="text-end">Цена</th>
                                     <th class="text-end">1h %</th>
                                     <th class="text-end">24h %</th>
                                     <th class="text-end">7d %</th>
+                                    <th class="text-end">14d %</th>
                                     <th class="text-end">30d %</th>
-                                    <th class="text-end">60d %</th>
+                                    <th class="text-end">200d %</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr v-if="cgIsLoading">
-                                    <td colspan="8" class="text-center text-muted">
+                                    <td colspan="9" class="text-center text-muted">
                                         <span class="spinner-border spinner-border-sm me-2" role="status"></span>
                                         Загрузка данных с CoinGecko...
                                     </td>
                                 </tr>
                                 <tr v-else-if="cgCoins.length === 0">
-                                    <td colspan="8" class="text-center text-muted">Нет данных</td>
+                                    <td colspan="9" class="text-center text-muted">Нет данных</td>
                                 </tr>
                                 <tr v-else v-for="(coin, idx) in cgCoins" :key="coin.id">
-                                    <td>{{ idx + 1 }}</td>
+                                    <td>
+                                        <button 
+                                            class="btn btn-sm btn-outline-danger p-0" 
+                                            style="width: 24px; height: 24px; line-height: 1;"
+                                            @click="removeCoin(coin.id)"
+                                            title="Удалить монету из списка"
+                                        >
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </td>
                                     <td>
                                         <div class="d-flex align-items-center gap-2">
                                             <img v-if="coin.image" :src="coin.image" :alt="coin.symbol" width="20" height="20">
@@ -413,8 +453,9 @@
                                     <td class="text-end" :class="cgChangeClass(coin.price_change_percentage_1h_in_currency)">{{ cgFormatPercent(coin.price_change_percentage_1h_in_currency) }}</td>
                                     <td class="text-end" :class="cgChangeClass(coin.price_change_percentage_24h_in_currency)">{{ cgFormatPercent(coin.price_change_percentage_24h_in_currency) }}</td>
                                     <td class="text-end" :class="cgChangeClass(coin.price_change_percentage_7d_in_currency)">{{ cgFormatPercent(coin.price_change_percentage_7d_in_currency) }}</td>
+                                    <td class="text-end" :class="cgChangeClass(coin.price_change_percentage_14d_in_currency)">{{ cgFormatPercent(coin.price_change_percentage_14d_in_currency) }}</td>
                                     <td class="text-end" :class="cgChangeClass(coin.price_change_percentage_30d_in_currency)">{{ cgFormatPercent(coin.price_change_percentage_30d_in_currency) }}</td>
-                                    <td class="text-end" :class="cgChangeClass(coin.price_change_percentage_60d_in_currency)">{{ cgFormatPercent(coin.price_change_percentage_60d_in_currency) }}</td>
+                                    <td class="text-end" :class="cgChangeClass(coin.price_change_percentage_200d_in_currency)">{{ cgFormatPercent(coin.price_change_percentage_200d_in_currency) }}</td>
                                 </tr>
                             </tbody>
                         </table>
