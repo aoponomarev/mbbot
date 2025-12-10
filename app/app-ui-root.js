@@ -22,7 +22,7 @@
     window.cmpTheme && window.cmpTheme(defaults),
     // window.cmpSplash больше не используется как часть - теперь это отдельный компонент
     window.cmpPerplexitySettings && window.cmpPerplexitySettings(defaults, models),
-    window.cmpChat && window.cmpChat(),
+    // window.cmpChat удален - чат с Perplexity AI убран из интерфейса
     window.cmpImportExport && window.cmpImportExport(),
     window.cmpCoinGecko && window.cmpCoinGecko()
   ].filter(Boolean);
