@@ -55,6 +55,7 @@
     
     <!-- Глобальные утилиты -->
     <script src="ui/utils/table-sort-mixin.js"></script>
+    <script src="ui/utils/pluralize.js"></script>
 
     <!-- X-Template для компонента сплэш-экрана (должен быть ДО загрузки Vue и компонентов) -->
     <script type="text/x-template" id="splash-template">
@@ -427,8 +428,14 @@
                                     </div>
                                 </div>
                             </div>
-                            <small class="text-muted" v-if="cgArchivedCoins.length > 0">{{ cgArchivedCoins.length }}</small>
-                            <small class="text-muted" v-if="sortedCoins.length > 0">{{ sortedCoins.length }}</small>
+                            <button 
+                                class="btn btn-sm btn-outline-secondary" 
+                                type="button"
+                                disabled
+                                style="width: auto; min-width: fit-content;"
+                            >
+                                {{ sortedCoins.length }} {{ pluralizeCoins(sortedCoins.length) }}
+                            </button>
                         </div>
                         <div class="d-flex align-items-center gap-2">
                             <small class="text-muted" v-if="cgLastUpdated" style="line-height: 1.2;">

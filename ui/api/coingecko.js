@@ -396,6 +396,11 @@ window.cmpCoinGecko = {
       return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     },
     
+    // Склонение слова "монета" для числа
+    pluralizeCoins(count) {
+      return window.pluralize(count, ['монета', 'монеты', 'монет']);
+    },
+    
     // Кэширование иконок монет в localStorage
     cacheCoinsIcons(coins) {
       if (!Array.isArray(coins) || coins.length === 0) return;
