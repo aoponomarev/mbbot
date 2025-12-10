@@ -1,8 +1,25 @@
 /* Общие стили layout */
 
 /* Контейнер основного контента с учетом фиксированных хедера и футера */
-.app-main-container {
-    padding-top: 60px !important;
-    padding-bottom: 60px !important;
+/* Хедер фиксированный, высота 50px, нужен отступ сверху */
+.container-fluid.app-main-container {
+    padding-top: 60px;
+    padding-bottom: 20px;
+}
+
+/* Основной контент: центрирование, адаптивность, ограничение ширины */
+.avto-K9mP4rT {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 576px) {
+    .avto-K9mP4rT {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
 }
 

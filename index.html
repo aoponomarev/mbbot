@@ -39,18 +39,13 @@
             style="display: none;"
         >
 
-        <div class="container-fluid py-4 app-main-container avto-X7pL2nQ">
+        <div class="container-fluid app-main-container avto-X7pL2nQ">
+            <main class="avto-K9mP4rT row justify-content-center">
+                <!-- Компонент общих настроек проекта (показывается при клике на гамбургер) -->
+                <app-settings v-if="showSettings"></app-settings>
 
-            <header class="mb-4"></header>
-
-            <main class="avto-K9mP4rT">
-                <div class="row">
-                    <!-- Компонент общих настроек проекта (показывается при клике на гамбургер) -->
-                    <app-settings v-if="showSettings"></app-settings>
-
-                    <!-- Компонент виджета CoinGecko (показывается по умолчанию и при вкладке "%") -->
-                    <app-coingecko v-if="!showSettings && activeTab === 'percent'"></app-coingecko>
-                </div>
+                <!-- Компонент виджета CoinGecko (показывается по умолчанию и при вкладке "%") -->
+                <app-coingecko v-if="!showSettings && activeTab === 'percent'"></app-coingecko>
             </main>
         </div>
     </div>
