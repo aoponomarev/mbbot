@@ -13,8 +13,8 @@ window.cmpHeader = {
         { id: 'median', label: 'Медиана' },
         { id: 'news', label: 'Новости' }
       ],
-      // Активная вкладка отображения
-      activeTab: 'percent',
+      // Активная вкладка отображения (синхронизируется с корневым компонентом)
+      // activeTab теперь хранится в корневом компоненте
       // Вкладки отображения (как радиокнопки Bootstrap)
       displayTabs: [
         { id: 'percent', label: '%' },
@@ -38,9 +38,18 @@ window.cmpHeader = {
   methods: {
     // Переключение вкладки отображения
     switchTab(tabId) {
-      this.activeTab = tabId;
+      const root = this.$root || window.appRoot;
+      if (root) {
+        root.activeTab = tabId;
+        
+        // При переключении на вкладку "%" всегда показываем CoinGecko (закрываем настройки)
+        if (tabId === 'percent') {
+          root.showSettings = false;
+        }
+        // TODO: для других вкладок реализовать переключение контента
+      }
+      
       this.showTabDropdown = false;
-      // TODO: реализовать переключение контента
       this.$nextTick(() => {
         this.adjustSelectWidths();
       });
@@ -56,10 +65,14 @@ window.cmpHeader = {
       });
     },
 
-    // Открытие меню (гамбургер)
+    // Открытие меню (гамбургер) - открывает настройки
     toggleMenu() {
-      // TODO: реализовать открытие бокового меню
-      console.log('Menu toggle');
+      const root = this.$root || window.appRoot;
+      if (root) {
+        // Гамбургер только открывает настройки, не переключает
+        // Настройки закрываются только при переключении на вкладку "%"
+        root.showSettings = true;
+      }
     },
 
     // Передача методов из родительского компонента через this.$root (Vue 3)
@@ -180,6 +193,12 @@ window.cmpHeader = {
   },
 
   computed: {
+    // Активная вкладка из корневого компонента (для реактивности)
+    activeTab() {
+      const root = this.$root || window.appRoot;
+      return root && root.activeTab ? root.activeTab : 'percent';
+    },
+
     // Иконка темы в зависимости от текущей темы (реактивно обновляется)
     themeIcon() {
       // Используем this.$root для реактивности
@@ -204,7 +223,9 @@ window.cmpHeader = {
 
     // Текущая метка выбранной вкладки
     selectedTabLabel() {
-      const tab = this.displayTabs.find(t => t.id === this.activeTab);
+      const root = this.$root || window.appRoot;
+      const activeTab = root && root.activeTab ? root.activeTab : 'percent';
+      const tab = this.displayTabs.find(t => t.id === activeTab);
       if (!tab) return '%';
       // В мобильной версии "Компл. дельты" заменяем на "Дельты"
       if (tab.id === 'complex-deltas') {
@@ -212,6 +233,7 @@ window.cmpHeader = {
       }
       return tab.label;
     },
+
 
     // Инверсная тема для dropdown и tooltips (реактивно обновляется)
     inverseTheme() {
@@ -226,13 +248,15 @@ window.cmpHeader = {
       // Принудительно обновляем computed свойства при изменении темы
       this.$forceUpdate();
     },
-    // Отслеживаем изменения выбранных значений для обновления ширины
-    selectedModel() {
+    '$root.activeTab'() {
+      // Обновляем computed свойства при изменении активной вкладки
+      this.$forceUpdate();
       this.$nextTick(() => {
         this.adjustSelectWidths();
       });
     },
-    activeTab() {
+    // Отслеживаем изменения выбранных значений для обновления ширины
+    selectedModel() {
       this.$nextTick(() => {
         this.adjustSelectWidths();
       });

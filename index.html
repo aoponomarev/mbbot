@@ -36,178 +36,11 @@
 
             <main class="avto-K9mP4rT">
                 <div class="row">
-                    <!-- Настройки Perplexity AI -->
-                    <div class="col-12 col-lg-4 mb-4">
-                        <div class="card avto-M3nP8qW">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">
-                                    <i class="fas fa-cog me-2"></i>Настройки Perplexity AI
-                                </h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="mb-3">
-                                    <label for="apiKey" class="form-label">API Key</label>
-                                    <div class="input-group">
-                                        <input
-                                            type="password"
-                                            class="form-control"
-                                            id="apiKey"
-                                            v-model="perplexityApiKey"
-                                            @input="saveApiKey"
-                                            placeholder="Введите ваш API ключ"
-                                        >
-                                        <button
-                                            class="btn btn-outline-secondary"
-                                            type="button"
-                                            @click="toggleApiKeyVisibility"
-                                            :title="showApiKey ? 'Скрыть ключ' : 'Показать ключ'"
-                                        >
-                                            <i :class="showApiKey ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
-                                        </button>
-                                    </div>
-                                    <small class="form-text text-muted">
-                                        Ключ сохраняется локально в браузере
-                                    </small>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="model" class="form-label">Модель</label>
-                                    <select class="form-select" id="model" v-model="perplexityModel">
-                                        <option value="sonar-pro">sonar-pro</option>
-                                        <option value="sonar">sonar</option>
-                                        <option value="llama-3.1-sonar-small-128k-online">llama-3.1-sonar-small-128k-online</option>
-                                        <option value="llama-3.1-sonar-large-128k-online">llama-3.1-sonar-large-128k-online</option>
-                                    </select>
-                                </div>
+                    <!-- Компонент общих настроек проекта (показывается при клике на гамбургер) -->
+                    <app-settings v-if="showSettings && activeTab === 'percent'"></app-settings>
 
-                                <!-- Экспорт/Импорт настроек -->
-                                <div class="mb-3 border-top pt-3">
-                                    <label class="form-label">
-                                        <i class="fas fa-database me-2"></i>Управление настройками
-                                    </label>
-                                    <div class="d-grid gap-2">
-                                        <button
-                                            class="btn btn-outline-primary"
-                                            @click="exportSettings"
-                                            title="Экспортировать настройки в data-app.json"
-                                        >
-                                            <i class="fas fa-download me-2"></i>Экспорт в JSON
-                                        </button>
-                                        <button
-                                            class="btn btn-outline-success"
-                                            @click="triggerImport"
-                                            title="Импортировать настройки из data-app.json"
-                                        >
-                                            <i class="fas fa-upload me-2"></i>Импорт из JSON
-                                        </button>
-                                    </div>
-                                    <input
-                                        type="file"
-                                        ref="fileInput"
-                                        @change="importSettings"
-                                        accept=".json"
-                                        style="display: none;"
-                                    >
-                                    <div v-if="importStatus" class="mt-2">
-                                        <div v-if="importStatus.type === 'success'" class="alert alert-success alert-dismissible fade show mb-0" role="alert">
-                                            <small><i class="fas fa-check-circle me-1"></i>{{ importStatus.message }}</small>
-                                            <button type="button" class="btn-close btn-close-sm" @click="importStatus = null"></button>
-                                        </div>
-                                        <div v-else-if="importStatus.type === 'error'" class="alert alert-danger alert-dismissible fade show mb-0" role="alert">
-                                            <small><i class="fas fa-exclamation-circle me-1"></i>{{ importStatus.message }}</small>
-                                            <button type="button" class="btn-close btn-close-sm" @click="importStatus = null"></button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div v-if="!perplexityApiKey" class="alert alert-warning mb-0">
-                                    <small><i class="fas fa-exclamation-triangle me-1"></i>Для работы необходимо указать API ключ</small>
-                                </div>
-                                <div v-else class="alert alert-success mb-0">
-                                    <small><i class="fas fa-check-circle me-1"></i>API ключ настроен</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Виджет CoinGecko -->
-                    <div class="col-12 mb-4">
-                        <div class="card avto-B7fN2kT">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <h5 class="card-title mb-0">
-                                    <i class="fas fa-chart-line me-2"></i>Топ-10 (CoinGecko)
-                                </h5>
-                                <div class="d-flex align-items-center gap-2">
-                                    <small class="text-muted" v-if="cgLastUpdated">Обновлено: {{ cgLastUpdated }}</small>
-                                    <button class="btn btn-sm btn-outline-primary" @click="fetchCoinGecko" :disabled="cgIsLoading">
-                                        <span v-if="cgIsLoading" class="spinner-border spinner-border-sm me-1" role="status"></span>
-                                        Обновить
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <div v-if="cgError" class="alert alert-danger" role="alert">
-                                    <small><i class="fas fa-exclamation-circle me-1"></i>{{ cgError }}</small>
-                                </div>
-                                <div class="table-responsive">
-                                    <table class="table table-sm align-middle">
-                                        <thead>
-                                            <tr>
-                                                <th>#</th>
-                                                <th>Монета</th>
-                                                <th class="text-end">Цена</th>
-                                                <th class="text-end">1h %</th>
-                                                <th class="text-end">24h %</th>
-                                                <th class="text-end">7d %</th>
-                                                <th class="text-end">30d %</th>
-                                                <th class="text-end">60d %</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr v-if="cgIsLoading">
-                                                <td colspan="8" class="text-center text-muted">
-                                                    <span class="spinner-border spinner-border-sm me-2" role="status"></span>
-                                                    Загрузка данных с CoinGecko...
-                                                </td>
-                                            </tr>
-                                            <tr v-else-if="cgCoins.length === 0">
-                                                <td colspan="8" class="text-center text-muted">Нет данных</td>
-                                            </tr>
-                                            <tr v-else v-for="(coin, idx) in cgCoins" :key="coin.id">
-                                                <td>{{ idx + 1 }}</td>
-                                                <td>
-                                                    <div class="d-flex align-items-center gap-2">
-                                                        <img v-if="coin.image" :src="coin.image" :alt="coin.symbol" width="20" height="20">
-                                                        <div>
-                                                            <div class="fw-semibold">{{ coin.name }}</div>
-                                                            <small class="text-muted text-uppercase">{{ coin.symbol }}</small>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td class="text-end">{{ cgFormatPrice(coin.current_price) }}</td>
-                                                <td class="text-end" :class="cgChangeClass(coin.price_change_percentage_1h_in_currency)">{{ cgFormatPercent(coin.price_change_percentage_1h_in_currency) }}</td>
-                                                <td class="text-end" :class="cgChangeClass(coin.price_change_percentage_24h_in_currency)">{{ cgFormatPercent(coin.price_change_percentage_24h_in_currency) }}</td>
-                                                <td class="text-end" :class="cgChangeClass(coin.price_change_percentage_7d_in_currency)">{{ cgFormatPercent(coin.price_change_percentage_7d_in_currency) }}</td>
-                                                <td class="text-end" :class="cgChangeClass(coin.price_change_percentage_30d_in_currency)">{{ cgFormatPercent(coin.price_change_percentage_30d_in_currency) }}</td>
-                                                <td class="text-end" :class="cgChangeClass(coin.price_change_percentage_60d_in_currency)">{{ cgFormatPercent(coin.price_change_percentage_60d_in_currency) }}</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Информационная карточка -->
-                    <div class="col-12">
-                        <div class="card avto-H5jR9vQ">
-                            <div class="card-body">
-                                <h5 class="card-title">Добро пожаловать!</h5>
-                                <p class="card-text">Приложение готово к работе.</p>
-                                <p class="text-muted">Vue.js: <span class="badge bg-success">{{ vueVersion }}</span></p>
-                                <p class="text-muted">Bootstrap: <span class="badge bg-primary">5.3.8</span></p>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Компонент виджета CoinGecko (показывается по умолчанию и при вкладке "%") -->
+                    <app-coingecko v-if="!showSettings && activeTab === 'percent'"></app-coingecko>
                 </div>
             </main>
         </div>
@@ -393,6 +226,7 @@
                                         'app-header-tab-inactive': activeTab !== tab.id
                                     }"
                                     :for="'tab-' + tab.id"
+                                    @click="switchTab(tab.id)"
                                 >
                                     {{ tab.label }}
                                 </label>
@@ -422,6 +256,175 @@
                 </div>
             </div>
         </header>
+    </script>
+
+    <!-- X-Template для компонента общих настроек проекта (должен быть ДО загрузки Vue и компонентов) -->
+    <script type="text/x-template" id="settings-template">
+        <div class="col-12 col-lg-4 mb-4">
+            <div class="card avto-M3nP8qW">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-cog me-2"></i>Настройки проекта
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Секция настроек Perplexity AI -->
+                    <div class="mb-4">
+                        <h6 class="text-muted mb-3">
+                            <i class="fas fa-robot me-2"></i>Perplexity AI
+                        </h6>
+                        <div class="mb-3">
+                            <label for="apiKey" class="form-label">API Key</label>
+                            <div class="input-group">
+                                <input
+                                    type="password"
+                                    class="form-control"
+                                    id="apiKey"
+                                    ref="apiKeyInput"
+                                    v-model="perplexityApiKey"
+                                    @input="saveApiKey"
+                                    placeholder="Введите ваш API ключ"
+                                >
+                                <button
+                                    class="btn btn-outline-secondary"
+                                    type="button"
+                                    @click="toggleApiKeyVisibility"
+                                    :title="showApiKey ? 'Скрыть ключ' : 'Показать ключ'"
+                                >
+                                    <i :class="showApiKey ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                                </button>
+                            </div>
+                            <small class="form-text text-muted">
+                                Ключ сохраняется локально в браузере
+                            </small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="model" class="form-label">Модель</label>
+                            <select class="form-select" id="model" v-model="perplexityModel">
+                                <option v-for="model in models" :key="model.value" :value="model.value">{{ model.label }}</option>
+                            </select>
+                        </div>
+
+                        <div v-if="!perplexityApiKey" class="alert alert-warning mb-0">
+                            <small><i class="fas fa-exclamation-triangle me-1"></i>Для работы необходимо указать API ключ</small>
+                        </div>
+                        <div v-else class="alert alert-success mb-0">
+                            <small><i class="fas fa-check-circle me-1"></i>API ключ настроен</small>
+                        </div>
+                    </div>
+
+                    <!-- Экспорт/Импорт настроек -->
+                    <div class="mb-3 border-top pt-3">
+                        <label class="form-label">
+                            <i class="fas fa-database me-2"></i>Управление настройками
+                        </label>
+                        <div class="d-grid gap-2">
+                            <button
+                                class="btn btn-outline-primary"
+                                @click="exportSettings"
+                                title="Экспортировать настройки в data-app.json"
+                            >
+                                <i class="fas fa-download me-2"></i>Экспорт в JSON
+                            </button>
+                            <button
+                                class="btn btn-outline-success"
+                                @click="triggerImport"
+                                title="Импортировать настройки из data-app.json"
+                            >
+                                <i class="fas fa-upload me-2"></i>Импорт из JSON
+                            </button>
+                        </div>
+                        <input
+                            type="file"
+                            ref="fileInput"
+                            @change="importSettings"
+                            accept=".json"
+                            style="display: none;"
+                        >
+                        <div v-if="importStatus" class="mt-2">
+                            <div v-if="importStatus.type === 'success'" class="alert alert-success alert-dismissible fade show mb-0" role="alert">
+                                <small><i class="fas fa-check-circle me-1"></i>{{ importStatus.message }}</small>
+                                <button type="button" class="btn-close btn-close-sm" @click="closeImportStatus"></button>
+                            </div>
+                            <div v-else-if="importStatus.type === 'error'" class="alert alert-danger alert-dismissible fade show mb-0" role="alert">
+                                <small><i class="fas fa-exclamation-circle me-1"></i>{{ importStatus.message }}</small>
+                                <button type="button" class="btn-close btn-close-sm" @click="closeImportStatus"></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <!-- X-Template для компонента виджета CoinGecko (должен быть ДО загрузки Vue и компонентов) -->
+    <script type="text/x-template" id="coingecko-template">
+        <div class="col-12 mb-4">
+            <div class="card avto-B7fN2kT">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-line me-2"></i>Топ-10 (CoinGecko)
+                    </h5>
+                    <div class="d-flex align-items-center gap-2">
+                        <small class="text-muted" v-if="cgLastUpdated">Обновлено: {{ cgLastUpdated }}</small>
+                        <button class="btn btn-sm btn-outline-primary" @click="fetchCoinGecko" :disabled="cgIsLoading">
+                            <span v-if="cgIsLoading" class="spinner-border spinner-border-sm me-1" role="status"></span>
+                            Обновить
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div v-if="cgError" class="alert alert-danger" role="alert">
+                        <small><i class="fas fa-exclamation-circle me-1"></i>{{ cgError }}</small>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Монета</th>
+                                    <th class="text-end">Цена</th>
+                                    <th class="text-end">1h %</th>
+                                    <th class="text-end">24h %</th>
+                                    <th class="text-end">7d %</th>
+                                    <th class="text-end">30d %</th>
+                                    <th class="text-end">60d %</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-if="cgIsLoading">
+                                    <td colspan="8" class="text-center text-muted">
+                                        <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                        Загрузка данных с CoinGecko...
+                                    </td>
+                                </tr>
+                                <tr v-else-if="cgCoins.length === 0">
+                                    <td colspan="8" class="text-center text-muted">Нет данных</td>
+                                </tr>
+                                <tr v-else v-for="(coin, idx) in cgCoins" :key="coin.id">
+                                    <td>{{ idx + 1 }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <img v-if="coin.image" :src="coin.image" :alt="coin.symbol" width="20" height="20">
+                                            <div>
+                                                <div class="fw-semibold">{{ coin.name }}</div>
+                                                <small class="text-muted text-uppercase">{{ coin.symbol }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-end">{{ cgFormatPrice(coin.current_price) }}</td>
+                                    <td class="text-end" :class="cgChangeClass(coin.price_change_percentage_1h_in_currency)">{{ cgFormatPercent(coin.price_change_percentage_1h_in_currency) }}</td>
+                                    <td class="text-end" :class="cgChangeClass(coin.price_change_percentage_24h_in_currency)">{{ cgFormatPercent(coin.price_change_percentage_24h_in_currency) }}</td>
+                                    <td class="text-end" :class="cgChangeClass(coin.price_change_percentage_7d_in_currency)">{{ cgFormatPercent(coin.price_change_percentage_7d_in_currency) }}</td>
+                                    <td class="text-end" :class="cgChangeClass(coin.price_change_percentage_30d_in_currency)">{{ cgFormatPercent(coin.price_change_percentage_30d_in_currency) }}</td>
+                                    <td class="text-end" :class="cgChangeClass(coin.price_change_percentage_60d_in_currency)">{{ cgFormatPercent(coin.price_change_percentage_60d_in_currency) }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </script>
 
     <!-- X-Template для компонента футера (должен быть ДО загрузки Vue и компонентов) -->

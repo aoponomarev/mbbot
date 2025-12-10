@@ -21,15 +21,17 @@
   const parts = [
     window.cmpTheme && window.cmpTheme(defaults),
     // window.cmpSplash больше не используется как часть - теперь это отдельный компонент
-    window.cmpPerplexitySettings && window.cmpPerplexitySettings(defaults, models),
+    // window.cmpPerplexitySettings больше не используется как часть - теперь это отдельный компонент
     // window.cmpChat удален - чат с Perplexity AI убран из интерфейса
-    window.cmpImportExport && window.cmpImportExport(),
-    window.cmpCoinGecko && window.cmpCoinGecko()
+    window.cmpImportExport && window.cmpImportExport()
+    // window.cmpCoinGecko больше не используется как часть - теперь это отдельный компонент
   ].filter(Boolean);
 
   const baseData = {
     vueVersion: '3.5.25',
-    lastCommitMessage: (cfg.lastCommitMessage || '').trim()
+    lastCommitMessage: (cfg.lastCommitMessage || '').trim(),
+    showSettings: false, // Показывать ли настройки (по умолчанию false - показываем CoinGecko)
+    activeTab: 'percent' // Активная вкладка отображения (по умолчанию "%")
   };
   const data = Object.assign(baseData, ...parts.map(p => p.data || {}));
   const methods = Object.assign({}, ...parts.map(p => p.methods || {}));
@@ -91,6 +93,30 @@
     }
   } else {
     console.warn('window.cmpFooter not found');
+  }
+
+  // Регистрация компонента общих настроек проекта
+  if (window.cmpSettings) {
+    try {
+      app.component('app-settings', window.cmpSettings);
+      console.log('Settings component registered');
+    } catch (error) {
+      console.error('Ошибка при регистрации компонента настроек:', error);
+    }
+  } else {
+    console.warn('window.cmpSettings not found');
+  }
+
+  // Регистрация компонента виджета CoinGecko
+  if (window.cmpCoinGecko) {
+    try {
+      app.component('app-coingecko', window.cmpCoinGecko);
+      console.log('CoinGecko component registered');
+    } catch (error) {
+      console.error('Ошибка при регистрации компонента CoinGecko:', error);
+    }
+  } else {
+    console.warn('window.cmpCoinGecko not found');
   }
 
   // Сохраняем ссылку на приложение в window для доступа из компонентов
