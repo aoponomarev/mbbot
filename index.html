@@ -46,7 +46,7 @@
             <main class="avto-K9mP4rT">
                 <div class="row">
                     <!-- Компонент общих настроек проекта (показывается при клике на гамбургер) -->
-                    <app-settings v-if="showSettings && activeTab === 'percent'"></app-settings>
+                    <app-settings v-if="showSettings"></app-settings>
 
                     <!-- Компонент виджета CoinGecko (показывается по умолчанию и при вкладке "%") -->
                     <app-coingecko v-if="!showSettings && activeTab === 'percent'"></app-coingecko>

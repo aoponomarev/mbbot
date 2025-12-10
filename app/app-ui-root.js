@@ -27,15 +27,24 @@
     // window.cmpCoinGecko больше не используется как часть - теперь это отдельный компонент
   ].filter(Boolean);
 
+  // Загружаем сохраненную активную вкладку из localStorage
+  const savedActiveTab = localStorage.getItem('activeTab');
+  const initialActiveTab = savedActiveTab || 'percent';
+
   const baseData = {
     vueVersion: '3.5.25',
     lastCommitMessage: (cfg.lastCommitMessage || '').trim(),
     showSettings: false, // Показывать ли настройки (по умолчанию false - показываем CoinGecko)
-    activeTab: 'percent' // Активная вкладка отображения (по умолчанию "%")
+    activeTab: initialActiveTab // Активная вкладка отображения (загружается из localStorage)
   };
   const data = Object.assign(baseData, ...parts.map(p => p.data || {}));
   const methods = Object.assign({}, ...parts.map(p => p.methods || {}));
-  const watch = Object.assign({}, ...parts.map(p => p.watch || {}));
+  const watch = Object.assign({
+    // Сохраняем активную вкладку в localStorage при изменении
+    activeTab(newTab) {
+      localStorage.setItem('activeTab', newTab);
+    }
+  }, ...parts.map(p => p.watch || {}));
   const mountedFns = parts.map(p => p.mounted).filter(Boolean);
 
   const { createApp } = Vue;
