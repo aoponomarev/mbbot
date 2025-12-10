@@ -362,92 +362,85 @@
     <script type="text/x-template" id="coingecko-template">
         <div class="col-12 mb-4">
             <div class="card avto-B7fN2kT">
-                <div class="card-header d-flex align-items-center">
-                    <div class="d-flex justify-content-between align-items-center w-100">
-                        <div class="flex-grow-1 me-3 position-relative">
-                            <input
-                                type="text"
-                                class="form-control form-control-sm"
-                                placeholder="Поиск монет по названию или тикеру..."
-                                v-model="cgSearchQuery"
-                                @focus="cgSearchResults.length > 0 ? null : searchCoins(cgSearchQuery)"
+                <div class="card-header d-flex align-items-center gap-2">
+                    <div class="flex-grow-1 position-relative">
+                        <input
+                            type="text"
+                            class="form-control form-control-sm"
+                            placeholder="Поиск монет по названию или тикеру..."
+                            v-model="cgSearchQuery"
+                            @focus="cgSearchResults.length > 0 ? null : searchCoins(cgSearchQuery)"
+                        >
+                        <!-- Выпадающий список результатов поиска -->
+                        <div v-if="cgSearchResults.length > 0" class="position-absolute w-100 bg-body border rounded shadow-sm cg-search-dropdown" style="z-index: 1000; max-height: 300px; overflow-y: auto; top: 100%; margin-top: 4px;">
+                            <div 
+                                v-for="result in cgSearchResults" 
+                                :key="result.id"
+                                class="p-2 border-bottom cg-search-item"
+                                @click="addCoin(result.id)"
+                                :class="{'bg-light': cgSelectedCoins.includes(result.id)}"
                             >
-                            <!-- Выпадающий список результатов поиска -->
-                            <div v-if="cgSearchResults.length > 0" class="position-absolute w-100 bg-body border rounded shadow-sm cg-search-dropdown" style="z-index: 1000; max-height: 300px; overflow-y: auto; top: 100%; margin-top: 4px;">
-                                <div 
-                                    v-for="result in cgSearchResults" 
-                                    :key="result.id"
-                                    class="p-2 border-bottom cg-search-item"
-                                    @click="addCoin(result.id)"
-                                    :class="{'bg-light': cgSelectedCoins.includes(result.id)}"
-                                >
-                                    <div class="d-flex align-items-center gap-2">
-                                        <img v-if="result.thumb" :src="result.thumb" :alt="result.symbol" width="20" height="20">
-                                        <div class="flex-grow-1">
-                                            <div class="fw-semibold small text-uppercase">{{ result.symbol }}</div>
-                                            <small class="text-muted">{{ result.name }}</small>
-                                        </div>
-                                        <small v-if="cgSelectedCoins.includes(result.id)" class="text-success">
-                                            <i class="fas fa-check"></i>
-                                        </small>
+                                <div class="d-flex align-items-center gap-2">
+                                    <img v-if="result.thumb" :src="result.thumb" :alt="result.symbol" width="20" height="20">
+                                    <div class="flex-grow-1">
+                                        <div class="fw-semibold small text-uppercase">{{ result.symbol }}</div>
+                                        <small class="text-muted">{{ result.name }}</small>
                                     </div>
+                                    <small v-if="cgSelectedCoins.includes(result.id)" class="text-success">
+                                        <i class="fas fa-check"></i>
+                                    </small>
                                 </div>
                             </div>
-                        </div>
-                        <div class="d-flex align-items-center gap-2">
-                            <div class="position-relative">
-                                <button 
-                                    class="btn btn-sm btn-outline-secondary" 
-                                    type="button"
-                                    :disabled="cgArchivedCoins.length === 0"
-                                    @click.stop="toggleArchiveDropdown"
-                                    style="width: auto; min-width: fit-content;"
-                                >
-                                    Архив
-                                </button>
-                                <!-- Выпадающий список архива -->
-                                <div 
-                                    v-if="showArchiveDropdown && cgArchivedCoins.length > 0" 
-                                    class="position-absolute bg-body border rounded shadow-sm cg-archive-dropdown" 
-                                    style="z-index: 1000; max-height: 300px; overflow-y: auto; top: 100%; margin-top: 4px; min-width: 200px; right: 0;"
-                                    @click.stop
-                                >
-                                    <div 
-                                        v-for="archivedId in cgArchivedCoins" 
-                                        :key="archivedId"
-                                        class="p-2 border-bottom cg-search-item"
-                                        @click="restoreFromArchiveById(archivedId)"
-                                    >
-                                        <div class="d-flex align-items-center gap-2">
-                                            <img v-if="getArchivedCoinIcon(archivedId)" :src="getArchivedCoinIcon(archivedId)" :alt="archivedId" width="20" height="20">
-                                            <div class="flex-grow-1">
-                                                <div class="fw-semibold small text-uppercase">{{ getArchivedCoinSymbol(archivedId) }}</div>
-                                                <small class="text-muted">{{ getArchivedCoinName(archivedId) }}</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <button 
-                                class="btn btn-sm btn-outline-secondary" 
-                                type="button"
-                                disabled
-                                style="width: auto; min-width: fit-content;"
-                            >
-                                {{ sortedCoins.length }} {{ pluralizeCoins(sortedCoins.length) }}
-                            </button>
-                        </div>
-                        <div class="d-flex align-items-center gap-2">
-                            <small class="text-muted" v-if="cgLastUpdated" style="line-height: 1.2;">
-                                <div>{{ formatLastUpdatedDate(cgLastUpdated) }}</div>
-                                <div>{{ formatLastUpdatedTime(cgLastUpdated) }}</div>
-                            </small>
-                            <button class="btn btn-sm btn-outline-secondary" @click="fetchCoinGecko" :disabled="cgIsLoading">
-                                <span v-if="cgIsLoading" class="spinner-border spinner-border-sm me-1" role="status"></span>
-                                <span v-else>Обновить</span>
-                            </button>
                         </div>
                     </div>
+                    <div class="position-relative">
+                        <button 
+                            class="btn btn-sm btn-outline-secondary" 
+                            type="button"
+                            :disabled="cgArchivedCoins.length === 0"
+                            @click.stop="toggleArchiveDropdown"
+                            style="width: auto; min-width: fit-content;"
+                        >
+                            Архив
+                        </button>
+                        <!-- Выпадающий список архива -->
+                        <div 
+                            v-if="showArchiveDropdown && cgArchivedCoins.length > 0" 
+                            class="position-absolute bg-body border rounded shadow-sm cg-archive-dropdown" 
+                            style="z-index: 1000; max-height: 300px; overflow-y: auto; top: 100%; margin-top: 4px; min-width: 200px; right: 0;"
+                            @click.stop
+                        >
+                            <div 
+                                v-for="archivedId in cgArchivedCoins" 
+                                :key="archivedId"
+                                class="p-2 border-bottom cg-search-item"
+                                @click="restoreFromArchiveById(archivedId)"
+                            >
+                                <div class="d-flex align-items-center gap-2">
+                                    <img v-if="getArchivedCoinIcon(archivedId)" :src="getArchivedCoinIcon(archivedId)" :alt="archivedId" width="20" height="20">
+                                    <div class="flex-grow-1">
+                                        <div class="fw-semibold small text-uppercase">{{ getArchivedCoinSymbol(archivedId) }}</div>
+                                        <small class="text-muted">{{ getArchivedCoinName(archivedId) }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button 
+                        class="btn btn-sm btn-outline-secondary" 
+                        type="button"
+                        style="width: auto; min-width: fit-content;"
+                    >
+                        {{ sortedCoins.length }} {{ pluralizeCoins(sortedCoins.length) }}
+                    </button>
+                    <small class="text-muted" v-if="cgLastUpdated" style="line-height: 1.2;">
+                        <div>{{ formatLastUpdatedDate(cgLastUpdated) }}</div>
+                        <div>{{ formatLastUpdatedTime(cgLastUpdated) }}</div>
+                    </small>
+                    <button class="btn btn-sm btn-outline-secondary" @click="fetchCoinGecko" :disabled="cgIsLoading">
+                        <span v-if="cgIsLoading" class="spinner-border spinner-border-sm me-1" role="status"></span>
+                        <span v-else>Обновить</span>
+                    </button>
                 </div>
                 <div class="card-body">
                     <div v-if="cgError" class="alert alert-danger" role="alert">
