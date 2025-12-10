@@ -41,3 +41,13 @@
     background-color: var(--bs-tertiary-bg) !important;
 }
 
+/* Убираем border-bottom у последней строки таблицы */
+.table tbody tr:last-child td {
+    border-bottom: none !important;
+}
+
+/* Уменьшаем padding-bottom у карточки CoinGecko */
+.avto-B7fN2kT .card-body {
+    padding-bottom: 0.5rem !important;
+}
+

@@ -394,10 +394,19 @@
                             </div>
                         </div>
                         <div class="d-flex align-items-center gap-2">
+                            <select class="form-select form-select-sm" style="width: auto;" v-model="selectedArchivedCoin" @change="restoreFromArchive">
+                                <option value="" disabled selected>Архив</option>
+                                <option v-for="archivedId in cgArchivedCoins" :key="archivedId" :value="archivedId">
+                                    {{ getArchivedCoinName(archivedId) }}
+                                </option>
+                            </select>
+                            <small class="text-muted" v-if="cgArchivedCoins.length > 0">{{ cgArchivedCoins.length }}</small>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
                             <small class="text-muted text-nowrap" v-if="cgLastUpdated">{{ cgLastUpdated }}</small>
-                            <button class="btn btn-sm btn-outline-secondary" @click="fetchCoinGecko" :disabled="cgIsLoading" title="Обновить данные">
-                                <span v-if="cgIsLoading" class="spinner-border spinner-border-sm" role="status"></span>
-                                <span v-else>⟳</span>
+                            <button class="btn btn-sm btn-outline-secondary" @click="fetchCoinGecko" :disabled="cgIsLoading">
+                                <span v-if="cgIsLoading" class="spinner-border spinner-border-sm me-1" role="status"></span>
+                                <span v-else>Обновить</span>
                             </button>
                         </div>
                     </div>
@@ -414,25 +423,25 @@
                                         <input type="checkbox" class="form-check-input">
                                     </th>
                                     <th style="cursor: pointer;" @click="handleSort('symbol')">
-                                        Монета <i :class="getSortIcon('symbol')"></i>
+                                        Монета
                                     </th>
                                     <th class="text-end" style="cursor: pointer;" @click="handleSort('price_change_percentage_1h_in_currency')">
-                                        1h % <i :class="getSortIcon('price_change_percentage_1h_in_currency')"></i>
+                                        1h %
                                     </th>
                                     <th class="text-end" style="cursor: pointer;" @click="handleSort('price_change_percentage_24h_in_currency')">
-                                        24h % <i :class="getSortIcon('price_change_percentage_24h_in_currency')"></i>
+                                        24h %
                                     </th>
                                     <th class="text-end" style="cursor: pointer;" @click="handleSort('price_change_percentage_7d_in_currency')">
-                                        7d % <i :class="getSortIcon('price_change_percentage_7d_in_currency')"></i>
+                                        7d %
                                     </th>
                                     <th class="text-end" style="cursor: pointer;" @click="handleSort('price_change_percentage_14d_in_currency')">
-                                        14d % <i :class="getSortIcon('price_change_percentage_14d_in_currency')"></i>
+                                        14d %
                                     </th>
                                     <th class="text-end" style="cursor: pointer;" @click="handleSort('price_change_percentage_30d_in_currency')">
-                                        30d % <i :class="getSortIcon('price_change_percentage_30d_in_currency')"></i>
+                                        30d %
                                     </th>
                                     <th class="text-end" style="cursor: pointer;" @click="handleSort('price_change_percentage_200d_in_currency')">
-                                        200d % <i :class="getSortIcon('price_change_percentage_200d_in_currency')"></i>
+                                        200d %
                                     </th>
                                 </tr>
                             </thead>
@@ -455,8 +464,8 @@
                                             class="d-flex align-items-center gap-2 cg-coin-block" 
                                             style="cursor: pointer;"
                                             :title="coin.name"
-                                            @click="openContextMenu($event, coin.id)"
-                                            @contextmenu.prevent="openContextMenu($event, coin.id)"
+                                            @click.stop="openContextMenu($event, coin.id)"
+                                            @contextmenu.prevent.stop="openContextMenu($event, coin.id)"
                                         >
                                             <img v-if="getCoinIcon(coin)" :src="getCoinIcon(coin)" :alt="coin.symbol" width="20" height="20">
                                             <span class="text-uppercase fw-semibold">{{ coin.symbol }}</span>

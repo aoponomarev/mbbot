@@ -38,7 +38,9 @@ window.cmpCoinGecko = {
       contextMenuCoin: null, // ID монеты для контекстного меню
       contextMenuX: 0,
       contextMenuY: 0,
-      showContextMenu: false
+      showContextMenu: false,
+      // Архив
+      selectedArchivedCoin: '' // Выбранная монета из архива для восстановления
     };
   },
   
@@ -183,20 +185,30 @@ window.cmpCoinGecko = {
     
     // Контекстное меню: открытие
     openContextMenu(event, coinId) {
+      event.stopPropagation(); // Предотвращаем всплытие события
       this.contextMenuCoin = coinId;
       this.contextMenuX = event.clientX;
       this.contextMenuY = event.clientY;
       this.showContextMenu = true;
       
-      // Закрываем меню при клике вне его
-      document.addEventListener('click', this.closeContextMenu);
+      // Закрываем меню при клике вне его (с небольшой задержкой, чтобы не закрыть сразу)
+      setTimeout(() => {
+        document.addEventListener('click', this.closeContextMenuOnOutside.bind(this));
+      }, 100);
+    },
+    
+    // Контекстное меню: закрытие при клике вне
+    closeContextMenuOnOutside(event) {
+      if (!event.target.closest('.cg-context-menu') && !event.target.closest('.cg-coin-block')) {
+        this.closeContextMenu();
+      }
     },
     
     // Контекстное меню: закрытие
     closeContextMenu() {
       this.showContextMenu = false;
       this.contextMenuCoin = null;
-      document.removeEventListener('click', this.closeContextMenu);
+      document.removeEventListener('click', this.closeContextMenuOnOutside);
     },
     
     // Перемещение монеты в списке
@@ -246,6 +258,40 @@ window.cmpCoinGecko = {
       
       // Удаляем из активного списка
       this.removeCoin(this.contextMenuCoin);
+    },
+    
+    // Восстановление монеты из архива
+    restoreFromArchive() {
+      if (!this.selectedArchivedCoin) return;
+      
+      const coinId = this.selectedArchivedCoin;
+      
+      // Удаляем из архива
+      const archiveIndex = this.cgArchivedCoins.indexOf(coinId);
+      if (archiveIndex > -1) {
+        this.cgArchivedCoins.splice(archiveIndex, 1);
+        localStorage.setItem('cgArchivedCoins', JSON.stringify(this.cgArchivedCoins));
+      }
+      
+      // Добавляем в активный список
+      if (!this.cgSelectedCoins.includes(coinId)) {
+        this.cgSelectedCoins.push(coinId);
+        localStorage.setItem('cgSelectedCoins', JSON.stringify(this.cgSelectedCoins));
+      }
+      
+      // Сбрасываем выбор и обновляем данные
+      this.selectedArchivedCoin = '';
+      this.fetchCoinGecko();
+    },
+    
+    // Получение названия монеты из архива (из кэша данных или по ID)
+    getArchivedCoinName(coinId) {
+      // Пытаемся найти в текущих данных
+      const coin = this.cgCoins.find(c => c.id === coinId);
+      if (coin) return coin.name;
+      
+      // Если нет в данных - возвращаем ID как fallback
+      return coinId;
     },
     
     // Кэширование иконок монет в localStorage
