@@ -29,8 +29,8 @@
 - **core/security/u-sec-obfuscate.js** — утилиты обфускации для безопасного хранения PIN и API-ключей.
 - **core/api/market-metrics.js** — утилита для получения метрик рынка (FGI, VIX, BTC Dominance, Open Interest, Funding Rate, Long/Short Ratio). Независимый модуль, экспортирует функции через `window.marketMetrics`.
 - **ui/api/import-export.js** — экспорт/импорт настроек.
-- **ui/api/perplexity.js** — настройка ключа/модели Perplexity.
-- **ui/api/coingecko.js** — виджет CoinGecko.
+- **ui/api/perplexity.js** (или **ui/api/settings.js**) — компонент общих настроек проекта (включая Perplexity AI).
+- **ui/api/coingecko.js** — компонент виджета CoinGecko с поиском монет, архивом, сортировкой таблиц, кэшированием иконок.
 - **ui/interaction/splash.js** — сплэш-экран с защитой PIN-кодом и настройкой API-ключа.
 - **ui/interaction/theme.js** — применение темы.
 - **ui/interaction/chat.js** — чат Perplexity.
@@ -277,9 +277,9 @@ if (settings.secureData.apiKeyPerplexity) {
 
 **Текущие настройки:**
 
-- **Обычные настройки**: `theme`, `perplexityModel` (и все остальные из localStorage)
+- **Обычные настройки**: `theme`, `perplexityModel`, `cgCoins`, `cgLastUpdated`, `cgSelectedCoins`, `cgArchivedCoins`, `activeTab` (и все остальные из localStorage)
 - **Обфусцированные настройки**: `app-pin`, `perplexity-api-key`
-- **Исключенные ключи**: `skipSplash` (sessionStorage, служебный)
+- **Исключенные ключи**: `skipSplash` (sessionStorage, служебный), `cgIconsCache`, `cgIconsCacheTimestamp`, `marketMetricsCache`, `marketMetricsCacheTimestamp` (кэши, не экспортируются)
 
 **Формат экспорта (v3.0):**
 ```json
@@ -296,6 +296,39 @@ if (settings.secureData.apiKeyPerplexity) {
   }
 }
 ```
+
+### ⚠️ Система кэширования данных
+
+**Назначение**: Оптимизация работы с внешними API через кэширование данных с временными ограничениями.
+
+**Реализация**:
+- **Иконки монет**: `ui/api/coingecko.js` - метод `cacheCoinsIcons()`
+- **Метрики рынка**: `ui/interaction/footer.js` - метод `fetchMarketIndices()`
+
+**Принципы работы**:
+
+1. **Кэширование иконок монет**:
+   - Ключи localStorage: `cgIconsCache` (объект с URL иконок), `cgIconsCacheTimestamp` (время последнего обновления)
+   - Интервал обновления: не чаще 1 раза в час (60 минут)
+   - Логика: обновление только если прошло больше часа с последнего обновления
+   - Хранение: объект `{coinId: iconUrl}` в localStorage
+
+2. **Кэширование метрик рынка**:
+   - Ключи localStorage: `marketMetricsCache` (объект с метриками), `marketMetricsCacheTimestamp` (время последнего обновления)
+   - Интервал обновления: не чаще 1 раза в час (60 минут)
+   - Фильтрация символов анимации: символы `|`, `/`, `-`, `\` заменяются на `"—"` перед сохранением в кэш
+   - Валидация: кэшируются только успешно загруженные метрики с реальными значениями (не `"—"`, не `null`, не `undefined`)
+   - Логика загрузки: если в кэше есть неопределенные метрики (`"—"`), они продолжают загружаться из API с показом анимации
+
+3. **Правила кэширования**:
+   - Пустые значения не кэшируются
+   - Символы анимации фильтруются перед сохранением
+   - При повреждении кэша (ошибка парсинга) - кэш удаляется и данные загружаются заново
+   - При первом запуске (когда кэша нет) - данные загружаются сразу
+
+**Текущие кэшируемые данные**:
+- Иконки монет CoinGecko (`cgIconsCache`)
+- Метрики рынка: FGI, VIX, BTC Dominance, Open Interest, Funding Rate, Long/Short Ratio (`marketMetricsCache`)
 
 ### ⚠️ Отслеживание согласованности архитектурных правил
 
