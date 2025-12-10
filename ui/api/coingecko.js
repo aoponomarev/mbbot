@@ -15,12 +15,16 @@ window.cmpCoinGecko = {
       'cardano', 'dogecoin', 'tron', 'avalanche-2', 'polkadot'
     ];
     
+    // Загружаем кэш иконок
+    const iconsCache = JSON.parse(localStorage.getItem('cgIconsCache') || '{}');
+    
     return {
       cgCoins: savedCoins ? JSON.parse(savedCoins) : [],
       cgIsLoading: false,
       cgError: null,
       cgLastUpdated: savedLastUpdated || null,
       cgSelectedCoins: savedSelectedCoins ? JSON.parse(savedSelectedCoins) : defaultCoins,
+      cgIconsCache: iconsCache, // Кэш иконок в data для реактивности
       // Поиск монет
       cgSearchQuery: '',
       cgSearchResults: [],
@@ -46,6 +50,9 @@ window.cmpCoinGecko = {
         const data = await res.json();
         this.cgCoins = Array.isArray(data) ? data : [];
         this.cgLastUpdated = new Date().toLocaleString();
+        
+        // Кэшируем иконки монет для быстрой загрузки
+        this.cacheCoinsIcons(this.cgCoins);
         
         // Сохраняем полный набор данных в localStorage
         localStorage.setItem('cgCoins', JSON.stringify(this.cgCoins));
@@ -88,8 +95,34 @@ window.cmpCoinGecko = {
           throw new Error(`HTTP ${res.status}`);
         }
         const data = await res.json();
+        
+        // Сортируем результаты: полные совпадения с тикером вверху
+        let coins = data.coins || [];
+        const queryLower = query.toLowerCase();
+        coins.sort((a, b) => {
+          const aSymbol = a.symbol.toLowerCase();
+          const bSymbol = b.symbol.toLowerCase();
+          
+          // Полное совпадение тикера - в начало
+          const aExactMatch = aSymbol === queryLower ? 1 : 0;
+          const bExactMatch = bSymbol === queryLower ? 1 : 0;
+          if (aExactMatch !== bExactMatch) {
+            return bExactMatch - aExactMatch; // Точные совпадения первыми
+          }
+          
+          // Тикер начинается с запроса - выше
+          const aStartsWith = aSymbol.startsWith(queryLower) ? 1 : 0;
+          const bStartsWith = bSymbol.startsWith(queryLower) ? 1 : 0;
+          if (aStartsWith !== bStartsWith) {
+            return bStartsWith - aStartsWith;
+          }
+          
+          // Остальные по market_cap_rank (популярности)
+          return (a.market_cap_rank || 9999) - (b.market_cap_rank || 9999);
+        });
+        
         // Ограничиваем результаты первыми 10 для удобства
-        this.cgSearchResults = data.coins ? data.coins.slice(0, 10) : [];
+        this.cgSearchResults = coins.slice(0, 10);
       } catch (error) {
         console.error('CoinGecko search error', error);
         this.cgSearchResults = [];
@@ -103,6 +136,13 @@ window.cmpCoinGecko = {
       if (!this.cgSelectedCoins.includes(coinId)) {
         this.cgSelectedCoins.push(coinId);
         localStorage.setItem('cgSelectedCoins', JSON.stringify(this.cgSelectedCoins));
+        
+        // Кэшируем иконку добавленной монеты из результатов поиска
+        const coinFromSearch = this.cgSearchResults.find(c => c.id === coinId);
+        if (coinFromSearch && coinFromSearch.thumb) {
+          this.cacheCoinsIcons([{ id: coinId, image: coinFromSearch.thumb }]);
+        }
+        
         // Обновляем данные для добавленной монеты
         this.fetchCoinGecko();
       }
@@ -121,6 +161,40 @@ window.cmpCoinGecko = {
         this.cgCoins = this.cgCoins.filter(coin => coin.id !== coinId);
         localStorage.setItem('cgCoins', JSON.stringify(this.cgCoins));
       }
+    },
+    
+    // Кэширование иконок монет в localStorage
+    cacheCoinsIcons(coins) {
+      if (!Array.isArray(coins) || coins.length === 0) return;
+      
+      let updated = false;
+      
+      coins.forEach(coin => {
+        if (coin.image && !this.cgIconsCache[coin.id]) {
+          this.cgIconsCache[coin.id] = coin.image;
+          updated = true;
+        }
+      });
+      
+      // Сохраняем обновленный кэш в localStorage
+      if (updated) {
+        localStorage.setItem('cgIconsCache', JSON.stringify(this.cgIconsCache));
+      }
+    },
+    
+    // Получение иконки монеты из кэша (с fallback на coin.image)
+    getCoinIcon(coin) {
+      // Сначала проверяем кэш
+      if (this.cgIconsCache[coin.id]) {
+        return this.cgIconsCache[coin.id];
+      }
+      // Если в кэше нет - используем текущую иконку и кэшируем её
+      if (coin.image) {
+        this.cgIconsCache[coin.id] = coin.image;
+        localStorage.setItem('cgIconsCache', JSON.stringify(this.cgIconsCache));
+        return coin.image;
+      }
+      return null;
     }
   },
   

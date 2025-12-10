@@ -369,12 +369,11 @@
                                 @focus="cgSearchResults.length > 0 ? null : searchCoins(cgSearchQuery)"
                             >
                             <!-- Выпадающий список результатов поиска -->
-                            <div v-if="cgSearchResults.length > 0" class="position-absolute w-100 bg-body border rounded shadow-sm" style="z-index: 1000; max-height: 300px; overflow-y: auto; top: 100%; margin-top: 4px;">
+                            <div v-if="cgSearchResults.length > 0" class="position-absolute w-100 bg-body border rounded shadow-sm cg-search-dropdown" style="z-index: 1000; max-height: 300px; overflow-y: auto; top: 100%; margin-top: 4px;">
                                 <div 
                                     v-for="result in cgSearchResults" 
                                     :key="result.id"
-                                    class="p-2 border-bottom cursor-pointer"
-                                    style="cursor: pointer;"
+                                    class="p-2 border-bottom cg-search-item"
                                     @click="addCoin(result.id)"
                                     :class="{'bg-light': cgSelectedCoins.includes(result.id)}"
                                 >
@@ -442,7 +441,7 @@
                                     </td>
                                     <td>
                                         <div class="d-flex align-items-center gap-2">
-                                            <img v-if="coin.image" :src="coin.image" :alt="coin.symbol" width="20" height="20">
+                                            <img v-if="getCoinIcon(coin)" :src="getCoinIcon(coin)" :alt="coin.symbol" width="20" height="20">
                                             <div>
                                                 <div class="fw-semibold">{{ coin.name }}</div>
                                                 <small class="text-muted text-uppercase">{{ coin.symbol }}</small>

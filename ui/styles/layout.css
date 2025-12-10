@@ -23,3 +23,21 @@
     }
 }
 
+/* Стили для выпадающего списка поиска монет CoinGecko */
+.cg-search-dropdown {
+    /* Используем тему Bootstrap для фона и границы */
+}
+
+.cg-search-item {
+    cursor: pointer;
+    transition: background-color 0.15s ease-in-out;
+}
+
+.cg-search-item:hover {
+    background-color: var(--bs-secondary-bg) !important;
+}
+
+.cg-search-item:active {
+    background-color: var(--bs-tertiary-bg) !important;
+}
+
