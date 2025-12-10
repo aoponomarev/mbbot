@@ -38,7 +38,40 @@
     activeTab: initialActiveTab // Активная вкладка отображения (загружается из localStorage)
   };
   const data = Object.assign(baseData, ...parts.map(p => p.data || {}));
-  const methods = Object.assign({}, ...parts.map(p => p.methods || {}));
+  const methods = Object.assign({
+    // Глобальный метод закрытия всех выпадающих списков при клике вне их области
+    // Используется для консистентного UX - все выпадающие элементы закрываются одновременно
+    closeAllDropdowns(event) {
+      if (!event) return;
+      
+      // Селекторы всех выпадающих элементов и их триггеров
+      const clickableSelectors = [
+        '.cg-search-dropdown', // Выпадающий список результатов поиска
+        '.cg-archive-dropdown', // Выпадающий список архива
+        '.cg-context-menu', // Контекстное меню монеты
+        '.cg-counter-dropdown', // Выпадающее меню счетчика монет
+        '.dropdown-menu', // Bootstrap dropdown меню (в хедере)
+        'input[type="text"]', // Поля ввода (включая поле поиска)
+        'input[type="checkbox"]', // Чекбоксы (не должны закрывать выпадающие списки)
+        'button[type="button"]', // Кнопки, открывающие dropdown
+        '.cg-coin-block', // Блок монеты для контекстного меню
+        '.cg-coins-counter', // Кнопка счетчика монет
+        '.app-header-hamburger' // Гамбургер меню
+      ];
+      
+      // Проверяем, был ли клик внутри любого из выпадающих элементов или их триггеров
+      const clickedInside = clickableSelectors.some(selector => {
+        return event.target.closest(selector);
+      });
+      
+      // Если клик вне всех выпадающих элементов - закрываем их все
+      if (!clickedInside) {
+        // Закрываем выпадающие списки через дочерние компоненты
+        // Используем событие для уведомления всех компонентов
+        document.dispatchEvent(new CustomEvent('close-all-dropdowns'));
+      }
+    }
+  }, ...parts.map(p => p.methods || {}));
   const watch = Object.assign({
     // Сохраняем активную вкладку в localStorage при изменении
     activeTab(newTab) {
@@ -62,9 +95,18 @@
           fn.call(this, this);
         }
       });
+      
+      // Устанавливаем глобальный обработчик клика для закрытия всех выпадающих списков
+      document.addEventListener('click', this.closeAllDropdowns);
+      
       console.log('Vue.js загружен:', this.vueVersion);
       console.log('Bootstrap загружен');
       console.log('Font Awesome загружен');
+    },
+    
+    beforeUnmount() {
+      // Удаляем глобальный обработчик при размонтировании
+      document.removeEventListener('click', this.closeAllDropdowns);
     }
   });
 

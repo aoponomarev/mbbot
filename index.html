@@ -60,7 +60,7 @@
     <!-- X-Template для компонента сплэш-экрана (должен быть ДО загрузки Vue и компонентов) -->
     <script type="text/x-template" id="splash-template">
         <div v-if="showSplash" id="splash-screen" class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center app-splash-screen" data-bs-theme="dark">
-            <div class="text-center app-splash-container">
+            <div class="text-center app-splash-container avto-Q2mK9pR">
                 <h3 class="text-white mb-4">Code SMS</h3>
                 <div class="mb-3">
                     <input
@@ -363,6 +363,60 @@
         <div class="col-12 mb-4">
             <div class="card avto-B7fN2kT">
                 <div class="card-header d-flex align-items-center gap-2">
+                    <!-- Кнопка счетчика монет (n/N) с выпадающим меню -->
+                    <div class="position-relative">
+                        <button 
+                            class="btn btn-sm cg-coins-counter" 
+                            type="button"
+                            @click.stop="toggleCounterDropdown"
+                        >
+                            <template v-if="selectedCoinsCount > 0 && selectedCoinsCount < totalCoinsCount">
+                                <span class="cg-counter-selected">{{ selectedCoinsCount }}</span>/{{ totalCoinsCount }}
+                            </template>
+                            <template v-else>
+                                {{ totalCoinsCount }}
+                            </template>
+                        </button>
+                        <!-- Выпадающее меню счетчика -->
+                        <div 
+                            v-if="showCounterDropdown" 
+                            class="position-absolute bg-body border rounded shadow-sm cg-counter-dropdown" 
+                            style="z-index: 1000; top: 100%; margin-top: 4px; min-width: 200px;"
+                            @click.stop
+                        >
+                            <div class="list-group list-group-flush">
+                                <button 
+                                    class="list-group-item list-group-item-action py-2 px-3 border-0" 
+                                    @click="selectAllCoins"
+                                    :disabled="selectedCoinsCount === totalCoinsCount && totalCoinsCount > 0"
+                                >
+                                    <i class="fas fa-check-square me-2"></i>Выбрать все
+                                </button>
+                                <button 
+                                    class="list-group-item list-group-item-action py-2 px-3 border-0" 
+                                    @click="deselectAllCoins"
+                                    :disabled="selectedCoinsCount === 0"
+                                >
+                                    <i class="fas fa-square me-2"></i>Отменить все
+                                </button>
+                                <div class="dropdown-divider my-0"></div>
+                                <button 
+                                    class="list-group-item list-group-item-action py-2 px-3 border-0" 
+                                    @click="deleteSelectedCoins"
+                                    :disabled="selectedCoinsCount === 0"
+                                >
+                                    <i class="fas fa-trash me-2"></i>Удалить отмеченные
+                                </button>
+                                <button 
+                                    class="list-group-item list-group-item-action py-2 px-3 border-0" 
+                                    @click="archiveSelectedCoins"
+                                    :disabled="selectedCoinsCount === 0"
+                                >
+                                    <i class="fas fa-archive me-2"></i>Архивировать отмеченные
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                     <div class="flex-grow-1 position-relative">
                         <input
                             type="text"
@@ -372,13 +426,13 @@
                             @focus="cgSearchResults.length > 0 ? null : searchCoins(cgSearchQuery)"
                         >
                         <!-- Выпадающий список результатов поиска -->
-                        <div v-if="cgSearchResults.length > 0" class="position-absolute w-100 bg-body border rounded shadow-sm cg-search-dropdown" style="z-index: 1000; max-height: 300px; overflow-y: auto; top: 100%; margin-top: 4px;">
+                        <div v-if="cgSearchResults.length > 0" class="position-absolute w-100 bg-body border rounded shadow-sm cg-search-dropdown avto-H8nL3qT" style="z-index: 1000; max-height: 300px; overflow-y: auto; top: 100%; margin-top: 4px;">
                             <div 
                                 v-for="result in cgSearchResults" 
                                 :key="result.id"
                                 class="p-2 border-bottom cg-search-item"
                                 @click="addCoin(result.id)"
-                                :class="{'bg-light': cgSelectedCoins.includes(result.id)}"
+                                :class="{'cg-search-item-selected': cgSelectedCoins.includes(result.id)}"
                             >
                                 <div class="d-flex align-items-center gap-2">
                                     <img v-if="result.thumb" :src="result.thumb" :alt="result.symbol" width="20" height="20">
@@ -386,7 +440,7 @@
                                         <div class="fw-semibold small text-uppercase">{{ result.symbol }}</div>
                                         <small class="text-muted">{{ result.name }}</small>
                                     </div>
-                                    <small v-if="cgSelectedCoins.includes(result.id)" class="text-success">
+                                    <small v-if="cgSelectedCoins.includes(result.id)">
                                         <i class="fas fa-check"></i>
                                     </small>
                                 </div>
@@ -395,7 +449,7 @@
                     </div>
                     <div class="position-relative">
                         <button 
-                            class="btn btn-sm btn-outline-secondary" 
+                            class="btn btn-sm" 
                             type="button"
                             :disabled="cgArchivedCoins.length === 0"
                             @click.stop="toggleArchiveDropdown"
@@ -406,7 +460,7 @@
                         <!-- Выпадающий список архива -->
                         <div 
                             v-if="showArchiveDropdown && cgArchivedCoins.length > 0" 
-                            class="position-absolute bg-body border rounded shadow-sm cg-archive-dropdown" 
+                            class="position-absolute bg-body border rounded shadow-sm cg-archive-dropdown avto-P4rM7wX" 
                             style="z-index: 1000; max-height: 300px; overflow-y: auto; top: 100%; margin-top: 4px; width: auto; min-width: fit-content; right: 0;"
                             @click.stop
                         >
@@ -426,18 +480,11 @@
                             </div>
                         </div>
                     </div>
-                    <button 
-                        class="btn btn-sm btn-outline-secondary" 
-                        type="button"
-                        style="width: auto; min-width: fit-content;"
-                    >
-                        {{ sortedCoins.length }} {{ pluralizeCoins(sortedCoins.length) }}
-                    </button>
                     <small class="text-muted" v-if="cgLastUpdated" style="line-height: 1.2;">
                         <div>{{ formatLastUpdatedDate(cgLastUpdated) }}</div>
                         <div>{{ formatLastUpdatedTime(cgLastUpdated) }}</div>
                     </small>
-                    <button class="btn btn-sm btn-outline-secondary" @click="fetchCoinGecko" :disabled="cgIsLoading">
+                    <button class="btn btn-sm cg-update-btn" @click="fetchCoinGecko" :disabled="cgIsLoading">
                         <span v-if="cgIsLoading" class="spinner-border spinner-border-sm me-1" role="status"></span>
                         <span v-else>Обновить</span>
                     </button>
@@ -451,7 +498,12 @@
                             <thead>
                                 <tr>
                                     <th style="width: 40px;">
-                                        <input type="checkbox" class="form-check-input">
+                                        <input 
+                                            type="checkbox" 
+                                            class="form-check-input"
+                                            @change="toggleAllCoins($event)"
+                                            :checked="selectedCoinIds.length === sortedCoins.length && sortedCoins.length > 0"
+                                        >
                                     </th>
                                     <th style="cursor: pointer;" @click="handleSort('symbol')">
                                         Монета
@@ -487,8 +539,15 @@
                                     <td colspan="8" class="text-center text-muted">Нет данных</td>
                                 </tr>
                                 <tr v-else v-for="coin in sortedCoins" :key="coin.id">
-                                    <td>
-                                        <input type="checkbox" class="form-check-input">
+                                    <td @click.stop>
+                                        <input 
+                                            type="checkbox" 
+                                            class="form-check-input"
+                                            :value="coin.id"
+                                            :checked="selectedCoinIds.includes(coin.id)"
+                                            @change="toggleCoinSelection(coin.id, $event.target.checked)"
+                                            @click.stop
+                                        >
                                     </td>
                                     <td>
                                         <div 

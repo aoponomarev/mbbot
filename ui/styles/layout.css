@@ -1,5 +1,75 @@
 /* Общие стили layout */
 
+/* Глобально: вертикальная полоса прокрутки всегда видна для предотвращения "дергания" интерфейса */
+html {
+    overflow-y: scroll;
+    /* Запрещаем горизонтальную прокрутку на уровне страницы */
+    overflow-x: hidden;
+}
+
+/* Глобально: скрываем горизонтальную полосу прокрутки везде, но разрешаем прокрутку через Shift + колесико мыши */
+body {
+    overflow-x: hidden;
+}
+
+/* Глобально: скрываем горизонтальную полосу прокрутки во всех контейнерах */
+* {
+    /* Для Firefox: скрываем горизонтальную полосу, но оставляем вертикальную */
+    scrollbar-width: thin;
+}
+
+/* Для Webkit браузеров (Chrome, Safari, Edge): настраиваем полосы прокрутки */
+*::-webkit-scrollbar {
+    width: 12px;
+    height: 0; /* Скрываем горизонтальную полосу прокрутки */
+}
+
+*::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+    background: transparent;
+}
+
+/* Восстанавливаем вертикальную полосу прокрутки */
+*::-webkit-scrollbar:vertical {
+    width: 12px;
+}
+
+*::-webkit-scrollbar-thumb:vertical {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+}
+
+*::-webkit-scrollbar-thumb:vertical:hover {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+[data-bs-theme="dark"] *::-webkit-scrollbar-thumb:vertical {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+[data-bs-theme="dark"] *::-webkit-scrollbar-thumb:vertical:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Для контейнеров с горизонтальной прокруткой (например, .table-responsive) - скрываем полосу, но разрешаем прокрутку */
+.table-responsive,
+[style*="overflow-x"],
+[class*="overflow"] {
+    overflow-x: auto !important;
+    /* Скрываем горизонтальную полосу прокрутки */
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+}
+
+.table-responsive::-webkit-scrollbar,
+[style*="overflow-x"]::-webkit-scrollbar,
+[class*="overflow"]::-webkit-scrollbar {
+    height: 0; /* Скрываем горизонтальную полосу прокрутки */
+}
+
 /* Контейнер основного контента с учетом фиксированных хедера и футера */
 /* Хедер фиксированный, высота 50px, нужен отступ сверху */
 /* Футер фиксированный, нужен отступ снизу */
@@ -25,21 +95,32 @@
 }
 
 /* Стили для выпадающего списка поиска монет CoinGecko */
-.cg-search-dropdown {
-    /* Используем тему Bootstrap для фона и границы */
-}
-
 .cg-search-item {
     cursor: pointer;
     transition: background-color 0.15s ease-in-out;
+    /* Одинаковый цвет текста и иконок во всех состояниях */
+    color: var(--bs-body-color);
 }
 
 .cg-search-item:hover {
     background-color: var(--bs-secondary-bg) !important;
+    color: var(--bs-body-color);
 }
 
 .cg-search-item:active {
     background-color: var(--bs-tertiary-bg) !important;
+    color: var(--bs-body-color);
+}
+
+.cg-search-item * {
+    /* Все элементы внутри (текст, иконки) сохраняют одинаковый цвет */
+    color: inherit;
+}
+
+/* Подсветка уже добавленных монет в списке поиска (тема-зависимая) */
+.cg-search-item-selected {
+    background-color: var(--bs-secondary-bg) !important;
+    color: var(--bs-body-color);
 }
 
 /* Убираем border-bottom у последней строки таблицы */
@@ -61,5 +142,269 @@
 .card-body > .table-responsive:last-child > .table,
 .card-body > .table:last-child {
     margin-bottom: 0 !important;
+}
+
+/* Кнопка счетчика монет (n/N) */
+.cg-coins-counter {
+    /* Фиксированная ширина в em для двузначных чисел и слеша (например: "99/99") */
+    width: 5em;
+    min-width: 5em;
+    text-align: center;
+}
+
+/* Кнопка обновления CoinGecko: фиксированная ширина для предотвращения "прыжков" интерфейса */
+.cg-update-btn {
+    min-width: 7em;
+    width: 7em;
+}
+
+/* Выделение числа отмеченных монет более контрастным цветом */
+.cg-counter-selected {
+    /* Используем дефолтный цвет текста Bootstrap, который адаптируется под тему (light/dark) */
+    color: var(--bs-body-color);
+    font-weight: 600; /* Полужирный для большей контрастности */
+}
+
+/* Кнопки в хедерах всех карточек: единый стиль без прозрачности */
+.card-header .btn {
+    /* Используем цвет secondary для фона (адаптируется под тему) */
+    background-color: var(--bs-secondary-bg);
+    border-color: #adb5bd; /* Высококонтрастная рамка для светлой темы */
+    color: var(--bs-body-color);
+    opacity: 1; /* Убираем любую прозрачность */
+}
+
+[data-bs-theme="dark"] .card-header .btn {
+    border-color: var(--bs-border-color); /* Для темной темы используем стандартный цвет */
+}
+
+.card-header .btn:hover:not(:disabled) {
+    /* В светлой теме - темнее при наведении */
+    background-color: #d5d8dc;
+    border-color: #98a2ac; /* Очень контрастная рамка при наведении в светлой теме */
+    color: var(--bs-body-color);
+}
+
+[data-bs-theme="dark"] .card-header .btn:hover:not(:disabled) {
+    /* В темной теме - заметно светлее при наведении */
+    background-color: #4a4d52;
+    border-color: var(--bs-border-color); /* Для темной темы используем стандартный цвет */
+    color: var(--bs-body-color);
+}
+
+.card-header .btn:focus:not(:disabled) {
+    /* В светлой теме - темнее при фокусе */
+    background-color: #d5d8dc;
+    border-color: #98a2ac; /* Очень контрастная рамка при фокусе в светлой теме */
+    color: var(--bs-body-color);
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-secondary-rgb), 0.25);
+}
+
+[data-bs-theme="dark"] .card-header .btn:focus:not(:disabled) {
+    /* В темной теме - заметно светлее при фокусе */
+    background-color: #4a4d52;
+    border-color: var(--bs-border-color); /* Для темной темы используем стандартный цвет */
+    color: var(--bs-body-color);
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-secondary-rgb), 0.25);
+}
+
+.card-header .btn:active:not(:disabled) {
+    background-color: var(--bs-secondary-bg);
+    border-color: #adb5bd; /* Высококонтрастная рамка при активном состоянии в светлой теме */
+    color: var(--bs-body-color);
+}
+
+[data-bs-theme="dark"] .card-header .btn:active:not(:disabled) {
+    border-color: var(--bs-border-color); /* Для темной темы используем стандартный цвет */
+}
+
+.card-header .btn:disabled {
+    background-color: var(--bs-secondary-bg);
+    border-color: #c1c9d1; /* Более светлая рамка для disabled в светлой теме */
+    color: var(--bs-secondary-color);
+    opacity: 0.65; /* Стандартная прозрачность для disabled */
+}
+
+[data-bs-theme="dark"] .card-header .btn:disabled {
+    border-color: var(--bs-border-color); /* Для темной темы используем стандартный цвет */
+}
+
+/* Текстовые инпуты в хедерах карточек: контрастные рамки как у кнопок */
+.card-header .form-control {
+    border-color: #adb5bd; /* Высококонтрастная рамка для светлой темы */
+}
+
+[data-bs-theme="dark"] .card-header .form-control {
+    border-color: var(--bs-border-color); /* Для темной темы используем стандартный цвет */
+}
+
+.card-header .form-control:focus {
+    border-color: #98a2ac; /* Очень контрастная рамка при фокусе в светлой теме */
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-secondary-rgb), 0.25);
+}
+
+[data-bs-theme="dark"] .card-header .form-control:focus {
+    border-color: var(--bs-border-color); /* Для темной темы используем стандартный цвет */
+}
+
+/* Селекты в хедерах карточек: контрастные рамки и hover эффекты */
+.card-header .form-select {
+    border-color: #adb5bd; /* Высококонтрастная рамка для светлой темы */
+}
+
+[data-bs-theme="dark"] .card-header .form-select {
+    border-color: var(--bs-border-color); /* Для темной темы используем стандартный цвет */
+}
+
+.card-header .form-select:hover {
+    /* В светлой теме - темнее при наведении */
+    background-color: #d5d8dc;
+    border-color: #98a2ac;
+}
+
+[data-bs-theme="dark"] .card-header .form-select:hover {
+    /* В темной теме - заметно светлее при наведении */
+    background-color: #4a4d52;
+    border-color: var(--bs-border-color);
+}
+
+.card-header .form-select:focus {
+    border-color: #98a2ac; /* Очень контрастная рамка при фокусе в светлой теме */
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-secondary-rgb), 0.25);
+}
+
+[data-bs-theme="dark"] .card-header .form-select:focus {
+    border-color: var(--bs-border-color); /* Для темной темы используем стандартный цвет */
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-secondary-rgb), 0.25);
+}
+
+/* Цвет всех card-header: более стальной (темнее, в сторону стального серого с легким синеватым оттенком) */
+.card-header {
+    /* Стальной серый оттенок для светлой темы - темнее и с легким синеватым оттенком */
+    background-color: #e8eaed;
+    border-bottom-color: #d1d5db;
+    /* Увеличенные вертикальные паддинги */
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+}
+
+[data-bs-theme="dark"] .card-header {
+    /* Стальной серый оттенок для темной темы - темнее и с легким синеватым оттенком */
+    background-color: #2e3035;
+    border-bottom-color: #3d4046;
+}
+
+/* Глобально для всех выпадающих списков: одинаковый цвет текста и иконок во всех состояниях */
+.list-group-item-action {
+    /* Дефолтный цвет текста, который не меняется при hover/active */
+    color: var(--bs-body-color);
+}
+
+.list-group-item-action:hover:not(:disabled),
+.list-group-item-action:focus:not(:disabled) {
+    /* При hover/focus меняется только фон, цвет текста остается прежним */
+    background-color: var(--bs-secondary-bg);
+    color: var(--bs-body-color);
+}
+
+.list-group-item-action:active:not(:disabled) {
+    background-color: var(--bs-tertiary-bg);
+    color: var(--bs-body-color);
+}
+
+.list-group-item-action:disabled {
+    color: var(--bs-secondary-color);
+}
+
+/* Иконки в выпадающих списках наследуют цвет текста */
+.list-group-item-action i,
+.list-group-item-action .fas,
+.list-group-item-action .far,
+.list-group-item-action .fa {
+    color: inherit;
+}
+
+/* Исправление бага: подсветка для всех элементов в выпадающем списке счетчика монет */
+.cg-counter-dropdown .list-group-item-action {
+    /* Базовый стиль для всех элементов */
+    color: var(--bs-body-color);
+}
+
+.cg-counter-dropdown .list-group-item-action:hover {
+    /* Подсветка при наведении для всех элементов (включая disabled) */
+    background-color: var(--bs-secondary-bg) !important;
+    color: var(--bs-body-color) !important;
+}
+
+.cg-counter-dropdown .list-group-item-action:focus {
+    /* Подсветка при фокусе */
+    background-color: var(--bs-secondary-bg) !important;
+    color: var(--bs-body-color) !important;
+}
+
+.cg-counter-dropdown .list-group-item-action:active {
+    /* Подсветка при активном состоянии */
+    background-color: var(--bs-tertiary-bg) !important;
+    color: var(--bs-body-color) !important;
+}
+
+.cg-counter-dropdown .list-group-item-action:disabled {
+    /* Для disabled элементов также показываем hover, но с более слабым эффектом */
+    opacity: 0.65;
+}
+
+.cg-counter-dropdown .list-group-item-action:disabled:hover {
+    /* Подсветка для disabled элементов в выпадающем списке счетчика */
+    background-color: var(--bs-secondary-bg) !important;
+    opacity: 0.65;
+    color: var(--bs-secondary-color) !important;
+}
+
+.cg-counter-dropdown .list-group-item-action i {
+    /* Иконки наследуют цвет текста */
+    color: inherit;
+}
+
+/* Контекстное меню монет: также одинаковый цвет текста */
+.cg-context-menu .list-group-item-action {
+    color: var(--bs-body-color);
+}
+
+.cg-context-menu .list-group-item-action:hover:not(:disabled),
+.cg-context-menu .list-group-item-action:focus:not(:disabled) {
+    background-color: var(--bs-secondary-bg);
+    color: var(--bs-body-color);
+}
+
+.cg-context-menu .list-group-item-action:active:not(:disabled) {
+    background-color: var(--bs-tertiary-bg);
+    color: var(--bs-body-color);
+}
+
+.cg-context-menu .list-group-item-action i {
+    color: inherit;
+}
+
+/* Глобально для всех выпадающих меню внутри <main>: единый стиль с более контрастной рамкой и тенью */
+main .cg-counter-dropdown,
+main .cg-search-dropdown,
+main .cg-archive-dropdown,
+main .cg-context-menu {
+    /* Единый радиус скругления - 2.5px */
+    border-radius: 2.5px !important;
+    /* Более контрастная рамка */
+    border: 1px solid #adb5bd !important;
+    /* Более контрастная тень */
+    box-shadow: 0 4px 8px -2px rgba(0, 0, 0, 0.15), 0 2px 6px -1px rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-bs-theme="dark"] main .cg-counter-dropdown,
+[data-bs-theme="dark"] main .cg-search-dropdown,
+[data-bs-theme="dark"] main .cg-archive-dropdown,
+[data-bs-theme="dark"] main .cg-context-menu {
+    /* Более контрастная рамка для темной темы */
+    border-color: #5a5d62 !important;
+    /* Более контрастная тень для темной темы */
+    box-shadow: 0 4px 8px -2px rgba(0, 0, 0, 0.4), 0 2px 6px -1px rgba(0, 0, 0, 0.3) !important;
 }
 

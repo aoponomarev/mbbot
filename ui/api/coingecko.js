@@ -55,7 +55,11 @@ window.cmpCoinGecko = {
       showContextMenu: false,
       // Архив
       selectedArchivedCoin: '', // Выбранная монета из архива для восстановления
-      showArchiveDropdown: false // Показать/скрыть выпадающий список архива
+      showArchiveDropdown: false, // Показать/скрыть выпадающий список архива
+      // Отмеченные чекбоксами монеты
+      selectedCoinIds: [], // Массив ID отмеченных монет
+      // Выпадающее меню кнопки счетчика
+      showCounterDropdown: false // Показать/скрыть выпадающее меню счетчика
     };
   },
   
@@ -63,6 +67,16 @@ window.cmpCoinGecko = {
     // Сортированный список монет
     sortedCoins() {
       return this.sortData(this.cgCoins, this.cgCoins);
+    },
+    
+    // Количество отмеченных монет
+    selectedCoinsCount() {
+      return this.selectedCoinIds.length;
+    },
+    
+    // Общее количество монет
+    totalCoinsCount() {
+      return this.sortedCoins.length;
     }
   },
 
@@ -84,6 +98,9 @@ window.cmpCoinGecko = {
         const data = await res.json();
         this.cgCoins = Array.isArray(data) ? data : [];
         this.cgLastUpdated = new Date().toISOString(); // Сохраняем ISO строку для парсинга
+        
+        // Очищаем выбранные монеты, так как список мог измениться
+        this.selectedCoinIds = [];
         
         // Кэшируем иконки монет для быстрой загрузки
         this.cacheCoinsIcons(this.cgCoins);
@@ -232,6 +249,11 @@ window.cmpCoinGecko = {
         // Удаляем монету из отображаемых данных
         this.cgCoins = this.cgCoins.filter(coin => coin.id !== coinId);
         localStorage.setItem('cgCoins', JSON.stringify(this.cgCoins));
+        // Удаляем монету из выбранных чекбоксами, если она была отмечена
+        const selectedIndex = this.selectedCoinIds.indexOf(coinId);
+        if (selectedIndex > -1) {
+          this.selectedCoinIds.splice(selectedIndex, 1);
+        }
       }
       this.closeContextMenu();
     },
@@ -243,46 +265,159 @@ window.cmpCoinGecko = {
       this.contextMenuX = event.clientX;
       this.contextMenuY = event.clientY;
       this.showContextMenu = true;
-      
-      // Закрываем меню при клике вне его (с небольшой задержкой, чтобы не закрыть сразу)
-      setTimeout(() => {
-        document.addEventListener('click', this.closeContextMenuOnOutside.bind(this));
-      }, 100);
     },
     
     // Открытие/закрытие dropdown архива
     toggleArchiveDropdown() {
       this.showArchiveDropdown = !this.showArchiveDropdown;
-      if (this.showArchiveDropdown) {
-        // Закрываем dropdown при клике вне его
-        setTimeout(() => {
-          document.addEventListener('click', this.closeArchiveDropdownOnOutside.bind(this));
-        }, 100);
-      } else {
-        document.removeEventListener('click', this.closeArchiveDropdownOnOutside);
-      }
-    },
-    
-    // Закрытие dropdown архива при клике вне
-    closeArchiveDropdownOnOutside(event) {
-      if (!event.target.closest('.cg-archive-dropdown') && !event.target.closest('button[type="button"]')) {
-        this.showArchiveDropdown = false;
-        document.removeEventListener('click', this.closeArchiveDropdownOnOutside);
-      }
-    },
-    
-    // Контекстное меню: закрытие при клике вне
-    closeContextMenuOnOutside(event) {
-      if (!event.target.closest('.cg-context-menu') && !event.target.closest('.cg-coin-block')) {
-        this.closeContextMenu();
-      }
     },
     
     // Контекстное меню: закрытие
     closeContextMenu() {
       this.showContextMenu = false;
       this.contextMenuCoin = null;
-      document.removeEventListener('click', this.closeContextMenuOnOutside);
+    },
+    
+    // Закрытие выпадающего списка архива
+    closeArchiveDropdown() {
+      this.showArchiveDropdown = false;
+    },
+    
+    // Закрытие выпадающего списка поиска
+    closeSearchDropdown() {
+      this.cgSearchResults = [];
+    },
+    
+    // Открытие/закрытие выпадающего меню счетчика
+    toggleCounterDropdown() {
+      this.showCounterDropdown = !this.showCounterDropdown;
+    },
+    
+    // Закрытие выпадающего меню счетчика
+    closeCounterDropdown() {
+      this.showCounterDropdown = false;
+    },
+    
+    // Обработчик глобального события закрытия всех выпадающих списков
+    handleCloseAllDropdowns() {
+      this.closeContextMenu();
+      this.closeArchiveDropdown();
+      this.closeSearchDropdown();
+      this.closeCounterDropdown();
+    },
+    
+    // Переключение выбора всех монет через чекбокс в заголовке
+    toggleAllCoins(event) {
+      if (event.target.checked) {
+        // Выбираем все монеты
+        this.selectedCoinIds = this.sortedCoins.map(coin => coin.id);
+      } else {
+        // Снимаем выбор со всех монет
+        this.selectedCoinIds = [];
+      }
+    },
+    
+    // Переключение выбора отдельной монеты через чекбокс
+    toggleCoinSelection(coinId, isChecked) {
+      if (isChecked) {
+        // Добавляем монету в выбранные, если её там еще нет
+        if (!this.selectedCoinIds.includes(coinId)) {
+          this.selectedCoinIds.push(coinId);
+        }
+      } else {
+        // Удаляем монету из выбранных
+        const index = this.selectedCoinIds.indexOf(coinId);
+        if (index > -1) {
+          this.selectedCoinIds.splice(index, 1);
+        }
+      }
+    },
+    
+    // Выбрать все монеты
+    selectAllCoins() {
+      this.selectedCoinIds = this.sortedCoins.map(coin => coin.id);
+      this.closeCounterDropdown();
+    },
+    
+    // Отменить выбор всех монет
+    deselectAllCoins() {
+      this.selectedCoinIds = [];
+      this.closeCounterDropdown();
+    },
+    
+    // Удалить отмеченные монеты
+    deleteSelectedCoins() {
+      if (this.selectedCoinIds.length === 0) return;
+      
+      // Сохраняем копию списка, так как removeCoin будет изменять selectedCoinIds
+      const coinsToDelete = [...this.selectedCoinIds];
+      
+      // Удаляем каждую отмеченную монету из списка выбранных для запроса
+      coinsToDelete.forEach(coinId => {
+        const index = this.cgSelectedCoins.indexOf(coinId);
+        if (index > -1) {
+          this.cgSelectedCoins.splice(index, 1);
+        }
+      });
+      
+      // Удаляем монеты из отображаемых данных
+      this.cgCoins = this.cgCoins.filter(coin => !coinsToDelete.includes(coin.id));
+      
+      // Очищаем список отмеченных
+      this.selectedCoinIds = [];
+      
+      // Сохраняем изменения
+      localStorage.setItem('cgSelectedCoins', JSON.stringify(this.cgSelectedCoins));
+      localStorage.setItem('cgCoins', JSON.stringify(this.cgCoins));
+      
+      this.closeCounterDropdown();
+    },
+    
+    // Архивировать отмеченные монеты
+    archiveSelectedCoins() {
+      if (this.selectedCoinIds.length === 0) return;
+      
+      // Сохраняем копию списка
+      const coinsToArchive = [...this.selectedCoinIds];
+      
+      // Архивируем каждую отмеченную монету
+      coinsToArchive.forEach(coinId => {
+        // Находим монету в текущих данных
+        const coin = this.cgCoins.find(c => c.id === coinId);
+        if (coin) {
+          // Проверяем, нет ли уже этой монеты в архиве
+          const existsInArchive = this.cgArchivedCoins.some(archived => archived.id === coinId);
+          if (!existsInArchive) {
+            // Сохраняем объект с id, symbol (тикер) и name (полное название)
+            this.cgArchivedCoins.push({
+              id: coin.id,
+              symbol: (coin.symbol || '').toUpperCase(),
+              name: coin.name || coin.id
+            });
+          }
+        }
+      });
+      
+      // Удаляем монеты из списка выбранных для запроса
+      coinsToArchive.forEach(coinId => {
+        const index = this.cgSelectedCoins.indexOf(coinId);
+        if (index > -1) {
+          this.cgSelectedCoins.splice(index, 1);
+        }
+      });
+      
+      // Удаляем монеты из отображаемых данных
+      this.cgCoins = this.cgCoins.filter(coin => !coinsToArchive.includes(coin.id));
+      
+      // Очищаем список отмеченных
+      this.selectedCoinIds = [];
+      
+      // Сохраняем изменения
+      localStorage.setItem('cgArchivedCoins', JSON.stringify(this.cgArchivedCoins));
+      localStorage.setItem('cgSelectedCoins', JSON.stringify(this.cgSelectedCoins));
+      localStorage.setItem('cgCoins', JSON.stringify(this.cgCoins));
+      
+      this.closeCounterDropdown();
     },
     
     // Перемещение монеты в списке
@@ -374,8 +509,7 @@ window.cmpCoinGecko = {
       }
       
       // Закрываем dropdown и обновляем данные
-      this.showArchiveDropdown = false;
-      document.removeEventListener('click', this.closeArchiveDropdownOnOutside);
+      this.closeArchiveDropdown();
       this.fetchCoinGecko();
     },
     
@@ -512,11 +646,20 @@ window.cmpCoinGecko = {
     if (window.appUnlocked && this.cgCoins.length === 0) {
       this.fetchCoinGecko();
     }
+    
+    // Подписываемся на глобальное событие закрытия всех выпадающих списков
+    this.handleCloseAllDropdownsBound = this.handleCloseAllDropdowns.bind(this);
+    document.addEventListener('close-all-dropdowns', this.handleCloseAllDropdownsBound);
   },
 
   beforeUnmount() {
     if (this.handleUnlock) {
       window.removeEventListener('app-unlocked', this.handleUnlock);
+    }
+    
+    // Отписываемся от глобального события
+    if (this.handleCloseAllDropdownsBound) {
+      document.removeEventListener('close-all-dropdowns', this.handleCloseAllDropdownsBound);
     }
   }
 };
