@@ -1,4 +1,4 @@
-/* Стили для dropdown меню в стиле Material Design */
+/* Стили для dropdown меню в хедере (инверсны включенной теме, идентичны для десктоп и мобильной версии) */
 
 /* Стилизация селектов и dropdown кнопок */
 .header-select {
@@ -6,45 +6,42 @@
     max-width: 100%;
 }
 
-/* Стилизация dropdown меню для мобильной версии */
-@media (max-width: 767.98px) {
-    .header-select.dropdown-toggle::after {
-        margin-left: 0.5rem;
-    }
-    
-    /* Стилизация dropdown меню с учетом темы в стиле Material Design */
-    .dropdown-menu[data-bs-theme="dark"] {
-        background-color: #2b2b2b;
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
-        border-radius: 4px;
-    }
-    
-    .dropdown-menu[data-bs-theme="dark"] .dropdown-item {
-        color: #ffffff;
-    }
-    
-    .dropdown-menu[data-bs-theme="dark"] .dropdown-item:hover,
-    .dropdown-menu[data-bs-theme="dark"] .dropdown-item.active {
-        background-color: rgba(255, 255, 255, 0.1);
-        color: #ffffff;
-    }
-    
-    .dropdown-menu[data-bs-theme="light"] {
-        background-color: #ffffff;
-        border: 1px solid rgba(0, 0, 0, 0.12);
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        border-radius: 4px;
-    }
-    
-    .dropdown-menu[data-bs-theme="light"] .dropdown-item {
-        color: #212529;
-    }
-    
-    .dropdown-menu[data-bs-theme="light"] .dropdown-item:hover,
-    .dropdown-menu[data-bs-theme="light"] .dropdown-item.active {
-        background-color: rgba(0, 0, 0, 0.08);
-        color: #212529;
-    }
+.header-select.dropdown-toggle::after {
+    margin-left: 0.5rem;
+}
+
+/* Стилизация dropdown меню с инверсной темой (используются Bootstrap дефолтные border-radius) */
+.app-header-dropdown-menu[data-bs-theme="dark"] {
+    background-color: #2b2b2b;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+    /* Используются Bootstrap дефолтные border-radius (var(--bs-border-radius)) */
+}
+
+.app-header-dropdown-menu[data-bs-theme="dark"] .dropdown-item {
+    color: #ffffff;
+}
+
+.app-header-dropdown-menu[data-bs-theme="dark"] .dropdown-item:hover,
+.app-header-dropdown-menu[data-bs-theme="dark"] .dropdown-item.active {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+.app-header-dropdown-menu[data-bs-theme="light"] {
+    background-color: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    /* Используются Bootstrap дефолтные border-radius (var(--bs-border-radius)) */
+}
+
+.app-header-dropdown-menu[data-bs-theme="light"] .dropdown-item {
+    color: #212529;
+}
+
+.app-header-dropdown-menu[data-bs-theme="light"] .dropdown-item:hover,
+.app-header-dropdown-menu[data-bs-theme="light"] .dropdown-item.active {
+    background-color: rgba(0, 0, 0, 0.08);
+    color: #212529;
 }
 

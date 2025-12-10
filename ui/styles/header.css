@@ -11,6 +11,12 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+/* Контейнер хедера - убираем боковые паддинги */
+.app-header-container-fluid {
+    padding-left: 0;
+    padding-right: 0;
+}
+
 /* Контейнер хедера */
 .app-header-container {
     height: 50px;

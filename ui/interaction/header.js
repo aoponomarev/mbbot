@@ -29,7 +29,9 @@ window.cmpHeader = {
       showTabDropdown: false,
       // Уникальные ID для dropdown
       modelDropdownId: 'modelDropdown-' + Math.random().toString(36).substr(2, 9),
-      tabDropdownId: 'tabDropdown-' + Math.random().toString(36).substr(2, 9)
+      tabDropdownId: 'tabDropdown-' + Math.random().toString(36).substr(2, 9),
+      // Экземпляры Bootstrap tooltips для управления
+      tooltipInstances: []
     };
   },
 
@@ -94,6 +96,12 @@ window.cmpHeader = {
       return localStorage.getItem('theme') || 'light';
     },
 
+    // Получение инверсной темы для dropdown и tooltips (инверсны включенной теме)
+    getInverseTheme() {
+      const currentTheme = this.getCurrentTheme();
+      return currentTheme === 'light' ? 'dark' : 'light';
+    },
+
     // Установка точной ширины селектов и dropdown кнопок на основе выбранного значения
     adjustSelectWidths() {
       // Создаем временный элемент для измерения ширины текста
@@ -131,6 +139,43 @@ window.cmpHeader = {
       }
 
       document.body.removeChild(measureEl);
+    },
+
+    // Инициализация Bootstrap tooltips с инверсной темой
+    initTooltips() {
+      // Уничтожаем существующие tooltips
+      if (this.tooltipInstances && this.tooltipInstances.length > 0) {
+        this.tooltipInstances.forEach(instance => {
+          if (instance && typeof instance.dispose === 'function') {
+            instance.dispose();
+          }
+        });
+      }
+      this.tooltipInstances = [];
+
+      // Находим все элементы с атрибутом title в хедере
+      const tooltipElements = this.$el?.querySelectorAll('[title]');
+      if (!tooltipElements || tooltipElements.length === 0) return;
+
+      const inverseTheme = this.inverseTheme;
+
+      // Инициализируем tooltips для каждого элемента
+      tooltipElements.forEach(element => {
+        // Пропускаем элементы, которые уже имеют data-bs-toggle="tooltip"
+        if (element.getAttribute('data-bs-toggle') === 'tooltip') {
+          return;
+        }
+
+        // Устанавливаем инверсную тему через data-bs-theme
+        element.setAttribute('data-bs-theme', inverseTheme);
+
+        // Создаем tooltip
+        const tooltip = new bootstrap.Tooltip(element, {
+          trigger: 'hover focus'
+        });
+
+        this.tooltipInstances.push(tooltip);
+      });
     }
   },
 
@@ -166,6 +211,12 @@ window.cmpHeader = {
         return 'Дельты';
       }
       return tab.label;
+    },
+
+    // Инверсная тема для dropdown и tooltips (реактивно обновляется)
+    inverseTheme() {
+      const currentTheme = this.getCurrentTheme();
+      return currentTheme === 'light' ? 'dark' : 'light';
     }
   },
 
@@ -193,12 +244,30 @@ window.cmpHeader = {
     if (this.$root && this.$root.$watch) {
       this.$root.$watch('theme', () => {
         this.$forceUpdate();
+        // Обновляем tooltips при изменении темы
+        this.$nextTick(() => {
+          this.initTooltips();
+        });
       });
     }
     
     // Устанавливаем точную ширину селектов на основе выбранного значения
     this.$nextTick(() => {
       this.adjustSelectWidths();
+      // Инициализируем tooltips
+      this.initTooltips();
     });
+  },
+
+  beforeUnmount() {
+    // Уничтожаем все tooltips при размонтировании компонента
+    if (this.tooltipInstances && this.tooltipInstances.length > 0) {
+      this.tooltipInstances.forEach(instance => {
+        if (instance && typeof instance.dispose === 'function') {
+          instance.dispose();
+        }
+      });
+      this.tooltipInstances = [];
+    }
   }
 };

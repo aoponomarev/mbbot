@@ -355,7 +355,7 @@
     <!-- X-Template для компонента футера (должен быть ДО загрузки Vue и компонентов) -->
     <script type="text/x-template" id="header-template">
         <header class="position-fixed top-0 start-0 w-100 app-header">
-            <div class="container-fluid">
+            <div class="container-fluid app-header-container-fluid">
                 <div class="d-flex align-items-center app-header-container">
                     <!-- Секция 1: Гамбургер (тап зона во всю секцию) -->
                     <div 
@@ -371,7 +371,7 @@
                     </div>
 
                     <!-- Секция 2: Математическая модель и вкладки отображения (широкая секция) -->
-                    <div class="flex-grow-1 d-flex align-items-center justify-content-center px-3">
+                    <div class="flex-grow-1 d-flex align-items-center justify-content-center">
                         <!-- Селект математической модели: десктопная версия -->
                         <select 
                             v-model="selectedModel"
@@ -402,7 +402,7 @@
                             <ul 
                                 class="dropdown-menu app-header-dropdown-menu"
                                 :aria-labelledby="modelDropdownId"
-                                :data-bs-theme="getCurrentTheme()"
+                                :data-bs-theme="inverseTheme"
                             >
                                 <li v-for="model in mathModels" :key="model.id">
                                     <a 
@@ -431,7 +431,7 @@
                             <ul 
                                 class="dropdown-menu app-header-dropdown-menu"
                                 :aria-labelledby="tabDropdownId"
-                                :data-bs-theme="getCurrentTheme()"
+                                :data-bs-theme="inverseTheme"
                             >
                                 <li v-for="tab in displayTabs" :key="tab.id">
                                     <a 
