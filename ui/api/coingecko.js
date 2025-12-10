@@ -2,6 +2,7 @@
 // Vue компонент с x-template шаблоном
 window.cmpCoinGecko = {
   template: '#coingecko-template',
+  mixins: [window.tableSortMixin], // Подключаем глобальный mixin для сортировки
 
   data() {
     // Загружаем сохраненные данные монет из localStorage
@@ -18,18 +19,34 @@ window.cmpCoinGecko = {
     // Загружаем кэш иконок
     const iconsCache = JSON.parse(localStorage.getItem('cgIconsCache') || '{}');
     
+    // Загружаем архив монет
+    const savedArchivedCoins = localStorage.getItem('cgArchivedCoins');
+    
     return {
       cgCoins: savedCoins ? JSON.parse(savedCoins) : [],
       cgIsLoading: false,
       cgError: null,
       cgLastUpdated: savedLastUpdated || null,
       cgSelectedCoins: savedSelectedCoins ? JSON.parse(savedSelectedCoins) : defaultCoins,
+      cgArchivedCoins: savedArchivedCoins ? JSON.parse(savedArchivedCoins) : [], // Архив монет
       cgIconsCache: iconsCache, // Кэш иконок в data для реактивности
       // Поиск монет
       cgSearchQuery: '',
       cgSearchResults: [],
-      cgSearching: false
+      cgSearching: false,
+      // Контекстное меню
+      contextMenuCoin: null, // ID монеты для контекстного меню
+      contextMenuX: 0,
+      contextMenuY: 0,
+      showContextMenu: false
     };
+  },
+  
+  computed: {
+    // Сортированный список монет
+    sortedCoins() {
+      return this.sortData(this.cgCoins, this.cgCoins);
+    }
   },
 
   methods: {
@@ -161,6 +178,74 @@ window.cmpCoinGecko = {
         this.cgCoins = this.cgCoins.filter(coin => coin.id !== coinId);
         localStorage.setItem('cgCoins', JSON.stringify(this.cgCoins));
       }
+      this.closeContextMenu();
+    },
+    
+    // Контекстное меню: открытие
+    openContextMenu(event, coinId) {
+      this.contextMenuCoin = coinId;
+      this.contextMenuX = event.clientX;
+      this.contextMenuY = event.clientY;
+      this.showContextMenu = true;
+      
+      // Закрываем меню при клике вне его
+      document.addEventListener('click', this.closeContextMenu);
+    },
+    
+    // Контекстное меню: закрытие
+    closeContextMenu() {
+      this.showContextMenu = false;
+      this.contextMenuCoin = null;
+      document.removeEventListener('click', this.closeContextMenu);
+    },
+    
+    // Перемещение монеты в списке
+    moveToPosition(position) {
+      const index = this.cgSelectedCoins.indexOf(this.contextMenuCoin);
+      if (index === -1) return;
+      
+      const coin = this.cgSelectedCoins.splice(index, 1)[0];
+      
+      switch (position) {
+        case 'start':
+          this.cgSelectedCoins.unshift(coin);
+          break;
+        case 'up':
+          if (index > 0) {
+            this.cgSelectedCoins.splice(index - 1, 0, coin);
+          } else {
+            this.cgSelectedCoins.push(coin); // Если первый - перемещаем в конец
+          }
+          break;
+        case 'down':
+          if (index < this.cgSelectedCoins.length) {
+            this.cgSelectedCoins.splice(index + 1, 0, coin);
+          } else {
+            this.cgSelectedCoins.unshift(coin); // Если последний - перемещаем в начало
+          }
+          break;
+        case 'end':
+          this.cgSelectedCoins.push(coin);
+          break;
+      }
+      
+      localStorage.setItem('cgSelectedCoins', JSON.stringify(this.cgSelectedCoins));
+      this.fetchCoinGecko(); // Обновляем данные для новой сортировки
+      this.closeContextMenu();
+    },
+    
+    // Архивирование монеты
+    archiveCoin() {
+      if (!this.contextMenuCoin) return;
+      
+      // Переносим монету в архив
+      if (!this.cgArchivedCoins.includes(this.contextMenuCoin)) {
+        this.cgArchivedCoins.push(this.contextMenuCoin);
+        localStorage.setItem('cgArchivedCoins', JSON.stringify(this.cgArchivedCoins));
+      }
+      
+      // Удаляем из активного списка
+      this.removeCoin(this.contextMenuCoin);
     },
     
     // Кэширование иконок монет в localStorage

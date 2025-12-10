@@ -52,6 +52,9 @@
 
     <!-- Bootstrap 5 JS Bundle (включает Popper) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    
+    <!-- Глобальные утилиты -->
+    <script src="ui/utils/table-sort-mixin.js"></script>
 
     <!-- X-Template для компонента сплэш-экрана (должен быть ДО загрузки Vue и компонентов) -->
     <script type="text/x-template" id="splash-template">
@@ -392,9 +395,9 @@
                         </div>
                         <div class="d-flex align-items-center gap-2">
                             <small class="text-muted text-nowrap" v-if="cgLastUpdated">{{ cgLastUpdated }}</small>
-                            <button class="btn btn-sm btn-outline-primary" @click="fetchCoinGecko" :disabled="cgIsLoading">
-                                <span v-if="cgIsLoading" class="spinner-border spinner-border-sm me-1" role="status"></span>
-                                <i v-else class="fas fa-sync-alt"></i>
+                            <button class="btn btn-sm btn-outline-secondary" @click="fetchCoinGecko" :disabled="cgIsLoading" title="Обновить данные">
+                                <span v-if="cgIsLoading" class="spinner-border spinner-border-sm" role="status"></span>
+                                <span v-else>⟳</span>
                             </button>
                         </div>
                     </div>
@@ -407,48 +410,58 @@
                         <table class="table table-sm align-middle">
                             <thead>
                                 <tr>
-                                    <th style="width: 40px;"></th>
-                                    <th>Монета</th>
-                                    <th class="text-end">Цена</th>
-                                    <th class="text-end">1h %</th>
-                                    <th class="text-end">24h %</th>
-                                    <th class="text-end">7d %</th>
-                                    <th class="text-end">14d %</th>
-                                    <th class="text-end">30d %</th>
-                                    <th class="text-end">200d %</th>
+                                    <th style="width: 40px;">
+                                        <input type="checkbox" class="form-check-input">
+                                    </th>
+                                    <th style="cursor: pointer;" @click="handleSort('symbol')">
+                                        Монета <i :class="getSortIcon('symbol')"></i>
+                                    </th>
+                                    <th class="text-end" style="cursor: pointer;" @click="handleSort('price_change_percentage_1h_in_currency')">
+                                        1h % <i :class="getSortIcon('price_change_percentage_1h_in_currency')"></i>
+                                    </th>
+                                    <th class="text-end" style="cursor: pointer;" @click="handleSort('price_change_percentage_24h_in_currency')">
+                                        24h % <i :class="getSortIcon('price_change_percentage_24h_in_currency')"></i>
+                                    </th>
+                                    <th class="text-end" style="cursor: pointer;" @click="handleSort('price_change_percentage_7d_in_currency')">
+                                        7d % <i :class="getSortIcon('price_change_percentage_7d_in_currency')"></i>
+                                    </th>
+                                    <th class="text-end" style="cursor: pointer;" @click="handleSort('price_change_percentage_14d_in_currency')">
+                                        14d % <i :class="getSortIcon('price_change_percentage_14d_in_currency')"></i>
+                                    </th>
+                                    <th class="text-end" style="cursor: pointer;" @click="handleSort('price_change_percentage_30d_in_currency')">
+                                        30d % <i :class="getSortIcon('price_change_percentage_30d_in_currency')"></i>
+                                    </th>
+                                    <th class="text-end" style="cursor: pointer;" @click="handleSort('price_change_percentage_200d_in_currency')">
+                                        200d % <i :class="getSortIcon('price_change_percentage_200d_in_currency')"></i>
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr v-if="cgIsLoading">
-                                    <td colspan="9" class="text-center text-muted">
+                                    <td colspan="8" class="text-center text-muted">
                                         <span class="spinner-border spinner-border-sm me-2" role="status"></span>
                                         Загрузка данных с CoinGecko...
                                     </td>
                                 </tr>
-                                <tr v-else-if="cgCoins.length === 0">
-                                    <td colspan="9" class="text-center text-muted">Нет данных</td>
+                                <tr v-else-if="sortedCoins.length === 0">
+                                    <td colspan="8" class="text-center text-muted">Нет данных</td>
                                 </tr>
-                                <tr v-else v-for="(coin, idx) in cgCoins" :key="coin.id">
+                                <tr v-else v-for="coin in sortedCoins" :key="coin.id">
                                     <td>
-                                        <button 
-                                            class="btn btn-sm btn-outline-danger p-0" 
-                                            style="width: 24px; height: 24px; line-height: 1;"
-                                            @click="removeCoin(coin.id)"
-                                            title="Удалить монету из списка"
-                                        >
-                                            <i class="fas fa-times"></i>
-                                        </button>
+                                        <input type="checkbox" class="form-check-input">
                                     </td>
                                     <td>
-                                        <div class="d-flex align-items-center gap-2">
+                                        <div 
+                                            class="d-flex align-items-center gap-2 cg-coin-block" 
+                                            style="cursor: pointer;"
+                                            :title="coin.name"
+                                            @click="openContextMenu($event, coin.id)"
+                                            @contextmenu.prevent="openContextMenu($event, coin.id)"
+                                        >
                                             <img v-if="getCoinIcon(coin)" :src="getCoinIcon(coin)" :alt="coin.symbol" width="20" height="20">
-                                            <div>
-                                                <div class="fw-semibold">{{ coin.name }}</div>
-                                                <small class="text-muted text-uppercase">{{ coin.symbol }}</small>
-                                            </div>
+                                            <span class="text-uppercase fw-semibold">{{ coin.symbol }}</span>
                                         </div>
                                     </td>
-                                    <td class="text-end">{{ cgFormatPrice(coin.current_price) }}</td>
                                     <td class="text-end" :class="cgChangeClass(coin.price_change_percentage_1h_in_currency)">{{ cgFormatPercent(coin.price_change_percentage_1h_in_currency) }}</td>
                                     <td class="text-end" :class="cgChangeClass(coin.price_change_percentage_24h_in_currency)">{{ cgFormatPercent(coin.price_change_percentage_24h_in_currency) }}</td>
                                     <td class="text-end" :class="cgChangeClass(coin.price_change_percentage_7d_in_currency)">{{ cgFormatPercent(coin.price_change_percentage_7d_in_currency) }}</td>
@@ -458,6 +471,36 @@
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+                </div>
+                
+                <!-- Контекстное меню для операций с монетой -->
+                <div 
+                    v-if="showContextMenu" 
+                    class="position-fixed bg-body border rounded shadow-sm cg-context-menu"
+                    :style="{left: contextMenuX + 'px', top: contextMenuY + 'px', zIndex: 2000}"
+                    @click.stop
+                >
+                    <div class="list-group list-group-flush">
+                        <button class="list-group-item list-group-item-action py-1 px-3 border-0" @click="moveToPosition('start')">
+                            <i class="fas fa-arrow-up me-2"></i>В начало
+                        </button>
+                        <button class="list-group-item list-group-item-action py-1 px-3 border-0" @click="moveToPosition('up')">
+                            <i class="fas fa-chevron-up me-2"></i>Вверх
+                        </button>
+                        <button class="list-group-item list-group-item-action py-1 px-3 border-0" @click="moveToPosition('down')">
+                            <i class="fas fa-chevron-down me-2"></i>Вниз
+                        </button>
+                        <button class="list-group-item list-group-item-action py-1 px-3 border-0" @click="moveToPosition('end')">
+                            <i class="fas fa-arrow-down me-2"></i>В конец
+                        </button>
+                        <div class="dropdown-divider my-0"></div>
+                        <button class="list-group-item list-group-item-action py-1 px-3 border-0 text-warning" @click="archiveCoin()">
+                            <i class="fas fa-archive me-2"></i>В архив
+                        </button>
+                        <button class="list-group-item list-group-item-action py-1 px-3 border-0 text-danger" @click="removeCoin(contextMenuCoin)">
+                            <i class="fas fa-trash me-2"></i>Удалить
+                        </button>
                     </div>
                 </div>
             </div>
