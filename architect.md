@@ -116,19 +116,33 @@ Fetch (ui/api) → Validate/Normalize (schemas) → Compute (calculator/indices)
 **Примеры**:
 ```html
 <!-- ✅ Автоматическая маркировка через класс -->
-<div class="container-fluid py-4 app-main-container avto-X7pL2nQ">
-  <main class="avto-K9mP4rT">
-    <div class="row">
-      <div class="col-12 col-lg-4 mb-4">
-        <div class="card avto-M3nP8qW">
-          <!-- Контент -->
-        </div>
+<div class="container-fluid app-main-container avto-X7pL2nQ">
+  <main class="avto-K9mP4rT row justify-content-center">
+    <div class="col-12 col-lg-4 mb-4">
+      <div class="card avto-M3nP8qW">
+        <!-- Контент -->
+      </div>
+    </div>
+    <div class="col-12 mb-4">
+      <div class="card avto-B7fN2kT">
+        <!-- Контент -->
       </div>
     </div>
   </main>
 </div>
 
-<!-- ✅ JS-зависимый элемент через ID (как было) -->
+<!-- ✅ Маркировка header и footer -->
+<header class="position-fixed top-0 start-0 w-100 app-header avto-vn6jdk3M">
+  <!-- Контент хедера -->
+</header>
+<footer class="position-fixed bottom-0 start-0 w-100 bg-body app-footer avto-3B8RpMhu">
+  <!-- Контент футера -->
+</footer>
+
+<!-- ✅ JS-зависимый элемент через ID (не маркируется avto-) -->
+<div id="splash-screen" class="app-splash-screen">
+  <!-- Splash screen имеет ID и используется в JS через getElementById -->
+</div>
 <input id="apiKey" class="form-control" v-model="perplexityApiKey">
 ```
 
