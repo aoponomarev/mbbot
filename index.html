@@ -420,13 +420,63 @@
                     <div class="flex-grow-1 position-relative">
                         <input
                             type="text"
-                            class="form-control form-control-sm"
-                            placeholder="Поиск монет по названию или тикеру..."
-                            v-model="cgSearchQuery"
-                            @focus="cgSearchResults.length > 0 ? null : searchCoins(cgSearchQuery)"
+                            class="form-control form-control-sm cg-search-input"
+                            :class="{'bg-light': isAddingTickers}"
+                            :placeholder="isAddingTickers ? 'Добавление монет...' : 'Поиск монет или вставка списка тикеров (например: BTC, ETH, SOL)...'"
+                            :value="searchQueryDisplay"
+                            @input="handleSearchInput"
+                            :disabled="isAddingTickers"
+                            @focus="!isAddingTickers && cgSearchResults.length > 0 ? null : searchCoins(cgSearchQuery)"
                         >
+                        <!-- Индикатор прогресса добавления тикеров -->
+                        <div v-if="isAddingTickers" class="position-absolute w-100 bg-body border rounded shadow-sm cg-search-dropdown avto-H8nL3qT cg-loading-panel" style="z-index: 1000; top: 100%; margin-top: 4px; padding: 0.75rem;">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="small">
+                                    <i class="fas fa-spinner fa-spin me-2"></i>
+                                    <span v-if="currentAddingTicker">
+                                        <strong>Добавление: {{ currentAddingTicker }}</strong>
+                                    </span>
+                                    <span v-else class="text-muted">Подготовка...</span>
+                                </div>
+                                <button 
+                                    class="btn btn-sm btn-outline-danger" 
+                                    @click="stopAddingTickers"
+                                    title="Остановить процесс добавления"
+                                >
+                                    <i class="fas fa-stop me-1"></i>Остановить
+                                </button>
+                            </div>
+                            <div v-if="getRemainingTickersCount() > 0" class="small text-muted mb-2">
+                                Осталось: {{ getRemainingTickersCount() }} {{ getRemainingTickersCount() === 1 ? 'монета' : getRemainingTickersCount() < 5 ? 'монеты' : 'монет' }}
+                            </div>
+                            <div v-if="getRemainingTickersDisplay().length > 0" class="d-flex flex-wrap gap-1 mb-2">
+                                <span 
+                                    v-for="ticker in getRemainingTickersDisplay().slice(0, 15)" 
+                                    :key="ticker"
+                                    class="badge"
+                                    :class="{
+                                        'bg-primary': ticker === currentAddingTicker, 
+                                        'bg-secondary': ticker !== currentAddingTicker && !failedTickers.includes(ticker),
+                                        'bg-warning-dark': failedTickers.includes(ticker)
+                                    }"
+                                    :title="failedTickers.includes(ticker) ? `Попытка ${tickerAttempts[ticker] || 0} из 5` : ''"
+                                >
+                                    {{ ticker }}
+                                    <span v-if="failedTickers.includes(ticker) && (tickerAttempts[ticker] || 0) > 0" class="ms-1">
+                                        ({{ tickerAttempts[ticker] || 0 }}/5)
+                                    </span>
+                                </span>
+                                <span v-if="getRemainingTickersDisplay().length > 15" class="badge bg-light text-dark">
+                                    +{{ getRemainingTickersDisplay().length - 15 }}...
+                                </span>
+                            </div>
+                            <div v-if="failedTickers.length > 0" class="small text-warning-dark">
+                                <i class="fas fa-exclamation-triangle me-1"></i>
+                                Неудачные тикеры будут отправлены в архив после 5 попыток
+                            </div>
+                        </div>
                         <!-- Выпадающий список результатов поиска -->
-                        <div v-if="cgSearchResults.length > 0" class="position-absolute w-100 bg-body border rounded shadow-sm cg-search-dropdown avto-H8nL3qT" style="z-index: 1000; max-height: 300px; overflow-y: auto; top: 100%; margin-top: 4px;">
+                        <div v-if="cgSearchResults.length > 0 && !isAddingTickers" class="position-absolute w-100 bg-body border rounded shadow-sm cg-search-dropdown avto-H8nL3qT" style="z-index: 1000; max-height: 300px; overflow-y: auto; top: 100%; margin-top: 4px;">
                             <div 
                                 v-for="result in cgSearchResults" 
                                 :key="result.id"
@@ -472,7 +522,10 @@
                                 @click="restoreFromArchiveById(getArchivedCoinId(archivedCoin))"
                             >
                                 <div class="d-flex align-items-center gap-2">
-                                    <img v-if="getArchivedCoinIcon(archivedCoin)" :src="getArchivedCoinIcon(archivedCoin)" :alt="getArchivedCoinId(archivedCoin)" width="20" height="20">
+                                    <!-- Иконка рефреша для автоматически заархивированных монет (неудачные попытки) -->
+                                    <i v-if="isFailedArchivedCoin(archivedCoin)" class="fas fa-sync-alt text-muted" style="width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 14px;"></i>
+                                    <!-- Обычная иконка монеты для вручную заархивированных -->
+                                    <img v-else-if="getArchivedCoinIcon(archivedCoin)" :src="getArchivedCoinIcon(archivedCoin)" :alt="getArchivedCoinId(archivedCoin)" width="20" height="20">
                                     <div class="flex-grow-1">
                                         <div class="fw-semibold small text-uppercase">{{ getArchivedCoinSymbol(archivedCoin) }}</div>
                                     </div>

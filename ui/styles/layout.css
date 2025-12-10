@@ -278,6 +278,34 @@ body {
     box-shadow: 0 0 0 0.25rem rgba(var(--bs-secondary-rgb), 0.25);
 }
 
+/* Глобальные стили для disabled полей ввода в темной теме */
+/* Bootstrap по умолчанию применяет белый фон для disabled элементов, что плохо видно в темной теме */
+[data-bs-theme="dark"] .form-control:disabled,
+[data-bs-theme="dark"] .form-control[readonly] {
+    background-color: var(--bs-secondary-bg) !important;
+    color: var(--bs-secondary-color) !important;
+    opacity: 0.65;
+}
+
+[data-bs-theme="dark"] .form-select:disabled {
+    background-color: var(--bs-secondary-bg) !important;
+    color: var(--bs-secondary-color) !important;
+    opacity: 0.65;
+}
+
+[data-bs-theme="dark"] .form-check-input:disabled {
+    background-color: var(--bs-secondary-bg) !important;
+    opacity: 0.65;
+}
+
+/* Дополнительно для textarea */
+[data-bs-theme="dark"] textarea.form-control:disabled,
+[data-bs-theme="dark"] textarea.form-control[readonly] {
+    background-color: var(--bs-secondary-bg) !important;
+    color: var(--bs-secondary-color) !important;
+    opacity: 0.65;
+}
+
 /* Цвет всех card-header: более стальной (темнее, в сторону стального серого с легким синеватым оттенком) */
 .card-header {
     /* Стальной серый оттенок для светлой темы - темнее и с легким синеватым оттенком */
@@ -406,5 +434,34 @@ main .cg-context-menu {
     border-color: #5a5d62 !important;
     /* Более контрастная тень для темной темы */
     box-shadow: 0 4px 8px -2px rgba(0, 0, 0, 0.4), 0 2px 6px -1px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Кастомный цвет для бейджей неудачных тикеров (лучшая читабельность на светлом фоне) */
+.badge.bg-warning-dark {
+    background-color: #cc7700 !important; /* Темный оранжевый - тот же цвет, что и для текста */
+    color: #ffffff !important;
+}
+
+[data-bs-theme="dark"] .badge.bg-warning-dark {
+    background-color: #ffb84d !important; /* Светлый оранжевый - тот же цвет, что и для текста */
+    color: #000000 !important;
+}
+
+/* Кастомный цвет для текста предупреждений о неудачных тикерах */
+.text-warning-dark {
+    color: #cc7700 !important; /* Темный оранжевый для светлой темы */
+}
+
+[data-bs-theme="dark"] .text-warning-dark {
+    color: #ffb84d !important; /* Светлый оранжевый для темной темы */
+}
+
+/* Позиционирование панельки загрузки монет - верхний край вровень с верхней границей card-header */
+.card-header .cg-loading-panel {
+    /* Поднимаем панельку так, чтобы её верх был на уровне верхней границы card-header */
+    /* form-control-sm имеет высоту ~31px, используем ex для более точного вертикального позиционирования */
+    /* Значение скорректировано: уменьшаем подъем ещё на ~5px для точного выравнивания */
+    margin-top: calc(-2.2rem + 0.45ex) !important;
+    top: 100% !important;
 }
 
