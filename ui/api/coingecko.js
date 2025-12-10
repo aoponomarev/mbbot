@@ -328,18 +328,19 @@ window.cmpCoinGecko = {
     archiveCoin() {
       if (!this.contextMenuCoin) return;
       
-      // Находим монету в текущих данных для получения тикера и названия
+      // Находим монету в текущих данных
       const coin = this.cgCoins.find(c => c.id === this.contextMenuCoin);
       if (!coin) return;
       
       // Проверяем, нет ли уже этой монеты в архиве
       const existsInArchive = this.cgArchivedCoins.some(archived => archived.id === this.contextMenuCoin);
       if (!existsInArchive) {
-        // Сохраняем объект с id, symbol и name
+        // Сохраняем объект с id, symbol (тикер) и name (полное название)
+        // В CoinGecko API: coin.symbol - это тикер, coin.name - это полное название
         this.cgArchivedCoins.push({
           id: coin.id,
-          symbol: coin.symbol.toUpperCase(),
-          name: coin.name
+          symbol: (coin.symbol || '').toUpperCase(), // Тикер в верхнем регистре (BTC, ETH)
+          name: coin.name || coin.id // Полное название монеты (Bitcoin, Ethereum)
         });
         localStorage.setItem('cgArchivedCoins', JSON.stringify(this.cgArchivedCoins));
       }
@@ -444,6 +445,16 @@ window.cmpCoinGecko = {
     cacheCoinsIcons(coins) {
       if (!Array.isArray(coins) || coins.length === 0) return;
       
+      // Проверяем время последнего обновления кэша (не чаще 1 раза в час)
+      const CACHE_UPDATE_INTERVAL = 60 * 60 * 1000; // 1 час в миллисекундах
+      const lastUpdateTime = localStorage.getItem('cgIconsCacheTimestamp');
+      const now = Date.now();
+      
+      // Если прошло меньше часа с последнего обновления - не обновляем
+      if (lastUpdateTime && (now - parseInt(lastUpdateTime)) < CACHE_UPDATE_INTERVAL) {
+        return;
+      }
+      
       let updated = false;
       
       coins.forEach(coin => {
@@ -453,9 +464,10 @@ window.cmpCoinGecko = {
         }
       });
       
-      // Сохраняем обновленный кэш в localStorage
+      // Сохраняем обновленный кэш в localStorage только если были изменения
       if (updated) {
         localStorage.setItem('cgIconsCache', JSON.stringify(this.cgIconsCache));
+        localStorage.setItem('cgIconsCacheTimestamp', now.toString());
       }
     },
     

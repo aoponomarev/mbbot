@@ -407,13 +407,14 @@
                         <div 
                             v-if="showArchiveDropdown && cgArchivedCoins.length > 0" 
                             class="position-absolute bg-body border rounded shadow-sm cg-archive-dropdown" 
-                            style="z-index: 1000; max-height: 300px; overflow-y: auto; top: 100%; margin-top: 4px; min-width: 200px; right: 0;"
+                            style="z-index: 1000; max-height: 300px; overflow-y: auto; top: 100%; margin-top: 4px; width: auto; min-width: fit-content; right: 0;"
                             @click.stop
                         >
                             <div 
                                 v-for="archivedCoin in cgArchivedCoins" 
                                 :key="getArchivedCoinId(archivedCoin)"
                                 class="p-2 border-bottom cg-search-item"
+                                :title="getArchivedCoinName(archivedCoin)"
                                 @click="restoreFromArchiveById(getArchivedCoinId(archivedCoin))"
                             >
                                 <div class="d-flex align-items-center gap-2">

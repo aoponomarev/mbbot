@@ -127,39 +127,77 @@ window.cmpFooter = {
         return;
       }
 
+      // Проверяем кэш метрик (не чаще 1 раза в час)
+      const CACHE_UPDATE_INTERVAL = 60 * 60 * 1000; // 1 час в миллисекундах
+      const cachedMetrics = localStorage.getItem('marketMetricsCache');
+      const cacheTimestamp = localStorage.getItem('marketMetricsCacheTimestamp');
+      const now = Date.now();
+
+      // Если есть кэш и прошло меньше часа - используем кэш
+      if (cachedMetrics && cacheTimestamp) {
+        const timeSinceUpdate = now - parseInt(cacheTimestamp);
+        if (timeSinceUpdate < CACHE_UPDATE_INTERVAL) {
+          try {
+            const metrics = JSON.parse(cachedMetrics);
+            // Фильтруем символы анимации из кэша (заменяем на "—")
+            const filteredMetrics = this.filterSpinnerChars(metrics);
+            
+            // Проверяем, есть ли хотя бы одна валидная метрика
+            const hasValidMetrics = Object.values(filteredMetrics).some(value => value !== '—' && value !== null && value !== undefined);
+            
+            if (hasValidMetrics) {
+              // Применяем метрики из кэша
+              this.applyMetrics(filteredMetrics);
+              
+              // Проверяем, есть ли неопределенные метрики (—)
+              const hasUndefinedMetrics = Object.values(filteredMetrics).some(value => value === '—');
+              
+              // Если есть неопределенные метрики - продолжаем загрузку для них
+              if (hasUndefinedMetrics) {
+                // Устанавливаем состояние загрузки для неопределенных метрик
+                this.isLoading = true;
+                this.startLoadingSpinner();
+                // Продолжаем выполнение - будет сделан запрос к API
+              } else {
+                // Все метрики определены - используем кэш, не делаем запрос
+                return;
+              }
+            } else {
+              // Кэш содержит только пустые значения - удаляем его и загружаем заново
+              localStorage.removeItem('marketMetricsCache');
+              localStorage.removeItem('marketMetricsCacheTimestamp');
+            }
+          } catch (error) {
+            console.warn('Failed to parse cached metrics, fetching new data:', error);
+            // Удаляем поврежденный кэш
+            localStorage.removeItem('marketMetricsCache');
+            localStorage.removeItem('marketMetricsCacheTimestamp');
+          }
+        }
+      }
+
       // Устанавливаем состояние загрузки и запускаем анимацию
       this.isLoading = true;
       this.startLoadingSpinner();
 
       try {
         const metrics = await window.marketMetrics.fetchAll();
-        this.fgi = metrics.fgi;
-        this.vix = metrics.vix;
-        this.btcDom = metrics.btcDom;
-        this.oi = metrics.oi;
-        this.fr = metrics.fr;
-        this.lsr = metrics.lsr;
-
-        // Парсим числовые значения для расчета цветов
-        this.fgiValue = metrics.fgi !== '—' ? parseFloat(metrics.fgi) : null;
-        this.vixValue = metrics.vix !== '—' ? parseFloat(metrics.vix) : null;
         
-        // BTC Dominance: убираем % и парсим
-        if (metrics.btcDom !== '—') {
-          this.btcDomValue = parseFloat(metrics.btcDom.replace('%', ''));
-        } else {
-          this.btcDomValue = null;
+        // Фильтруем символы анимации перед сохранением в кэш
+        const filteredMetrics = this.filterSpinnerChars(metrics);
+        
+        // Проверяем, есть ли хотя бы одна метрика с реальным значением (не "—")
+        const hasValidMetrics = Object.values(filteredMetrics).some(value => value !== '—' && value !== null && value !== undefined);
+        
+        // Кэшируем только если есть хотя бы одна успешно загруженная метрика
+        // При этом фильтруем символы анимации - они не должны попадать в кэш
+        if (hasValidMetrics) {
+          localStorage.setItem('marketMetricsCache', JSON.stringify(filteredMetrics));
+          localStorage.setItem('marketMetricsCacheTimestamp', now.toString());
         }
-
-        // Funding Rate: убираем % и парсим
-        if (metrics.fr !== '—') {
-          this.frValue = parseFloat(metrics.fr.replace('%', ''));
-        } else {
-          this.frValue = null;
-        }
-
-        // Long/Short Ratio: парсим напрямую
-        this.lsrValue = metrics.lsr !== '—' ? parseFloat(metrics.lsr) : null;
+        
+        // Применяем метрики (даже если они пустые, чтобы показать состояние загрузки)
+        this.applyMetrics(filteredMetrics);
 
         // Останавливаем анимацию после загрузки
         this.isLoading = false;
@@ -170,6 +208,55 @@ window.cmpFooter = {
         this.isLoading = false;
         this.stopLoadingSpinner();
       }
+    },
+
+    // Фильтрация символов анимации из метрик (заменяет на "—")
+    filterSpinnerChars(metrics) {
+      const spinnerChars = ['|', '/', '-', '\\'];
+      const filtered = {};
+      
+      Object.keys(metrics).forEach(key => {
+        const value = metrics[key];
+        // Если значение является символом анимации - заменяем на "—"
+        if (spinnerChars.includes(value)) {
+          filtered[key] = '—';
+        } else {
+          filtered[key] = value;
+        }
+      });
+      
+      return filtered;
+    },
+
+    // Применение метрик к компоненту (используется и для кэша, и для новых данных)
+    applyMetrics(metrics) {
+      this.fgi = metrics.fgi;
+      this.vix = metrics.vix;
+      this.btcDom = metrics.btcDom;
+      this.oi = metrics.oi;
+      this.fr = metrics.fr;
+      this.lsr = metrics.lsr;
+
+      // Парсим числовые значения для расчета цветов
+      this.fgiValue = metrics.fgi !== '—' ? parseFloat(metrics.fgi) : null;
+      this.vixValue = metrics.vix !== '—' ? parseFloat(metrics.vix) : null;
+      
+      // BTC Dominance: убираем % и парсим
+      if (metrics.btcDom !== '—') {
+        this.btcDomValue = parseFloat(metrics.btcDom.replace('%', ''));
+      } else {
+        this.btcDomValue = null;
+      }
+
+      // Funding Rate: убираем % и парсим
+      if (metrics.fr !== '—') {
+        this.frValue = parseFloat(metrics.fr.replace('%', ''));
+      } else {
+        this.frValue = null;
+      }
+
+      // Long/Short Ratio: парсим напрямую
+      this.lsrValue = metrics.lsr !== '—' ? parseFloat(metrics.lsr) : null;
     }
   },
 
@@ -194,7 +281,7 @@ window.cmpFooter = {
       checkUnlocked();
     }
 
-    // Обновляем индексы каждые 5 минут
+    // Проверяем необходимость обновления каждые 5 минут (обновление произойдет только если прошло больше часа)
     setInterval(() => {
       if (window.appUnlocked) {
         this.fetchMarketIndices();
