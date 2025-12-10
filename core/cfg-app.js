@@ -13,5 +13,5 @@ window.appConfig = {
     { value: 'llama-3.1-sonar-small-128k-online', label: 'llama-3.1-sonar-small-128k-online' },
     { value: 'llama-3.1-sonar-large-128k-online', label: 'llama-3.1-sonar-large-128k-online' }
   ],
-  lastCommitMessage: 'Fix archive button width, coin display order, header alignment, and table spacing'
+  lastCommitMessage: 'Add coins count indicator and format date/time in two lines'
 };

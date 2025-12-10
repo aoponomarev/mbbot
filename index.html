@@ -428,9 +428,13 @@
                                 </div>
                             </div>
                             <small class="text-muted" v-if="cgArchivedCoins.length > 0">{{ cgArchivedCoins.length }}</small>
+                            <small class="text-muted" v-if="sortedCoins.length > 0">{{ sortedCoins.length }}</small>
                         </div>
                         <div class="d-flex align-items-center gap-2">
-                            <small class="text-muted text-nowrap" v-if="cgLastUpdated">{{ cgLastUpdated }}</small>
+                            <small class="text-muted" v-if="cgLastUpdated" style="line-height: 1.2;">
+                                <div>{{ formatLastUpdatedDate(cgLastUpdated) }}</div>
+                                <div>{{ formatLastUpdatedTime(cgLastUpdated) }}</div>
+                            </small>
                             <button class="btn btn-sm btn-outline-secondary" @click="fetchCoinGecko" :disabled="cgIsLoading">
                                 <span v-if="cgIsLoading" class="spinner-border spinner-border-sm me-1" role="status"></span>
                                 <span v-else>Обновить</span>

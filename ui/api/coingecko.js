@@ -69,7 +69,7 @@ window.cmpCoinGecko = {
         }
         const data = await res.json();
         this.cgCoins = Array.isArray(data) ? data : [];
-        this.cgLastUpdated = new Date().toLocaleString();
+        this.cgLastUpdated = new Date().toISOString(); // Сохраняем ISO строку для парсинга
         
         // Кэшируем иконки монет для быстрой загрузки
         this.cacheCoinsIcons(this.cgCoins);
@@ -376,6 +376,24 @@ window.cmpCoinGecko = {
       }
       // Пытаемся получить из кэша
       return this.cgIconsCache[coinId] || null;
+    },
+    
+    // Форматирование даты обновления (дата)
+    formatLastUpdatedDate(dateValue) {
+      if (!dateValue) return '';
+      // Поддержка как ISO строки, так и старого формата toLocaleString
+      const date = new Date(dateValue);
+      if (isNaN(date.getTime())) return '';
+      return date.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    },
+    
+    // Форматирование времени обновления (время)
+    formatLastUpdatedTime(dateValue) {
+      if (!dateValue) return '';
+      // Поддержка как ISO строки, так и старого формата toLocaleString
+      const date = new Date(dateValue);
+      if (isNaN(date.getTime())) return '';
+      return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     },
     
     // Кэширование иконок монет в localStorage
