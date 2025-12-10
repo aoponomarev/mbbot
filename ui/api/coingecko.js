@@ -21,6 +21,20 @@ window.cmpCoinGecko = {
     
     // Загружаем архив монет
     const savedArchivedCoins = localStorage.getItem('cgArchivedCoins');
+    let archivedCoins = [];
+    if (savedArchivedCoins) {
+      const parsed = JSON.parse(savedArchivedCoins);
+      // Обратная совместимость: если массив строк (старый формат) - преобразуем в объекты
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        if (typeof parsed[0] === 'string') {
+          // Старый формат: массив ID
+          archivedCoins = parsed.map(id => ({ id, symbol: id.toUpperCase(), name: id }));
+        } else {
+          // Новый формат: массив объектов
+          archivedCoins = parsed;
+        }
+      }
+    }
     
     return {
       cgCoins: savedCoins ? JSON.parse(savedCoins) : [],
@@ -28,7 +42,7 @@ window.cmpCoinGecko = {
       cgError: null,
       cgLastUpdated: savedLastUpdated || null,
       cgSelectedCoins: savedSelectedCoins ? JSON.parse(savedSelectedCoins) : defaultCoins,
-      cgArchivedCoins: savedArchivedCoins ? JSON.parse(savedArchivedCoins) : [], // Архив монет
+      cgArchivedCoins: archivedCoins, // Архив монет: массив объектов {id, symbol, name}
       cgIconsCache: iconsCache, // Кэш иконок в data для реактивности
       // Поиск монет
       cgSearchQuery: '',
@@ -314,9 +328,19 @@ window.cmpCoinGecko = {
     archiveCoin() {
       if (!this.contextMenuCoin) return;
       
-      // Переносим монету в архив
-      if (!this.cgArchivedCoins.includes(this.contextMenuCoin)) {
-        this.cgArchivedCoins.push(this.contextMenuCoin);
+      // Находим монету в текущих данных для получения тикера и названия
+      const coin = this.cgCoins.find(c => c.id === this.contextMenuCoin);
+      if (!coin) return;
+      
+      // Проверяем, нет ли уже этой монеты в архиве
+      const existsInArchive = this.cgArchivedCoins.some(archived => archived.id === this.contextMenuCoin);
+      if (!existsInArchive) {
+        // Сохраняем объект с id, symbol и name
+        this.cgArchivedCoins.push({
+          id: coin.id,
+          symbol: coin.symbol.toUpperCase(),
+          name: coin.name
+        });
         localStorage.setItem('cgArchivedCoins', JSON.stringify(this.cgArchivedCoins));
       }
       
@@ -335,8 +359,8 @@ window.cmpCoinGecko = {
     restoreFromArchiveById(coinId) {
       if (!coinId) return;
       
-      // Удаляем из архива
-      const archiveIndex = this.cgArchivedCoins.indexOf(coinId);
+      // Удаляем из архива (ищем по id в объектах)
+      const archiveIndex = this.cgArchivedCoins.findIndex(archived => archived.id === coinId);
       if (archiveIndex > -1) {
         this.cgArchivedCoins.splice(archiveIndex, 1);
         localStorage.setItem('cgArchivedCoins', JSON.stringify(this.cgArchivedCoins));
@@ -355,21 +379,36 @@ window.cmpCoinGecko = {
     },
     
     // Получение названия монеты из архива
-    getArchivedCoinName(coinId) {
-      const coin = this.cgCoins.find(c => c.id === coinId);
-      if (coin) return coin.name;
-      return coinId;
+    getArchivedCoinName(archivedCoin) {
+      // archivedCoin может быть объектом {id, symbol, name} или строкой (старый формат)
+      if (typeof archivedCoin === 'object' && archivedCoin.name) {
+        return archivedCoin.name;
+      }
+      // Fallback: ищем в текущих данных или возвращаем ID
+      const coin = this.cgCoins.find(c => c.id === (archivedCoin.id || archivedCoin));
+      return coin ? coin.name : (archivedCoin.id || archivedCoin);
     },
     
     // Получение тикера монеты из архива
-    getArchivedCoinSymbol(coinId) {
-      const coin = this.cgCoins.find(c => c.id === coinId);
-      if (coin) return coin.symbol.toUpperCase();
-      return coinId;
+    getArchivedCoinSymbol(archivedCoin) {
+      // archivedCoin может быть объектом {id, symbol, name} или строкой (старый формат)
+      if (typeof archivedCoin === 'object' && archivedCoin.symbol) {
+        return archivedCoin.symbol;
+      }
+      // Fallback: ищем в текущих данных или возвращаем ID
+      const coin = this.cgCoins.find(c => c.id === (archivedCoin.id || archivedCoin));
+      return coin ? coin.symbol.toUpperCase() : (archivedCoin.id || archivedCoin).toUpperCase();
+    },
+    
+    // Получение ID монеты из архива (для восстановления)
+    getArchivedCoinId(archivedCoin) {
+      // archivedCoin может быть объектом {id, symbol, name} или строкой (старый формат)
+      return typeof archivedCoin === 'object' ? archivedCoin.id : archivedCoin;
     },
     
     // Получение иконки монеты из архива
-    getArchivedCoinIcon(coinId) {
+    getArchivedCoinIcon(archivedCoin) {
+      const coinId = typeof archivedCoin === 'object' ? archivedCoin.id : archivedCoin;
       const coin = this.cgCoins.find(c => c.id === coinId);
       if (coin) {
         return this.getCoinIcon(coin);

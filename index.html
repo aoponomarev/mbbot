@@ -411,15 +411,15 @@
                             @click.stop
                         >
                             <div 
-                                v-for="archivedId in cgArchivedCoins" 
-                                :key="archivedId"
+                                v-for="archivedCoin in cgArchivedCoins" 
+                                :key="getArchivedCoinId(archivedCoin)"
                                 class="p-2 border-bottom cg-search-item"
-                                @click="restoreFromArchiveById(archivedId)"
+                                @click="restoreFromArchiveById(getArchivedCoinId(archivedCoin))"
                             >
                                 <div class="d-flex align-items-center gap-2">
-                                    <img v-if="getArchivedCoinIcon(archivedId)" :src="getArchivedCoinIcon(archivedId)" :alt="archivedId" width="20" height="20">
+                                    <img v-if="getArchivedCoinIcon(archivedCoin)" :src="getArchivedCoinIcon(archivedCoin)" :alt="getArchivedCoinId(archivedCoin)" width="20" height="20">
                                     <div class="flex-grow-1">
-                                        <div class="fw-semibold small text-uppercase">{{ getArchivedCoinSymbol(archivedId) }}</div>
+                                        <div class="fw-semibold small text-uppercase">{{ getArchivedCoinSymbol(archivedCoin) }}</div>
                                     </div>
                                 </div>
                             </div>
