@@ -13,5 +13,5 @@ window.appConfig = {
     { value: 'llama-3.1-sonar-small-128k-online', label: 'llama-3.1-sonar-small-128k-online' },
     { value: 'llama-3.1-sonar-large-128k-online', label: 'llama-3.1-sonar-large-128k-online' }
   ],
-  lastCommitMessage: 'Add table sorting, context menu, coin archive, and UI improvements'
+  lastCommitMessage: 'Fix archive dropdown, context menu actions, and add multi-coin search'
 };

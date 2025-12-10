@@ -40,7 +40,8 @@ window.cmpCoinGecko = {
       contextMenuY: 0,
       showContextMenu: false,
       // Архив
-      selectedArchivedCoin: '' // Выбранная монета из архива для восстановления
+      selectedArchivedCoin: '', // Выбранная монета из архива для восстановления
+      showArchiveDropdown: false // Показать/скрыть выпадающий список архива
     };
   },
   
@@ -99,7 +100,7 @@ window.cmpCoinGecko = {
       return '';
     },
     
-    // Поиск монет по названию или тикеру
+    // Поиск монет по названию или тикеру (поддерживает множественный поиск через разделители)
     async searchCoins(query) {
       if (!query || query.length < 2) {
         this.cgSearchResults = [];
@@ -108,40 +109,78 @@ window.cmpCoinGecko = {
       
       this.cgSearching = true;
       try {
-        const url = `https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(query)}`;
-        const res = await fetch(url);
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}`);
+        // Разбиваем запрос на отдельные поисковые термины (разделители: все кроме букв и цифр)
+        const searchTerms = query.split(/[^a-zA-Z0-9]+/).filter(term => term.length >= 2);
+        
+        if (searchTerms.length === 0) {
+          this.cgSearchResults = [];
+          this.cgSearching = false;
+          return;
         }
-        const data = await res.json();
         
-        // Сортируем результаты: полные совпадения с тикером вверху
-        let coins = data.coins || [];
-        const queryLower = query.toLowerCase();
-        coins.sort((a, b) => {
-          const aSymbol = a.symbol.toLowerCase();
-          const bSymbol = b.symbol.toLowerCase();
+        // Если один термин - используем обычный поиск
+        if (searchTerms.length === 1) {
+          const url = `https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(searchTerms[0])}`;
+          const res = await fetch(url);
+          if (!res.ok) {
+            throw new Error(`HTTP ${res.status}`);
+          }
+          const data = await res.json();
+          let coins = data.coins || [];
           
-          // Полное совпадение тикера - в начало
-          const aExactMatch = aSymbol === queryLower ? 1 : 0;
-          const bExactMatch = bSymbol === queryLower ? 1 : 0;
-          if (aExactMatch !== bExactMatch) {
-            return bExactMatch - aExactMatch; // Точные совпадения первыми
+          // Сортируем результаты: полные совпадения с тикером вверху
+          const queryLower = searchTerms[0].toLowerCase();
+          coins.sort((a, b) => {
+            const aSymbol = a.symbol.toLowerCase();
+            const bSymbol = b.symbol.toLowerCase();
+            
+            // Полное совпадение тикера - в начало
+            const aExactMatch = aSymbol === queryLower ? 1 : 0;
+            const bExactMatch = bSymbol === queryLower ? 1 : 0;
+            if (aExactMatch !== bExactMatch) {
+              return bExactMatch - aExactMatch;
+            }
+            
+            // Тикер начинается с запроса - выше
+            const aStartsWith = aSymbol.startsWith(queryLower) ? 1 : 0;
+            const bStartsWith = bSymbol.startsWith(queryLower) ? 1 : 0;
+            if (aStartsWith !== bStartsWith) {
+              return bStartsWith - aStartsWith;
+            }
+            
+            // Остальные по market_cap_rank (популярности)
+            return (a.market_cap_rank || 9999) - (b.market_cap_rank || 9999);
+          });
+          
+          this.cgSearchResults = coins.slice(0, 10);
+        } else {
+          // Множественный поиск: ищем каждую монету отдельно и объединяем результаты
+          const allResults = new Map(); // Используем Map для уникальности по ID
+          
+          for (const term of searchTerms) {
+            const url = `https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(term)}`;
+            const res = await fetch(url);
+            if (res.ok) {
+              const data = await res.json();
+              const coins = data.coins || [];
+              
+              // Добавляем результаты в общую карту (приоритет первым найденным)
+              coins.forEach(coin => {
+                if (!allResults.has(coin.id)) {
+                  allResults.set(coin.id, coin);
+                }
+              });
+            }
           }
           
-          // Тикер начинается с запроса - выше
-          const aStartsWith = aSymbol.startsWith(queryLower) ? 1 : 0;
-          const bStartsWith = bSymbol.startsWith(queryLower) ? 1 : 0;
-          if (aStartsWith !== bStartsWith) {
-            return bStartsWith - aStartsWith;
-          }
+          // Преобразуем Map в массив и сортируем по популярности
+          let coins = Array.from(allResults.values());
+          coins.sort((a, b) => {
+            return (a.market_cap_rank || 9999) - (b.market_cap_rank || 9999);
+          });
           
-          // Остальные по market_cap_rank (популярности)
-          return (a.market_cap_rank || 9999) - (b.market_cap_rank || 9999);
-        });
-        
-        // Ограничиваем результаты первыми 10 для удобства
-        this.cgSearchResults = coins.slice(0, 10);
+          this.cgSearchResults = coins.slice(0, 10);
+        }
       } catch (error) {
         console.error('CoinGecko search error', error);
         this.cgSearchResults = [];
@@ -197,6 +236,27 @@ window.cmpCoinGecko = {
       }, 100);
     },
     
+    // Открытие/закрытие dropdown архива
+    toggleArchiveDropdown() {
+      this.showArchiveDropdown = !this.showArchiveDropdown;
+      if (this.showArchiveDropdown) {
+        // Закрываем dropdown при клике вне его
+        setTimeout(() => {
+          document.addEventListener('click', this.closeArchiveDropdownOnOutside.bind(this));
+        }, 100);
+      } else {
+        document.removeEventListener('click', this.closeArchiveDropdownOnOutside);
+      }
+    },
+    
+    // Закрытие dropdown архива при клике вне
+    closeArchiveDropdownOnOutside(event) {
+      if (!event.target.closest('.cg-archive-dropdown') && !event.target.closest('button[type="button"]')) {
+        this.showArchiveDropdown = false;
+        document.removeEventListener('click', this.closeArchiveDropdownOnOutside);
+      }
+    },
+    
     // Контекстное меню: закрытие при клике вне
     closeContextMenuOnOutside(event) {
       if (!event.target.closest('.cg-context-menu') && !event.target.closest('.cg-coin-block')) {
@@ -216,27 +276,31 @@ window.cmpCoinGecko = {
       const index = this.cgSelectedCoins.indexOf(this.contextMenuCoin);
       if (index === -1) return;
       
-      const coin = this.cgSelectedCoins.splice(index, 1)[0];
+      const coin = this.cgSelectedCoins[index];
       
       switch (position) {
         case 'start':
+          // Удаляем из текущей позиции и вставляем в начало
+          this.cgSelectedCoins.splice(index, 1);
           this.cgSelectedCoins.unshift(coin);
           break;
         case 'up':
           if (index > 0) {
-            this.cgSelectedCoins.splice(index - 1, 0, coin);
-          } else {
-            this.cgSelectedCoins.push(coin); // Если первый - перемещаем в конец
+            // Меняем местами с предыдущим элементом
+            this.cgSelectedCoins[index] = this.cgSelectedCoins[index - 1];
+            this.cgSelectedCoins[index - 1] = coin;
           }
           break;
         case 'down':
-          if (index < this.cgSelectedCoins.length) {
-            this.cgSelectedCoins.splice(index + 1, 0, coin);
-          } else {
-            this.cgSelectedCoins.unshift(coin); // Если последний - перемещаем в начало
+          if (index < this.cgSelectedCoins.length - 1) {
+            // Меняем местами со следующим элементом
+            this.cgSelectedCoins[index] = this.cgSelectedCoins[index + 1];
+            this.cgSelectedCoins[index + 1] = coin;
           }
           break;
         case 'end':
+          // Удаляем из текущей позиции и вставляем в конец
+          this.cgSelectedCoins.splice(index, 1);
           this.cgSelectedCoins.push(coin);
           break;
       }
@@ -260,11 +324,16 @@ window.cmpCoinGecko = {
       this.removeCoin(this.contextMenuCoin);
     },
     
-    // Восстановление монеты из архива
+    // Восстановление монеты из архива (старый метод для совместимости)
     restoreFromArchive() {
       if (!this.selectedArchivedCoin) return;
-      
-      const coinId = this.selectedArchivedCoin;
+      this.restoreFromArchiveById(this.selectedArchivedCoin);
+      this.selectedArchivedCoin = '';
+    },
+    
+    // Восстановление монеты из архива по ID
+    restoreFromArchiveById(coinId) {
+      if (!coinId) return;
       
       // Удаляем из архива
       const archiveIndex = this.cgArchivedCoins.indexOf(coinId);
@@ -279,19 +348,34 @@ window.cmpCoinGecko = {
         localStorage.setItem('cgSelectedCoins', JSON.stringify(this.cgSelectedCoins));
       }
       
-      // Сбрасываем выбор и обновляем данные
-      this.selectedArchivedCoin = '';
+      // Закрываем dropdown и обновляем данные
+      this.showArchiveDropdown = false;
+      document.removeEventListener('click', this.closeArchiveDropdownOnOutside);
       this.fetchCoinGecko();
     },
     
-    // Получение названия монеты из архива (из кэша данных или по ID)
+    // Получение названия монеты из архива
     getArchivedCoinName(coinId) {
-      // Пытаемся найти в текущих данных
       const coin = this.cgCoins.find(c => c.id === coinId);
       if (coin) return coin.name;
-      
-      // Если нет в данных - возвращаем ID как fallback
       return coinId;
+    },
+    
+    // Получение тикера монеты из архива
+    getArchivedCoinSymbol(coinId) {
+      const coin = this.cgCoins.find(c => c.id === coinId);
+      if (coin) return coin.symbol.toUpperCase();
+      return coinId;
+    },
+    
+    // Получение иконки монеты из архива
+    getArchivedCoinIcon(coinId) {
+      const coin = this.cgCoins.find(c => c.id === coinId);
+      if (coin) {
+        return this.getCoinIcon(coin);
+      }
+      // Пытаемся получить из кэша
+      return this.cgIconsCache[coinId] || null;
     },
     
     // Кэширование иконок монет в localStorage
