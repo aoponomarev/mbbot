@@ -18,7 +18,6 @@
     <link rel="stylesheet" href="ui/styles/footer.css">
     <link rel="stylesheet" href="ui/styles/dropdown.css">
     <link rel="stylesheet" href="ui/styles/splash.css">
-    <link rel="stylesheet" href="ui/styles/chat.css">
 </head>
 <body class="min-vh-100">
     <div id="app">
@@ -31,18 +30,15 @@
         <!-- Компонент футера -->
         <app-footer></app-footer>
 
-        <div class="container-fluid py-4 app-main-container">
+        <div class="container-fluid py-4 app-main-container avto-X7pL2nQ">
 
-            <header class="mb-4">
-                <h1 class="display-4">BOT</h1>
-                <p class="lead">Statistics/ToDo Application</p>
-            </header>
+            <header class="mb-4"></header>
 
-            <main>
+            <main class="avto-K9mP4rT">
                 <div class="row">
                     <!-- Настройки Perplexity AI -->
                     <div class="col-12 col-lg-4 mb-4">
-                        <div class="card">
+                        <div class="card avto-M3nP8qW">
                             <div class="card-header">
                                 <h5 class="card-title mb-0">
                                     <i class="fas fa-cog me-2"></i>Настройки Perplexity AI
@@ -133,79 +129,9 @@
                         </div>
                     </div>
 
-                    <!-- Чат с Perplexity AI -->
-                    <div class="col-12 col-lg-8 mb-4">
-                        <div class="card h-100">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <h5 class="card-title mb-0">
-                                    <i class="fas fa-robot me-2"></i>Perplexity AI
-                                </h5>
-                                <button
-                                    class="btn btn-sm btn-outline-secondary"
-                                    @click="clearChat"
-                                    :disabled="messages.length === 0"
-                                    title="Очистить историю"
-                                >
-                                    <i class="fas fa-trash me-1"></i>Очистить
-                                </button>
-                            </div>
-                            <div class="card-body d-flex flex-column app-chat-card-body">
-                                <!-- История сообщений -->
-                                <div class="flex-grow-1 overflow-auto mb-3 app-chat-messages-container" ref="messagesContainer">
-                                    <div v-if="messages.length === 0" class="text-center text-muted py-5">
-                                        <i class="fas fa-comments fa-3x mb-3 d-block"></i>
-                                        <p>Начните диалог с Perplexity AI</p>
-                                    </div>
-                                    <div v-for="(msg, index) in messages" :key="index" class="mb-3">
-                                        <div v-if="msg.role === 'user'" class="d-flex justify-content-end">
-                                            <div class="bg-primary text-white rounded p-2 app-chat-message-user">
-                                                <small class="d-block mb-1"><strong>Вы:</strong></small>
-                                                <div>{{ msg.content }}</div>
-                                            </div>
-                                        </div>
-                                        <div v-else class="d-flex justify-content-start">
-                                            <div class="bg-light border rounded p-2 app-chat-message-assistant">
-                                                <small class="d-block mb-1 text-muted"><strong>Perplexity:</strong></small>
-                                                <div v-html="formatMessage(msg.content)"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div v-if="isLoading" class="text-center text-muted">
-                                        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
-                                        <span>Perplexity думает...</span>
-                                    </div>
-                                </div>
-
-                                <!-- Форма ввода -->
-                                <div class="border-top pt-3">
-                                    <div class="input-group">
-                                        <input
-                                            type="text"
-                                            class="form-control"
-                                            v-model="currentQuestion"
-                                            @keyup.enter="askPerplexity"
-                                            :disabled="!perplexityApiKey || isLoading"
-                                            placeholder="Задайте вопрос..."
-                                        >
-                                        <button
-                                            class="btn btn-primary"
-                                            @click="askPerplexity"
-                                            :disabled="!perplexityApiKey || isLoading || !currentQuestion.trim()"
-                                        >
-                                            <i class="fas fa-paper-plane me-1"></i>Отправить
-                                        </button>
-                                    </div>
-                                    <div v-if="error" class="alert alert-danger mt-2 mb-0">
-                                        <small><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- Виджет CoinGecko -->
                     <div class="col-12 mb-4">
-                        <div class="card">
+                        <div class="card avto-B7fN2kT">
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <h5 class="card-title mb-0">
                                     <i class="fas fa-chart-line me-2"></i>Топ-10 (CoinGecko)
@@ -273,7 +199,7 @@
 
                     <!-- Информационная карточка -->
                     <div class="col-12">
-                        <div class="card">
+                        <div class="card avto-H5jR9vQ">
                             <div class="card-body">
                                 <h5 class="card-title">Добро пожаловать!</h5>
                                 <p class="card-text">Приложение готово к работе.</p>
@@ -352,7 +278,7 @@
         </div>
     </script>
 
-    <!-- X-Template для компонента футера (должен быть ДО загрузки Vue и компонентов) -->
+    <!-- X-Template для компонента хедера (должен быть ДО загрузки Vue и компонентов) -->
     <script type="text/x-template" id="header-template">
         <header class="position-fixed top-0 start-0 w-100 app-header">
             <div class="container-fluid app-header-container-fluid">
@@ -448,27 +374,29 @@
 
                         <!-- Вкладки отображения: десктопная версия (Bootstrap радиокнопки) -->
                         <div class="btn-group d-none d-md-flex" role="group" aria-label="Display tabs">
-                            <input
-                                v-for="(tab, index) in displayTabs"
-                                :key="tab.id"
-                                type="radio"
-                                class="btn-check"
-                                :id="'tab-' + tab.id"
-                                :name="'display-tabs'"
-                                :value="tab.id"
-                                :checked="activeTab === tab.id"
-                                @change="switchTab(tab.id)"
-                            >
-                            <label
-                                v-for="(tab, index) in displayTabs"
-                                :key="tab.id"
-                                class="btn btn-sm btn-outline-light"
-                                :class="{ 'rounded-start': index === 0, 'rounded-end': index === displayTabs.length - 1 }"
-                                :for="'tab-' + tab.id"
-                                :class="activeTab === tab.id ? 'app-header-tab app-header-tab-active' : 'app-header-tab app-header-tab-inactive'"
-                            >
-                                {{ tab.label }}
-                            </label>
+                            <template v-for="(tab, index) in displayTabs" :key="tab.id">
+                                <input
+                                    type="radio"
+                                    class="btn-check"
+                                    :id="'tab-' + tab.id"
+                                    :name="'display-tabs'"
+                                    :value="tab.id"
+                                    :checked="activeTab === tab.id"
+                                    @change="switchTab(tab.id)"
+                                >
+                                <label
+                                    class="btn btn-sm btn-outline-light app-header-tab"
+                                    :class="{
+                                        'rounded-start': index === 0,
+                                        'rounded-end': index === displayTabs.length - 1,
+                                        'app-header-tab-active': activeTab === tab.id,
+                                        'app-header-tab-inactive': activeTab !== tab.id
+                                    }"
+                                    :for="'tab-' + tab.id"
+                                >
+                                    {{ tab.label }}
+                                </label>
+                            </template>
                         </div>
                     </div>
 
@@ -496,6 +424,7 @@
         </header>
     </script>
 
+    <!-- X-Template для компонента футера (должен быть ДО загрузки Vue и компонентов) -->
     <script type="text/x-template" id="footer-template">
         <footer class="position-fixed bottom-0 start-0 w-100 bg-body app-footer">
             <div class="container-fluid">
@@ -584,7 +513,6 @@
     <script src="./ui/interaction/header.js"></script>
     <script src="./ui/interaction/footer.js"></script>
     <script src="./ui/api/perplexity.js"></script>
-    <script src="./ui/interaction/chat.js"></script>
     <script src="./ui/api/import-export.js"></script>
     <script src="./ui/api/coingecko.js"></script>
     <script src="./app/app-ui-root.js"></script>
