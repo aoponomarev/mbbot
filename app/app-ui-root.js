@@ -46,6 +46,7 @@
       
       // Селекторы всех выпадающих элементов и их триггеров
       const clickableSelectors = [
+      '.cg-coin-sort-dropdown', // Выпадающее меню сортировки монет
         '.cg-search-dropdown', // Выпадающий список результатов поиска
         '.cg-archive-dropdown', // Выпадающий список архива
         '.cg-context-menu', // Контекстное меню монеты

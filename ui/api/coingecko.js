@@ -36,7 +36,22 @@ window.cmpCoinGecko = {
       }
     }
     
+    // Загружаем состояние чекнутости монет
+    const savedSelectedCoinIds = localStorage.getItem('cgSelectedCoinIds');
+    const selectedCoinIds = savedSelectedCoinIds ? JSON.parse(savedSelectedCoinIds) : [];
+    
+    // Загружаем тип сортировки колонки монет
+    const savedCoinSortType = localStorage.getItem('cgCoinSortType');
+    const coinSortType = savedCoinSortType || null;
+    
+      // Загружаем состояние сортировки других колонок
+      const savedSortBy = localStorage.getItem('cgSortBy');
+      const savedSortOrder = localStorage.getItem('cgSortOrder');
+      
     return {
+      // Состояние сортировки (переопределяем из mixin для загрузки из localStorage)
+      sortBy: savedSortBy || null,
+      sortOrder: savedSortOrder || null,
       cgCoins: savedCoins ? JSON.parse(savedCoins) : [],
       cgIsLoading: false,
       cgError: null,
@@ -57,9 +72,12 @@ window.cmpCoinGecko = {
       selectedArchivedCoin: '', // Выбранная монета из архива для восстановления
       showArchiveDropdown: false, // Показать/скрыть выпадающий список архива
       // Отмеченные чекбоксами монеты
-      selectedCoinIds: [], // Массив ID отмеченных монет
+      selectedCoinIds: selectedCoinIds, // Массив ID отмеченных монет (загружается из localStorage)
       // Выпадающее меню кнопки счетчика
       showCounterDropdown: false, // Показать/скрыть выпадающее меню счетчика
+      // Сортировка колонки монет
+      showCoinSortDropdown: false, // Показать/скрыть выпадающее меню сортировки монет
+      coinSortType: coinSortType, // Тип сортировки: null | 'market_cap' | 'total_volume' | 'alphabet' | 'selected' (загружается из localStorage)
       // Режим добавления тикеров (парсинг списка)
       isAddingTickers: false, // Флаг процесса добавления
       pendingTickers: [], // Очередь тикеров для добавления (массив строк-тикеров)
@@ -78,6 +96,11 @@ window.cmpCoinGecko = {
   computed: {
     // Сортированный список монет
     sortedCoins() {
+      // Если выбрана сортировка колонки монет - используем специальную логику
+      if (this.coinSortType) {
+        return this.sortCoinsByType(this.cgCoins);
+      }
+      // Для остальных колонок используем стандартную сортировку
       return this.sortData(this.cgCoins, this.cgCoins);
     },
     
@@ -104,6 +127,28 @@ window.cmpCoinGecko = {
   },
 
   methods: {
+    // Переопределяем handleSort из mixin для сброса сортировки монет при сортировке других колонок
+    handleSort(field) {
+      // Если сортируем не колонку монет - сбрасываем сортировку монет
+      if (field !== 'symbol') {
+        this.coinSortType = null;
+        localStorage.removeItem('cgCoinSortType');
+      }
+      // Вызываем оригинальный метод из mixin
+      window.tableSortMixin.methods.handleSort.call(this, field);
+      // Сохраняем состояние сортировки
+      if (this.sortBy) {
+        localStorage.setItem('cgSortBy', this.sortBy);
+      } else {
+        localStorage.removeItem('cgSortBy');
+      }
+      if (this.sortOrder) {
+        localStorage.setItem('cgSortOrder', this.sortOrder);
+      } else {
+        localStorage.removeItem('cgSortOrder');
+      }
+    },
+    
     async fetchCoinGecko() {
       if (!window.appUnlocked) {
         return;
@@ -134,6 +179,7 @@ window.cmpCoinGecko = {
         
         // Очищаем выбранные монеты, так как список мог измениться
         this.selectedCoinIds = [];
+        localStorage.setItem('cgSelectedCoinIds', JSON.stringify(this.selectedCoinIds));
         
         // Кэшируем иконки монет для быстрой загрузки
         this.cacheCoinsIcons(this.cgCoins);
@@ -721,6 +767,7 @@ window.cmpCoinGecko = {
         const selectedIndex = this.selectedCoinIds.indexOf(coinId);
         if (selectedIndex > -1) {
           this.selectedCoinIds.splice(selectedIndex, 1);
+          localStorage.setItem('cgSelectedCoinIds', JSON.stringify(this.selectedCoinIds));
         }
       }
       this.closeContextMenu();
@@ -772,6 +819,86 @@ window.cmpCoinGecko = {
       this.closeArchiveDropdown();
       this.closeSearchDropdown();
       this.closeCounterDropdown();
+      this.closeCoinSortDropdown();
+    },
+    
+    // Открытие/закрытие выпадающего меню сортировки монет
+    toggleCoinSortDropdown() {
+      this.showCoinSortDropdown = !this.showCoinSortDropdown;
+    },
+    
+    // Закрытие выпадающего меню сортировки монет
+    closeCoinSortDropdown() {
+      this.showCoinSortDropdown = false;
+    },
+    
+    // Установка типа сортировки монет
+    setCoinSortType(type) {
+      this.coinSortType = type;
+      // Сбрасываем стандартную сортировку при выборе сортировки монет
+      this.sortBy = null;
+      this.sortOrder = null;
+      // Сохраняем состояние сортировки
+      if (type) {
+        localStorage.setItem('cgCoinSortType', type);
+      } else {
+        localStorage.removeItem('cgCoinSortType');
+      }
+      localStorage.removeItem('cgSortBy');
+      localStorage.removeItem('cgSortOrder');
+      this.closeCoinSortDropdown();
+    },
+    
+    // Сортировка монет по типу (только по убыванию)
+    sortCoinsByType(coins) {
+      if (!this.coinSortType || !coins || coins.length === 0) {
+        return coins.slice();
+      }
+      
+      const sorted = coins.slice();
+      
+      switch (this.coinSortType) {
+        case 'market_cap':
+          // Сортировка по капитализации (по убыванию)
+          sorted.sort((a, b) => {
+            const aVal = a.market_cap || 0;
+            const bVal = b.market_cap || 0;
+            return bVal - aVal; // По убыванию
+          });
+          break;
+          
+        case 'total_volume':
+          // Сортировка по дневному объему (по убыванию)
+          sorted.sort((a, b) => {
+            const aVal = a.total_volume || 0;
+            const bVal = b.total_volume || 0;
+            return bVal - aVal; // По убыванию
+          });
+          break;
+          
+        case 'alphabet':
+          // Сортировка по алфавиту (по возрастанию - от A к Z)
+          sorted.sort((a, b) => {
+            const aSymbol = (a.symbol || '').toUpperCase();
+            const bSymbol = (b.symbol || '').toUpperCase();
+            return aSymbol.localeCompare(bSymbol); // По возрастанию (A-Z)
+          });
+          break;
+          
+        case 'selected':
+          // Сортировка выбранных монет вверх
+          sorted.sort((a, b) => {
+            const aSelected = this.selectedCoinIds.includes(a.id) ? 1 : 0;
+            const bSelected = this.selectedCoinIds.includes(b.id) ? 1 : 0;
+            return bSelected - aSelected; // Выбранные вверх
+          });
+          break;
+          
+        default:
+          return sorted;
+      }
+      
+      return sorted;
     },
     
     // Переключение выбора всех монет через чекбокс в заголовке
@@ -783,6 +910,8 @@ window.cmpCoinGecko = {
         // Снимаем выбор со всех монет
         this.selectedCoinIds = [];
       }
+      // Сохраняем состояние чекнутости монет
+      localStorage.setItem('cgSelectedCoinIds', JSON.stringify(this.selectedCoinIds));
     },
     
     // Переключение выбора отдельной монеты через чекбокс
@@ -799,17 +928,23 @@ window.cmpCoinGecko = {
           this.selectedCoinIds.splice(index, 1);
         }
       }
+      // Сохраняем состояние чекнутости монет
+      localStorage.setItem('cgSelectedCoinIds', JSON.stringify(this.selectedCoinIds));
     },
     
     // Выбрать все монеты
     selectAllCoins() {
       this.selectedCoinIds = this.sortedCoins.map(coin => coin.id);
+      // Сохраняем состояние чекнутости монет
+      localStorage.setItem('cgSelectedCoinIds', JSON.stringify(this.selectedCoinIds));
       this.closeCounterDropdown();
     },
     
     // Отменить выбор всех монет
     deselectAllCoins() {
       this.selectedCoinIds = [];
+      // Сохраняем состояние чекнутости монет
+      localStorage.setItem('cgSelectedCoinIds', JSON.stringify(this.selectedCoinIds));
       this.closeCounterDropdown();
     },
     
@@ -837,6 +972,7 @@ window.cmpCoinGecko = {
       // Сохраняем изменения
       localStorage.setItem('cgSelectedCoins', JSON.stringify(this.cgSelectedCoins));
       localStorage.setItem('cgCoins', JSON.stringify(this.cgCoins));
+      localStorage.setItem('cgSelectedCoinIds', JSON.stringify(this.selectedCoinIds));
       
       this.closeCounterDropdown();
     },
@@ -890,46 +1026,30 @@ window.cmpCoinGecko = {
       localStorage.setItem('cgArchivedCoins', JSON.stringify(this.cgArchivedCoins));
       localStorage.setItem('cgSelectedCoins', JSON.stringify(this.cgSelectedCoins));
       localStorage.setItem('cgCoins', JSON.stringify(this.cgCoins));
+      localStorage.setItem('cgSelectedCoinIds', JSON.stringify(this.selectedCoinIds));
       
       this.closeCounterDropdown();
     },
     
-    // Перемещение монеты в списке
-    moveToPosition(position) {
-      const index = this.cgSelectedCoins.indexOf(this.contextMenuCoin);
-      if (index === -1) return;
+    // Открытие монеты на Bybit в новой вкладке
+    openCoinOnBybit() {
+      if (!this.contextMenuCoin) return;
       
-      const coin = this.cgSelectedCoins[index];
-      
-      switch (position) {
-        case 'start':
-          // Удаляем из текущей позиции и вставляем в начало
-          this.cgSelectedCoins.splice(index, 1);
-          this.cgSelectedCoins.unshift(coin);
-          break;
-        case 'up':
-          if (index > 0) {
-            // Меняем местами с предыдущим элементом
-            this.cgSelectedCoins[index] = this.cgSelectedCoins[index - 1];
-            this.cgSelectedCoins[index - 1] = coin;
-          }
-          break;
-        case 'down':
-          if (index < this.cgSelectedCoins.length - 1) {
-            // Меняем местами со следующим элементом
-            this.cgSelectedCoins[index] = this.cgSelectedCoins[index + 1];
-            this.cgSelectedCoins[index + 1] = coin;
-          }
-          break;
-        case 'end':
-          // Удаляем из текущей позиции и вставляем в конец
-          this.cgSelectedCoins.splice(index, 1);
-          this.cgSelectedCoins.push(coin);
-          break;
+      // Находим монету в списке для получения тикера
+      const coin = this.cgCoins.find(c => c.id === this.contextMenuCoin);
+      if (!coin || !coin.symbol) {
+        console.error('Монета не найдена или отсутствует тикер');
+        this.closeContextMenu();
+        return;
       }
       
-      localStorage.setItem('cgSelectedCoins', JSON.stringify(this.cgSelectedCoins));
-      this.fetchCoinGecko(); // Обновляем данные для новой сортировки
+      // Формируем ссылку: https://www.bybit.com/trade/usdt/{тикер}USDT
+      const ticker = coin.symbol.toUpperCase();
+      const url = `https://www.bybit.com/trade/usdt/${ticker}USDT`;
+      
+      // Открываем в новой вкладке
+      window.open(url, '_blank');
+      
       this.closeContextMenu();
     },
     

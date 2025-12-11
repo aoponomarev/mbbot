@@ -471,7 +471,8 @@ body {
 main .cg-counter-dropdown,
 main .cg-search-dropdown,
 main .cg-archive-dropdown,
-main .cg-context-menu {
+main .cg-context-menu,
+main .cg-coin-sort-dropdown {
     /* Z-index для dropdown меню (совпадает с Bootstrap) */
     z-index: var(--z-index-dropdown);
     /* Единый радиус скругления - 2.5px */
@@ -485,7 +486,8 @@ main .cg-context-menu {
 [data-bs-theme="dark"] main .cg-counter-dropdown,
 [data-bs-theme="dark"] main .cg-search-dropdown,
 [data-bs-theme="dark"] main .cg-archive-dropdown,
-[data-bs-theme="dark"] main .cg-context-menu {
+[data-bs-theme="dark"] main .cg-context-menu,
+[data-bs-theme="dark"] main .cg-coin-sort-dropdown {
     /* Более контрастная рамка для темной темы */
     border-color: var(--color-dropdown-border-dark) !important;
     /* Более контрастная тень для темной темы */
@@ -496,6 +498,74 @@ main .cg-context-menu {
 .badge.bg-warning-dark {
     background-color: var(--color-warning-dark) !important;
     color: var(--bs-white) !important;
+}
+
+/* Специальный класс для таблицы с монетами - убираем фон у строк и ячеек для видимости перемещения */
+.cg-coins-table tbody tr,
+.cg-coins-table tbody td {
+    background-color: transparent !important;
+}
+
+.cg-coins-table thead th {
+    background-color: transparent !important;
+}
+
+/* Подсветка выбранных строк таблицы с монетами - едва видимая прозрачная подсветка primary цвета */
+/* Используем чистый primary цвет (максимальная насыщенность 100%) с низкой альфа для прозрачности */
+.cg-coins-table tbody tr.coin-row-selected,
+.cg-coins-table tbody tr.coin-row-selected td {
+    /* Чистый primary цвет: hue из переменной, максимальная насыщенность (100%), средняя яркость (50%), низкая альфа (0.05) */
+    background-color: hsla(var(--color-primary-h), 100%, 50%, 0.05) !important;
+}
+
+/* Перекрываем все состояния (hover, nth-child) для выбранных строк */
+.cg-coins-table tbody tr.coin-row-selected:hover,
+.cg-coins-table tbody tr.coin-row-selected:hover td,
+.cg-coins-table tbody tr.coin-row-selected:nth-child(even),
+.cg-coins-table tbody tr.coin-row-selected:nth-child(even) td,
+.cg-coins-table tbody tr.coin-row-selected:nth-child(odd),
+.cg-coins-table tbody tr.coin-row-selected:nth-child(odd) td {
+    background-color: hsla(var(--color-primary-h), 100%, 50%, 0.05) !important;
+}
+
+/* Для темной темы: немного светлее яркость для лучшей видимости */
+[data-bs-theme="dark"] .cg-coins-table tbody tr.coin-row-selected,
+[data-bs-theme="dark"] .cg-coins-table tbody tr.coin-row-selected td,
+[data-bs-theme="dark"] .cg-coins-table tbody tr.coin-row-selected:hover,
+[data-bs-theme="dark"] .cg-coins-table tbody tr.coin-row-selected:hover td,
+[data-bs-theme="dark"] .cg-coins-table tbody tr.coin-row-selected:nth-child(even),
+[data-bs-theme="dark"] .cg-coins-table tbody tr.coin-row-selected:nth-child(even) td,
+[data-bs-theme="dark"] .cg-coins-table tbody tr.coin-row-selected:nth-child(odd),
+[data-bs-theme="dark"] .cg-coins-table tbody tr.coin-row-selected:nth-child(odd) td {
+    /* Для темной темы: яркость 60% для лучшей видимости */
+    background-color: hsla(var(--color-primary-h), 100%, 60%, 0.05) !important;
+}
+
+/* Анимация перемещения строк таблицы при сортировке */
+.coin-row-item {
+    position: relative;
+}
+
+.coin-row-move {
+    transition: transform 0.3s ease;
+    z-index: 100; /* Высокий z-index для отображения поверх таблицы */
+    transform: translateZ(0);
+    will-change: transform;
+    background-color: var(--bs-body-bg) !important; /* Фон для видимости перемещающейся строки */
+}
+
+.coin-row-enter-active,
+.coin-row-leave-active {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    z-index: 100; /* Высокий z-index для отображения поверх таблицы */
+    transform: translateZ(0);
+    will-change: transform;
+    background-color: var(--bs-body-bg) !important; /* Фон для видимости перемещающейся строки */
+}
+
+.coin-row-enter-from,
+.coin-row-leave-to {
+    opacity: 0;
 }
 
 [data-bs-theme="dark"] .badge.bg-warning-dark {

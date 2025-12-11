@@ -582,7 +582,7 @@
                         <small><i class="fas fa-exclamation-circle me-1"></i>{{ cgError }}</small>
                     </div>
                     <div class="table-responsive">
-                        <table class="table table-sm align-middle">
+                        <table class="table table-sm align-middle cg-coins-table">
                             <thead>
                                 <tr>
                                     <th style="width: 40px;">
@@ -593,8 +593,46 @@
                                             :checked="selectedCoinIds.length === sortedCoins.length && sortedCoins.length > 0"
                                         >
                                     </th>
-                                    <th style="cursor: pointer;" @click="handleSort('symbol')">
+                                    <th class="position-relative" style="cursor: pointer;" @click.stop="toggleCoinSortDropdown">
                                         Монета
+                                        <!-- Выпадающее меню сортировки монет -->
+                                        <div 
+                                            v-if="showCoinSortDropdown" 
+                                            class="position-absolute bg-body border rounded shadow-sm cg-coin-sort-dropdown" 
+                                            style="top: 100%; left: 0; margin-top: 4px; min-width: 200px; z-index: var(--z-index-dropdown);"
+                                            @click.stop
+                                        >
+                                            <div class="list-group list-group-flush">
+                                                <button 
+                                                    class="list-group-item list-group-item-action py-2 px-3 border-0" 
+                                                    @click="setCoinSortType('market_cap')"
+                                                    :class="{'active': coinSortType === 'market_cap'}"
+                                                >
+                                                    По капитализации
+                                                </button>
+                                                <button 
+                                                    class="list-group-item list-group-item-action py-2 px-3 border-0" 
+                                                    @click="setCoinSortType('total_volume')"
+                                                    :class="{'active': coinSortType === 'total_volume'}"
+                                                >
+                                                    По дневному объему
+                                                </button>
+                                                <button 
+                                                    class="list-group-item list-group-item-action py-2 px-3 border-0" 
+                                                    @click="setCoinSortType('alphabet')"
+                                                    :class="{'active': coinSortType === 'alphabet'}"
+                                                >
+                                                    По алфавиту
+                                                </button>
+                                                <button 
+                                                    class="list-group-item list-group-item-action py-2 px-3 border-0" 
+                                                    @click="setCoinSortType('selected')"
+                                                    :class="{'active': coinSortType === 'selected'}"
+                                                >
+                                                    Выбранные
+                                                </button>
+                                            </div>
+                                        </div>
                                     </th>
                                     <th class="text-end" style="cursor: pointer;" @click="handleSort('price_change_percentage_1h_in_currency')">
                                         1h %
@@ -616,7 +654,7 @@
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody v-if="cgIsLoading || sortedCoins.length === 0">
                                 <tr v-if="cgIsLoading">
                                     <td colspan="8" class="text-center text-muted">
                                         <span class="spinner-border spinner-border-sm me-2" role="status"></span>
@@ -626,7 +664,9 @@
                                 <tr v-else-if="sortedCoins.length === 0">
                                     <td colspan="8" class="text-center text-muted">Нет данных</td>
                                 </tr>
-                                <tr v-else v-for="coin in sortedCoins" :key="coin.id">
+                            </tbody>
+                            <transition-group v-else name="coin-row" tag="tbody">
+                                <tr v-for="coin in sortedCoins" :key="coin.id" class="coin-row-item" :class="{'coin-row-selected': selectedCoinIds.includes(coin.id)}">
                                     <td @click.stop>
                                         <input 
                                             type="checkbox" 
@@ -656,7 +696,7 @@
                                     <td class="text-end" :class="cgChangeClass(coin.price_change_percentage_30d_in_currency)">{{ cgFormatPercent(coin.price_change_percentage_30d_in_currency) }}</td>
                                     <td class="text-end" :class="cgChangeClass(coin.price_change_percentage_200d_in_currency)">{{ cgFormatPercent(coin.price_change_percentage_200d_in_currency) }}</td>
                                 </tr>
-                            </tbody>
+                            </transition-group>
                         </table>
                     </div>
                 </div>
@@ -669,17 +709,8 @@
                     @click.stop
                 >
                     <div class="list-group list-group-flush">
-                        <button class="list-group-item list-group-item-action py-1 px-3 border-0" @click="moveToPosition('start')">
-                            <i class="fas fa-arrow-up me-2"></i>В начало
-                        </button>
-                        <button class="list-group-item list-group-item-action py-1 px-3 border-0" @click="moveToPosition('up')">
-                            <i class="fas fa-chevron-up me-2"></i>Вверх
-                        </button>
-                        <button class="list-group-item list-group-item-action py-1 px-3 border-0" @click="moveToPosition('down')">
-                            <i class="fas fa-chevron-down me-2"></i>Вниз
-                        </button>
-                        <button class="list-group-item list-group-item-action py-1 px-3 border-0" @click="moveToPosition('end')">
-                            <i class="fas fa-arrow-down me-2"></i>В конец
+                        <button class="list-group-item list-group-item-action py-1 px-3 border-0" @click="openCoinOnBybit()">
+                            <i class="fas fa-external-link-alt me-2"></i>Открыть
                         </button>
                         <div class="dropdown-divider my-0"></div>
                         <button class="list-group-item list-group-item-action py-1 px-3 border-0" @click="archiveCoin()">

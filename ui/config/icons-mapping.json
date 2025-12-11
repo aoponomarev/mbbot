@@ -20,6 +20,11 @@
       "title": "Настройки",
       "description": "Открыть настройки проекта"
     },
+    "open-external": {
+      "icon": "fas fa-external-link-alt",
+      "title": "Открыть",
+      "description": "Открыть на внешнем ресурсе (Bybit)"
+    },
     "export": {
       "icon": "fas fa-download",
       "title": "Экспорт",
@@ -72,26 +77,6 @@
     }
   },
   "navigation": {
-    "move-to-start": {
-      "icon": "fas fa-arrow-up",
-      "title": "В начало",
-      "description": "Переместить элемент в начало списка"
-    },
-    "move-up": {
-      "icon": "fas fa-chevron-up",
-      "title": "Вверх",
-      "description": "Переместить элемент вверх"
-    },
-    "move-down": {
-      "icon": "fas fa-chevron-down",
-      "title": "Вниз",
-      "description": "Переместить элемент вниз"
-    },
-    "move-to-end": {
-      "icon": "fas fa-arrow-down",
-      "title": "В конец",
-      "description": "Переместить элемент в конец списка"
-    },
     "sort": {
       "icon": "fas fa-sort",
       "title": "Сортировка",
