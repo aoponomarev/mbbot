@@ -236,7 +236,7 @@ window.cmpCoinGecko = {
     
     // Заголовки колонок CD (статический порядок)
     cdHeaders() {
-      return ['CDH', 'CD6', 'CD5', 'CD4', 'CD3', 'CDH', 'CD2', 'CD1'];
+      return ['CDH', 'CD6', 'CD5', 'CD4', 'CD3', 'CD2', 'CD1'];
     },
     
   },
@@ -282,7 +282,7 @@ window.cmpCoinGecko = {
     
     // Переопределяем getSortValue из mixin для обработки CD полей
     getSortValue(item, field) {
-      // Если поле начинается с 'cd' (cdh, cdh2, cd1, cd2, и т.д.) - используем getCDValue
+      // Если поле начинается с 'cd' (cdh, cd1, cd2, и т.д.) - используем getCDValue
       if (field && field.toLowerCase().startsWith('cd')) {
         return this.getCDValue(item, field);
       }
@@ -419,11 +419,11 @@ window.cmpCoinGecko = {
      * Получить значение CD для отображения в таблице по полю сортировки
      * 
      * @param {Object} coin - Объект монеты
-     * @param {string} field - Поле сортировки ('cdh', 'cdh2', 'cd1', 'cd2', 'cd3', 'cd4', 'cd5', 'cd6')
+     * @param {string} field - Поле сортировки ('cdh', 'cd1', 'cd2', 'cd3', 'cd4', 'cd5', 'cd6')
      * @returns {number} CD значение
      */
     getCDValue(coin, field) {
-      if (field === 'cdh' || field === 'cdh2') {
+      if (field === 'cdh') {
         return this.getCDH(coin);
       }
       // Извлекаем индекс из поля (cd1 -> 1, cd2 -> 2, и т.д.)
@@ -453,19 +453,13 @@ window.cmpCoinGecko = {
     /**
      * getCDField(header, index)
      * Получить поле для сортировки по заголовку CD колонки
-     * Обрабатывает два CDH: первый как 'cdh', второй как 'cdh2'
      * 
      * @param {string} header - Заголовок колонки ('CDH', 'CD1', 'CD2', и т.д.)
-     * @param {number} index - Индекс колонки в массиве cdHeaders
-     * @returns {string} Поле для сортировки ('cdh', 'cdh2', 'cd1', 'cd2', и т.д.)
+     * @param {number} index - Индекс колонки в массиве cdHeaders (не используется, оставлен для совместимости)
+     * @returns {string} Поле для сортировки ('cdh', 'cd1', 'cd2', и т.д.)
      */
     getCDField(header, index) {
-      const headerLower = header.toLowerCase();
-      if (headerLower === 'cdh') {
-        // Первый CDH (индекс 0) -> 'cdh', второй -> 'cdh2'
-        return index === 0 ? 'cdh' : 'cdh2';
-      }
-      return headerLower;
+      return header.toLowerCase();
     },
     
     /**

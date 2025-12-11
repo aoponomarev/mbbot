@@ -1,5 +1,5 @@
 // Глобальный Vue mixin для сортировки таблиц
-// Циклическая сортировка: null (дефолт) → asc (возрастание) → desc (убывание) → null
+// Циклическая сортировка: desc (убывание) → asc (возрастание) → null (отмена) → desc
 window.tableSortMixin = {
   data() {
     return {
@@ -12,19 +12,20 @@ window.tableSortMixin = {
     // Обработка клика на заголовок колонки для сортировки
     handleSort(field) {
       if (this.sortBy === field) {
-        // Циклическое переключение: null → asc → desc → null
-        if (this.sortOrder === null) {
+        // Циклическое переключение: desc → asc → null → desc
+        if (this.sortOrder === 'desc') {
           this.sortOrder = 'asc';
         } else if (this.sortOrder === 'asc') {
-          this.sortOrder = 'desc';
-        } else {
           this.sortOrder = null;
           this.sortBy = null;
+        } else {
+          // null -> начинаем с убывания
+          this.sortOrder = 'desc';
         }
       } else {
-        // Новое поле - начинаем с возрастания
+        // Новое поле - начинаем с убывания (desc)
         this.sortBy = field;
-        this.sortOrder = 'asc';
+        this.sortOrder = 'desc';
       }
     },
     

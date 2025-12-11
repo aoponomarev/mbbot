@@ -75,7 +75,86 @@ window.columnVisibilityMixin = {
       });
       
       return result;
+    },
+    
+    // Число видимых колонок на текущей вкладке
+    visibleColumnsCount() {
+      // Используем DOM для точного подсчета видимых колонок
+      // Это более надежно, чем подсчет по классам, так как учитывает v-for и динамические колонки
+      if (!this.$el) return 0;
+      
+      const table = this.$el.querySelector('table');
+      if (!table) return 0;
+      
+      const colgroup = table.querySelector('colgroup');
+      if (!colgroup) return 0;
+      
+      // Подсчитываем видимые колонки (не с классом col-hidden)
+      const visibleCols = Array.from(colgroup.querySelectorAll('col')).filter(col => {
+        return !col.classList.contains('col-hidden');
+      });
+      
+      return visibleCols.length;
     }
+  },
+  
+  watch: {
+    // Отслеживаем изменение видимых колонок для автоматического расчета ширины
+    visibleColumnsCount: {
+      handler(newCount) {
+        if (newCount > 0) {
+          this.$nextTick(() => {
+            this.updateColumnWidths(newCount);
+          });
+        }
+      },
+      immediate: true
+    },
+    
+    // Также отслеживаем изменение активной вкладки
+    activeTab() {
+      this.$nextTick(() => {
+        if (this.visibleColumnsCount > 0) {
+          this.updateColumnWidths(this.visibleColumnsCount);
+        }
+      });
+    }
+  },
+  
+  methods: {
+    // Обновление ширины колонок на основе числа видимых колонок
+    updateColumnWidths(visibleCount) {
+      // Находим таблицу в компоненте (через $el)
+      const table = this.$el?.querySelector('table');
+      if (!table) return;
+      
+      const colgroup = table.querySelector('colgroup');
+      if (!colgroup) return;
+      
+      // Получаем все видимые колонки (не с классом col-hidden)
+      const visibleCols = Array.from(colgroup.querySelectorAll('col')).filter(col => {
+        return !col.classList.contains('col-hidden');
+      });
+      
+      if (visibleCols.length === 0) return;
+      
+      // Рассчитываем ширину: 100% / число видимых колонок
+      const widthPercent = 100 / visibleCols.length;
+      
+      // Устанавливаем ширину для каждой видимой колонки
+      visibleCols.forEach(col => {
+        col.style.width = `${widthPercent}%`;
+      });
+    }
+  },
+  
+  mounted() {
+    // Вызываем обновление ширины колонок после монтирования компонента
+    this.$nextTick(() => {
+      if (this.visibleColumnsCount > 0) {
+        this.updateColumnWidths(this.visibleColumnsCount);
+      }
+    });
   }
 };
 
