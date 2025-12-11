@@ -1,3 +1,57 @@
+// =========================
+// УТИЛИТА: Трансформация данных CoinGecko в формат со старыми переменными
+// Источник: old_app_not_write/parsing.js (строки 62-70)
+// =========================
+// Преобразует данные CoinGecko API в формат, совместимый со старым приложением:
+// - Создает массив pvs (Price Variations) из 6 интервалов времени
+// - Сохраняет структуру данных для совместимости с математической моделью
+// 
+// Маппинг интервалов CoinGecko → Старые переменные:
+// - price_change_percentage_1h_in_currency → PV1h (pvs[0])
+// - price_change_percentage_24h_in_currency → PV24h (pvs[1])
+// - price_change_percentage_7d_in_currency → PV7d (pvs[2])
+// - price_change_percentage_14d_in_currency → PV14d (pvs[3]) - НОВЫЙ интервал (заменяет 30d в старом индексе)
+// - price_change_percentage_30d_in_currency → PV30d (pvs[4]) - НОВЫЙ индекс (был pvs[3] в старом)
+// - price_change_percentage_200d_in_currency → PV200d (pvs[5]) - НОВЫЙ интервал (заменяет 60d и 90d)
+// 
+// ВАЖНО: Замененные интервалы (14d вместо 30d в индексе 3, 200d вместо 60d/90d в индексе 5)
+// потребуют анализа и пересмотра весов и коэффициентов в математической модели.
+// 
+// @param {Object} coinGeckoCoin - Объект монеты из CoinGecko API
+// @returns {Object} Объект монеты с добавленными полями pvs и отдельными переменными PV
+function transformCoinGeckoToPV(coinGeckoCoin) {
+  // Безопасное извлечение значений с fallback на 0
+  const safeValue = (value) => {
+    const num = parseFloat(value);
+    return Number.isFinite(num) ? num : 0;
+  };
+  
+  // Создаем массив pvs (Price Variations) - совместимый со старым форматом
+  // Источник: old_app_not_write/parsing.js, строка 70: pvs: values
+  const pvs = [
+    safeValue(coinGeckoCoin.price_change_percentage_1h_in_currency),   // pvs[0] - PV1h (1 час)
+    safeValue(coinGeckoCoin.price_change_percentage_24h_in_currency), // pvs[1] - PV24h (24 часа)
+    safeValue(coinGeckoCoin.price_change_percentage_7d_in_currency),  // pvs[2] - PV7d (7 дней)
+    safeValue(coinGeckoCoin.price_change_percentage_14d_in_currency), // pvs[3] - PV14d (14 дней) - НОВЫЙ интервал
+    safeValue(coinGeckoCoin.price_change_percentage_30d_in_currency), // pvs[4] - PV30d (30 дней) - сдвинут с индекса 3
+    safeValue(coinGeckoCoin.price_change_percentage_200d_in_currency)  // pvs[5] - PV200d (200 дней) - НОВЫЙ интервал (заменяет 60d и 90d)
+  ];
+  
+  // Добавляем pvs к объекту монеты для совместимости со старым форматом
+  // Также добавляем отдельные переменные для удобства (опционально, для совместимости)
+  return {
+    ...coinGeckoCoin,
+    pvs, // Массив дельт изменения цены (совместим со старым форматом)
+    // Отдельные переменные для удобства (совместимость со старым кодом)
+    PV1h: pvs[0],
+    PV24h: pvs[1],
+    PV7d: pvs[2],
+    PV14d: pvs[3],
+    PV30d: pvs[4],
+    PV200d: pvs[5]
+  };
+}
+
 // Компонент виджета CoinGecko
 // Vue компонент с x-template шаблоном
 window.cmpCoinGecko = {
@@ -44,11 +98,22 @@ window.cmpCoinGecko = {
       const savedSortBy = localStorage.getItem('cgSortBy');
       const savedSortOrder = localStorage.getItem('cgSortOrder');
       
+    // Загружаем и трансформируем данные из localStorage (если они есть)
+    // Если данные уже имеют формат со старыми переменными (pvs) - оставляем как есть
+    // Если нет - трансформируем (для обратной совместимости)
+    let loadedCoins = savedCoins ? JSON.parse(savedCoins) : [];
+    // Проверяем, нужно ли трансформировать данные (если у первой монеты нет поля pvs)
+    // Источник трансформации: old_app_not_write/parsing.js
+    if (loadedCoins.length > 0 && !loadedCoins[0].pvs) {
+      // Трансформируем данные из старого формата CoinGecko в формат со старыми переменными
+      loadedCoins = loadedCoins.map(coin => transformCoinGeckoToPV(coin));
+    }
+    
     return {
       // Состояние сортировки (переопределяем из mixin для загрузки из localStorage)
       sortBy: savedSortBy || null,
       sortOrder: savedSortOrder || null,
-      cgCoins: savedCoins ? JSON.parse(savedCoins) : [],
+      cgCoins: loadedCoins,
       cgIsLoading: false,
       cgError: null,
       cgLastUpdated: savedLastUpdated || null,
@@ -170,7 +235,10 @@ window.cmpCoinGecko = {
         this.decreaseAdaptiveTimeout();
         
         const data = await res.json();
-        this.cgCoins = Array.isArray(data) ? data : [];
+        // Трансформируем данные CoinGecko в формат со старыми переменными (pvs, PV1h и т.д.)
+        // Источник трансформации: old_app_not_write/parsing.js
+        // Это обеспечивает преемственность с математической моделью из старого приложения
+        this.cgCoins = Array.isArray(data) ? data.map(coin => transformCoinGeckoToPV(coin)) : [];
         this.cgLastUpdated = new Date().toISOString(); // Сохраняем ISO строку для парсинга
         
         // Очищаем выбранные монеты, так как список мог измениться
@@ -806,7 +874,9 @@ window.cmpCoinGecko = {
         this.decreaseAdaptiveTimeout();
         
         const data = await res.json();
-        const coins = Array.isArray(data) ? data : [];
+        // Трансформируем данные CoinGecko в формат со старыми переменными (pvs, PV1h и т.д.)
+        // Источник трансформации: old_app_not_write/parsing.js
+        const coins = Array.isArray(data) ? data.map(coin => transformCoinGeckoToPV(coin)) : [];
         
         // Добавляем все монеты в список выбранных (если их еще нет)
         const newCoinIds = [];
@@ -857,7 +927,9 @@ window.cmpCoinGecko = {
         this.decreaseAdaptiveTimeout();
         
         const data = await res.json();
-        const coins = Array.isArray(data) ? data : [];
+        // Трансформируем данные CoinGecko в формат со старыми переменными (pvs, PV1h и т.д.)
+        // Источник трансформации: old_app_not_write/parsing.js
+        const coins = Array.isArray(data) ? data.map(coin => transformCoinGeckoToPV(coin)) : [];
         
         // Добавляем все монеты в список выбранных (если их еще нет)
         const newCoinIds = [];
