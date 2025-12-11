@@ -510,12 +510,12 @@ main .cg-coin-sort-dropdown {
     background-color: transparent !important;
 }
 
-/* Подсветка выбранных строк таблицы с монетами - едва видимая прозрачная подсветка primary цвета */
-/* Используем чистый primary цвет (максимальная насыщенность 100%) с низкой альфа для прозрачности */
+/* Подсветка выбранных строк таблицы с монетами - едва видимая прозрачная подсветка зеленовато-бирюзового цвета */
+/* Используем чистый цвет с максимальной насыщенностью, оптимальной яркостью и низкой альфа */
 .cg-coins-table tbody tr.coin-row-selected,
 .cg-coins-table tbody tr.coin-row-selected td {
-    /* Чистый primary цвет: hue из переменной, максимальная насыщенность (100%), средняя яркость (50%), низкая альфа (0.05) */
-    background-color: hsla(var(--color-primary-h), 100%, 50%, 0.05) !important;
+    /* Зеленовато-бирюзовый цвет: hue из переменной (170), максимальная насыщенность (100%), оптимальная яркость (40%), низкая альфа (0.05) */
+    background-color: hsla(var(--color-selected-h), 100%, 40%, 0.05) !important;
 }
 
 /* Перекрываем все состояния (hover, nth-child) для выбранных строк */
@@ -525,10 +525,10 @@ main .cg-coin-sort-dropdown {
 .cg-coins-table tbody tr.coin-row-selected:nth-child(even) td,
 .cg-coins-table tbody tr.coin-row-selected:nth-child(odd),
 .cg-coins-table tbody tr.coin-row-selected:nth-child(odd) td {
-    background-color: hsla(var(--color-primary-h), 100%, 50%, 0.05) !important;
+    background-color: hsla(var(--color-selected-h), 100%, 40%, 0.05) !important;
 }
 
-/* Для темной темы: немного светлее яркость для лучшей видимости */
+/* Для темной темы: используем те же параметры для консистентности */
 [data-bs-theme="dark"] .cg-coins-table tbody tr.coin-row-selected,
 [data-bs-theme="dark"] .cg-coins-table tbody tr.coin-row-selected td,
 [data-bs-theme="dark"] .cg-coins-table tbody tr.coin-row-selected:hover,
@@ -537,8 +537,8 @@ main .cg-coin-sort-dropdown {
 [data-bs-theme="dark"] .cg-coins-table tbody tr.coin-row-selected:nth-child(even) td,
 [data-bs-theme="dark"] .cg-coins-table tbody tr.coin-row-selected:nth-child(odd),
 [data-bs-theme="dark"] .cg-coins-table tbody tr.coin-row-selected:nth-child(odd) td {
-    /* Для темной темы: яркость 60% для лучшей видимости */
-    background-color: hsla(var(--color-primary-h), 100%, 60%, 0.05) !important;
+    /* Для темной темы: те же параметры для консистентности */
+    background-color: hsla(var(--color-selected-h), 100%, 40%, 0.05) !important;
 }
 
 /* Анимация перемещения строк таблицы при сортировке */
