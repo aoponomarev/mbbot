@@ -1,0 +1,159 @@
+/* Стили иконок через CSS переменные (зарутованы от Bootstrap) */
+
+/* Цвета иконок фреймворков */
+:root {
+  /* Vue.js - зеленый */
+  --icon-vuejs-color: hsl(152, 48%, 53%);
+  
+  /* Bootstrap - фиолетовый */
+  --icon-bootstrap-color: hsl(264, 45%, 47%);
+  
+  /* Цвета иконок метрик (динамические, вычисляются в JS) */
+  --icon-metric-default-color: hsl(0, 0%, 43%); /* #6c757d - серый по умолчанию */
+  
+  /* Цвета статусов */
+  --icon-status-warning-color: hsl(45, 100%, 51%); /* Bootstrap warning */
+  --icon-status-error-color: hsl(354, 70%, 54%); /* Bootstrap danger */
+  --icon-status-success-color: hsl(142, 71%, 45%); /* Bootstrap success */
+  --icon-status-info-color: hsl(199, 89%, 48%); /* Bootstrap info */
+  
+  /* Цвета действий */
+  --icon-action-color: var(--bs-body-color);
+  --icon-action-hover-color: var(--bs-primary);
+  --icon-action-disabled-color: var(--bs-secondary);
+}
+
+/* Темная тема */
+[data-bs-theme="dark"] {
+  --icon-metric-default-color: hsl(0, 0%, 60%);
+}
+
+/* Иконки фреймворков */
+.fa-vuejs {
+  color: var(--icon-vuejs-color);
+}
+
+.fa-bootstrap {
+  color: var(--icon-bootstrap-color);
+}
+
+/* Иконки статусов */
+.fa-exclamation-triangle {
+  color: var(--icon-status-warning-color);
+}
+
+.fa-exclamation-circle {
+  color: var(--icon-status-error-color);
+}
+
+.fa-check-circle {
+  color: var(--icon-status-success-color);
+}
+
+.fa-check {
+  color: var(--icon-status-success-color);
+}
+
+/* Иконки действий (базовые стили) */
+.fa-sync-alt,
+.fa-moon,
+.fa-sun,
+.fa-cog,
+.fa-download,
+.fa-upload,
+.fa-check-square,
+.fa-square,
+.fa-trash,
+.fa-archive,
+.fa-save,
+.fa-eye,
+.fa-eye-slash,
+.fa-stop {
+  color: var(--icon-action-color);
+}
+
+/* Иконки навигации */
+.fa-arrow-up,
+.fa-arrow-down,
+.fa-chevron-up,
+.fa-chevron-down,
+.fa-sort,
+.fa-sort-up,
+.fa-sort-down {
+  color: var(--icon-action-color);
+}
+
+/* Иконки метрик (цвет задается динамически через inline style в JS) */
+.fa-bitcoin,
+.fa-chart-line,
+.fa-wave-square,
+.fa-chart-bar,
+.fa-percent,
+.fa-balance-scale {
+  /* Цвет задается динамически в компоненте footer */
+}
+
+/* Иконки других элементов */
+.fa-robot,
+.fa-database,
+.fa-bars {
+  color: var(--icon-action-color);
+}
+
+/* Hover эффекты для интерактивных иконок */
+button:hover .fa-sync-alt,
+button:hover .fa-moon,
+button:hover .fa-sun,
+button:hover .fa-cog,
+button:hover .fa-download,
+button:hover .fa-upload,
+button:hover .fa-check-square,
+button:hover .fa-square,
+button:hover .fa-trash,
+button:hover .fa-archive,
+button:hover .fa-save,
+button:hover .fa-eye,
+button:hover .fa-eye-slash,
+button:hover .fa-stop,
+button:hover .fa-arrow-up,
+button:hover .fa-arrow-down,
+button:hover .fa-chevron-up,
+button:hover .fa-chevron-down,
+button:hover .fa-sort,
+button:hover .fa-sort-up,
+button:hover .fa-sort-down,
+button:hover .fa-robot,
+button:hover .fa-database,
+button:hover .fa-bars {
+  color: var(--icon-action-hover-color);
+}
+
+/* Disabled состояние */
+button:disabled .fa-sync-alt,
+button:disabled .fa-moon,
+button:disabled .fa-sun,
+button:disabled .fa-cog,
+button:disabled .fa-download,
+button:disabled .fa-upload,
+button:disabled .fa-check-square,
+button:disabled .fa-square,
+button:disabled .fa-trash,
+button:disabled .fa-archive,
+button:disabled .fa-save,
+button:disabled .fa-eye,
+button:disabled .fa-eye-slash,
+button:disabled .fa-stop,
+button:disabled .fa-arrow-up,
+button:disabled .fa-arrow-down,
+button:disabled .fa-chevron-up,
+button:disabled .fa-chevron-down,
+button:disabled .fa-sort,
+button:disabled .fa-sort-up,
+button:disabled .fa-sort-down,
+button:disabled .fa-robot,
+button:disabled .fa-database,
+button:disabled .fa-bars {
+  color: var(--icon-action-disabled-color);
+  opacity: 0.6;
+}
+

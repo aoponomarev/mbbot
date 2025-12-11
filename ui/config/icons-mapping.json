@@ -1,0 +1,202 @@
+{
+  "actions": {
+    "refresh": {
+      "icon": "fas fa-sync-alt",
+      "title": "Обновить",
+      "description": "Обновление данных или страницы"
+    },
+    "theme": {
+      "light": {
+        "icon": "fas fa-moon",
+        "title": "Переключить на темную тему"
+      },
+      "dark": {
+        "icon": "fas fa-sun",
+        "title": "Переключить на светлую тему"
+      }
+    },
+    "settings": {
+      "icon": "fas fa-cog",
+      "title": "Настройки",
+      "description": "Открыть настройки проекта"
+    },
+    "export": {
+      "icon": "fas fa-download",
+      "title": "Экспорт",
+      "description": "Экспорт настроек в JSON"
+    },
+    "import": {
+      "icon": "fas fa-upload",
+      "title": "Импорт",
+      "description": "Импорт настроек из JSON"
+    },
+    "select-all": {
+      "icon": "fas fa-check-square",
+      "title": "Выбрать все",
+      "description": "Выбрать все элементы"
+    },
+    "deselect-all": {
+      "icon": "fas fa-square",
+      "title": "Отменить все",
+      "description": "Отменить выбор всех элементов"
+    },
+    "delete": {
+      "icon": "fas fa-trash",
+      "title": "Удалить",
+      "description": "Удалить элемент или элементы"
+    },
+    "archive": {
+      "icon": "fas fa-archive",
+      "title": "Архив",
+      "description": "Архивировать элемент или элементы"
+    },
+    "save": {
+      "icon": "fas fa-save",
+      "title": "Сохранить",
+      "description": "Сохранить изменения"
+    },
+    "eye": {
+      "icon": "fas fa-eye",
+      "title": "Показать",
+      "description": "Показать скрытое содержимое"
+    },
+    "eye-slash": {
+      "icon": "fas fa-eye-slash",
+      "title": "Скрыть",
+      "description": "Скрыть содержимое"
+    },
+    "stop": {
+      "icon": "fas fa-stop",
+      "title": "Остановить",
+      "description": "Остановить выполнение операции"
+    }
+  },
+  "navigation": {
+    "move-to-start": {
+      "icon": "fas fa-arrow-up",
+      "title": "В начало",
+      "description": "Переместить элемент в начало списка"
+    },
+    "move-up": {
+      "icon": "fas fa-chevron-up",
+      "title": "Вверх",
+      "description": "Переместить элемент вверх"
+    },
+    "move-down": {
+      "icon": "fas fa-chevron-down",
+      "title": "Вниз",
+      "description": "Переместить элемент вниз"
+    },
+    "move-to-end": {
+      "icon": "fas fa-arrow-down",
+      "title": "В конец",
+      "description": "Переместить элемент в конец списка"
+    },
+    "sort": {
+      "icon": "fas fa-sort",
+      "title": "Сортировка",
+      "description": "Нейтральная иконка сортировки"
+    },
+    "sort-up": {
+      "icon": "fas fa-sort-up",
+      "title": "Сортировка по возрастанию",
+      "description": "Сортировка по возрастанию"
+    },
+    "sort-down": {
+      "icon": "fas fa-sort-down",
+      "title": "Сортировка по убыванию",
+      "description": "Сортировка по убыванию"
+    }
+  },
+  "status": {
+    "warning": {
+      "icon": "fas fa-exclamation-triangle",
+      "title": "Предупреждение",
+      "description": "Иконка предупреждения"
+    },
+    "error": {
+      "icon": "fas fa-exclamation-circle",
+      "title": "Ошибка",
+      "description": "Иконка ошибки"
+    },
+    "success": {
+      "icon": "fas fa-check-circle",
+      "title": "Успех",
+      "description": "Иконка успешного выполнения"
+    },
+    "check": {
+      "icon": "fas fa-check",
+      "title": "Отмечено",
+      "description": "Иконка отметки"
+    },
+    "spinner": {
+      "icon": "fas fa-spinner fa-spin",
+      "title": "Загрузка",
+      "description": "Иконка загрузки с анимацией"
+    }
+  },
+  "metrics": {
+    "bitcoin": {
+      "icon": "fab fa-bitcoin",
+      "title": "Bitcoin Dominance",
+      "description": "Иконка доминирования Bitcoin"
+    },
+    "fgi": {
+      "icon": "fas fa-chart-line",
+      "title": "Fear & Greed Index",
+      "description": "Иконка индекса страха и жадности"
+    },
+    "vix": {
+      "icon": "fas fa-wave-square",
+      "title": "VIX",
+      "description": "Иконка индекса волатильности"
+    },
+    "oi": {
+      "icon": "fas fa-chart-bar",
+      "title": "Open Interest",
+      "description": "Иконка открытого интереса"
+    },
+    "fr": {
+      "icon": "fas fa-percent",
+      "title": "Funding Rate",
+      "description": "Иконка ставки финансирования"
+    },
+    "lsr": {
+      "icon": "fas fa-balance-scale",
+      "title": "Long/Short Ratio",
+      "description": "Иконка соотношения лонгов и шортов"
+    }
+  },
+  "frameworks": {
+    "vuejs": {
+      "icon": "fab fa-vuejs",
+      "title": "Vue.js",
+      "description": "Иконка фреймворка Vue.js",
+      "color": "hsl(152, 48%, 53%)"
+    },
+    "bootstrap": {
+      "icon": "fab fa-bootstrap",
+      "title": "Bootstrap",
+      "description": "Иконка фреймворка Bootstrap",
+      "color": "hsl(264, 45%, 47%)"
+    }
+  },
+  "other": {
+    "robot": {
+      "icon": "fas fa-robot",
+      "title": "AI",
+      "description": "Иконка искусственного интеллекта"
+    },
+    "database": {
+      "icon": "fas fa-database",
+      "title": "База данных",
+      "description": "Иконка управления данными"
+    },
+    "hamburger": {
+      "icon": "fas fa-bars",
+      "title": "Меню",
+      "description": "Иконка гамбургер-меню"
+    }
+  }
+}
+
