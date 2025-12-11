@@ -12,36 +12,36 @@
 
 /* Стилизация dropdown меню с инверсной темой (используются Bootstrap дефолтные border-radius) */
 .app-header-dropdown-menu[data-bs-theme="dark"] {
-    background-color: #2b2b2b;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+    background-color: var(--color-dropdown-dark-bg);
+    border: 1px solid var(--color-dropdown-dark-border);
+    box-shadow: 0 4px 6px -1px hsla(0, 0%, 0%, 0.3), 0 2px 4px -1px hsla(0, 0%, 0%, 0.2);
     /* Используются Bootstrap дефолтные border-radius (var(--bs-border-radius)) */
 }
 
 .app-header-dropdown-menu[data-bs-theme="dark"] .dropdown-item {
-    color: #ffffff;
+    color: var(--color-dropdown-dark-text);
 }
 
 .app-header-dropdown-menu[data-bs-theme="dark"] .dropdown-item:hover,
 .app-header-dropdown-menu[data-bs-theme="dark"] .dropdown-item.active {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
+    background-color: var(--color-dropdown-dark-overlay);
+    color: var(--color-dropdown-dark-text);
 }
 
 .app-header-dropdown-menu[data-bs-theme="light"] {
-    background-color: #ffffff;
-    border: 1px solid rgba(0, 0, 0, 0.12);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    background-color: var(--color-dropdown-light-bg);
+    border: 1px solid var(--color-dropdown-light-border);
+    box-shadow: 0 4px 6px -1px hsla(0, 0%, 0%, 0.1), 0 2px 4px -1px hsla(0, 0%, 0%, 0.06);
     /* Используются Bootstrap дефолтные border-radius (var(--bs-border-radius)) */
 }
 
 .app-header-dropdown-menu[data-bs-theme="light"] .dropdown-item {
-    color: #212529;
+    color: var(--color-dropdown-light-text);
 }
 
 .app-header-dropdown-menu[data-bs-theme="light"] .dropdown-item:hover,
 .app-header-dropdown-menu[data-bs-theme="light"] .dropdown-item.active {
-    background-color: rgba(0, 0, 0, 0.08);
-    color: #212529;
+    background-color: var(--color-dropdown-light-overlay);
+    color: var(--color-dropdown-light-text);
 }
 

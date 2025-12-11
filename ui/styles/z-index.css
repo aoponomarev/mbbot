@@ -1,0 +1,27 @@
+/* Z-index слои (связаны с Bootstrap z-index переменными) */
+
+:root,
+[data-bs-theme="light"],
+[data-bs-theme="dark"] {
+    /* Используем Bootstrap переменные для совместимости */
+    /* Bootstrap 5 z-index переменные:
+     * --bs-zindex-dropdown: 1000
+     * --bs-zindex-sticky: 1020
+     * --bs-zindex-fixed: 1030
+     * --bs-zindex-modal-backdrop: 1040
+     * --bs-zindex-modal: 1050
+     * --bs-zindex-popover: 1070
+     * --bs-zindex-tooltip: 1080
+     */
+    
+    /* Кастомные z-index для элементов приложения */
+    /* Связаны с Bootstrap переменными для консистентности */
+    --z-index-dropdown: var(--bs-zindex-dropdown, 1000); /* Dropdown меню (совпадает с Bootstrap) */
+    --z-index-splash: 9999; /* Сплэш-экран - самый верхний слой */
+    --z-index-overlay: 1; /* Для элементов внутри контейнеров (например, текст поверх SVG) */
+    
+    /* Z-index для фиксированных элементов интерфейса */
+    --z-index-footer: 1000; /* Футер - фиксированный внизу (совпадает с Bootstrap dropdown) */
+    --z-index-header: 1050; /* Хедер - фиксированный сверху (совпадает с Bootstrap modal) */
+}
+

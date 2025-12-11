@@ -91,6 +91,12 @@ window.cmpCoinGecko = {
       return this.sortedCoins.length;
     },
     
+    // Процент выбранных монет для круговой диаграммы (0-1)
+    selectedCoinsPercentage() {
+      if (this.totalCoinsCount === 0) return 0;
+      return this.selectedCoinsCount / this.totalCoinsCount;
+    },
+    
     // Отображение значения в поле поиска (реактивное)
     searchQueryDisplay() {
       return this.isAddingTickers ? this.displayPendingTickers : this.cgSearchQuery;

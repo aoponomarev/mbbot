@@ -11,6 +11,12 @@
     <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     
+    <!-- Кастомизация цветов темы (HSL) -->
+    <link rel="stylesheet" href="ui/styles/theme-colors.css">
+    
+    <!-- Z-index слои (связаны с Bootstrap) -->
+    <link rel="stylesheet" href="ui/styles/z-index.css">
+    
     <!-- Стили компонентов приложения -->
     <!-- Стили компонентов приложения -->
     <link rel="stylesheet" href="ui/styles/layout.css">
@@ -131,9 +137,9 @@
                         title="Меню"
                     >
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <rect x="2" y="5" width="16" height="2" fill="#ffffff" rx="0.5"/>
-                            <rect x="2" y="9" width="16" height="2" fill="#ffffff" rx="0.5"/>
-                            <rect x="2" y="13" width="16" height="2" fill="#ffffff" rx="0.5"/>
+                            <rect x="2" y="5" width="16" height="2" fill="currentColor" rx="0.5"/>
+                            <rect x="2" y="9" width="16" height="2" fill="currentColor" rx="0.5"/>
+                            <rect x="2" y="13" width="16" height="2" fill="currentColor" rx="0.5"/>
                         </svg>
                     </div>
 
@@ -361,27 +367,49 @@
     <!-- X-Template для компонента виджета CoinGecko (должен быть ДО загрузки Vue и компонентов) -->
     <script type="text/x-template" id="coingecko-template">
         <div class="col-12 mb-4">
-            <div class="card avto-B7fN2kT">
+            <div class="card avto-B7fN2kT for-coinsindicator">
                 <div class="card-header d-flex align-items-center gap-2">
-                    <!-- Кнопка счетчика монет (n/N) с выпадающим меню -->
+                    <!-- Кнопка счетчика монет с выпадающим меню -->
                     <div class="position-relative">
                         <button 
                             class="btn btn-sm cg-coins-counter" 
                             type="button"
                             @click.stop="toggleCounterDropdown"
                         >
-                            <template v-if="selectedCoinsCount > 0 && selectedCoinsCount < totalCoinsCount">
-                                <span class="cg-counter-selected">{{ selectedCoinsCount }}</span>/{{ totalCoinsCount }}
-                            </template>
-                            <template v-else>
-                                {{ totalCoinsCount }}
-                            </template>
+                            <!-- Круговая диаграмма (разорванное кольцо) при выбранных чекбоксах -->
+                            <svg v-if="selectedCoinsCount > 0" class="cg-counter-ring" viewBox="0 0 36 36">
+                                <circle
+                                    class="cg-counter-ring-bg"
+                                    cx="18"
+                                    cy="18"
+                                    r="15.915"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    opacity="0.2"
+                                />
+                                <circle
+                                    class="cg-counter-ring-progress"
+                                    cx="18"
+                                    cy="18"
+                                    r="15.915"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    :stroke-dasharray="`${selectedCoinsPercentage * 100} 100`"
+                                    stroke-dashoffset="25"
+                                    transform="rotate(-90 18 18)"
+                                />
+                            </svg>
+                            <!-- Число: выбранные или общее -->
+                            <span>{{ selectedCoinsCount > 0 ? selectedCoinsCount : totalCoinsCount }}</span>
                         </button>
                         <!-- Выпадающее меню счетчика -->
                         <div 
                             v-if="showCounterDropdown" 
                             class="position-absolute bg-body border rounded shadow-sm cg-counter-dropdown" 
-                            style="z-index: 1000; top: 100%; margin-top: 4px; min-width: 200px;"
+                            style="top: 100%; margin-top: 4px; min-width: 200px;"
                             @click.stop
                         >
                             <div class="list-group list-group-flush">
@@ -429,7 +457,7 @@
                             @focus="!isAddingTickers && cgSearchResults.length > 0 ? null : searchCoins(cgSearchQuery)"
                         >
                         <!-- Индикатор прогресса добавления тикеров -->
-                        <div v-if="isAddingTickers" class="position-absolute w-100 bg-body border rounded shadow-sm cg-search-dropdown avto-H8nL3qT cg-loading-panel" style="z-index: 1000; top: 100%; margin-top: 4px; padding: 0.75rem;">
+                        <div v-if="isAddingTickers" class="position-absolute w-100 bg-body border rounded shadow-sm cg-search-dropdown avto-H8nL3qT cg-loading-panel" style="top: 100%; margin-top: 4px; padding: 0.75rem;">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <div class="small">
                                     <i class="fas fa-spinner fa-spin me-2"></i>
@@ -476,7 +504,7 @@
                             </div>
                         </div>
                         <!-- Выпадающий список результатов поиска -->
-                        <div v-if="cgSearchResults.length > 0 && !isAddingTickers" class="position-absolute w-100 bg-body border rounded shadow-sm cg-search-dropdown avto-H8nL3qT" style="z-index: 1000; max-height: 300px; overflow-y: auto; top: 100%; margin-top: 4px;">
+                        <div v-if="cgSearchResults.length > 0 && !isAddingTickers" class="position-absolute w-100 bg-body border rounded shadow-sm cg-search-dropdown avto-H8nL3qT" style="max-height: 300px; overflow-y: auto; top: 100%; margin-top: 4px;">
                             <div 
                                 v-for="result in cgSearchResults" 
                                 :key="result.id"
@@ -499,19 +527,19 @@
                     </div>
                     <div class="position-relative">
                         <button 
-                            class="btn btn-sm" 
+                            class="btn btn-sm cg-archive-btn" 
                             type="button"
                             :disabled="cgArchivedCoins.length === 0"
                             @click.stop="toggleArchiveDropdown"
-                            style="width: auto; min-width: fit-content;"
                         >
-                            Архив
+                            <i class="fas fa-archive d-inline d-md-none"></i>
+                            <span class="d-none d-md-inline">Архив</span>
                         </button>
                         <!-- Выпадающий список архива -->
                         <div 
                             v-if="showArchiveDropdown && cgArchivedCoins.length > 0" 
                             class="position-absolute bg-body border rounded shadow-sm cg-archive-dropdown avto-P4rM7wX" 
-                            style="z-index: 1000; max-height: 300px; overflow-y: auto; top: 100%; margin-top: 4px; width: auto; min-width: fit-content; right: 0;"
+                            style="max-height: 300px; overflow-y: auto; top: 100%; margin-top: 4px; width: auto; min-width: fit-content; right: 0;"
                             @click.stop
                         >
                             <div 
@@ -533,13 +561,16 @@
                             </div>
                         </div>
                     </div>
-                    <small class="text-muted" v-if="cgLastUpdated" style="line-height: 1.2;">
+                    <small class="text-muted d-none d-md-block" v-if="cgLastUpdated" style="line-height: 1.2;">
                         <div>{{ formatLastUpdatedDate(cgLastUpdated) }}</div>
                         <div>{{ formatLastUpdatedTime(cgLastUpdated) }}</div>
                     </small>
                     <button class="btn btn-sm cg-update-btn" @click="fetchCoinGecko" :disabled="cgIsLoading">
-                        <span v-if="cgIsLoading" class="spinner-border spinner-border-sm me-1" role="status"></span>
-                        <span v-else>Обновить</span>
+                        <span v-if="cgIsLoading" class="spinner-border spinner-border-sm" role="status"></span>
+                        <template v-else>
+                            <i class="fas fa-sync-alt d-inline d-md-none"></i>
+                            <span class="d-none d-md-inline">Обновить</span>
+                        </template>
                     </button>
                 </div>
                 <div class="card-body">
@@ -692,11 +723,11 @@
                                 <span>LSR: <span class="font-monospace app-footer-metric-value">{{ displayLSR }}</span></span>
                             </div>
                             <div class="d-flex align-items-center gap-1">
-                                <i class="fab fa-vuejs" style="color: #4FC08D;"></i>
+                                <i class="fab fa-vuejs fa-vuejs"></i>
                                 <span>{{ vueVersion }}</span>
                             </div>
                             <div class="d-flex align-items-center gap-1">
-                                <i class="fab fa-bootstrap" style="color: #7952B3;"></i>
+                                <i class="fab fa-bootstrap fa-bootstrap"></i>
                                 <span>{{ bootstrapVersion }}</span>
                             </div>
                         </div>

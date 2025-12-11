@@ -38,20 +38,20 @@ body {
 }
 
 *::-webkit-scrollbar-thumb:vertical {
-    background: rgba(0, 0, 0, 0.2);
+    background: hsla(0, 0%, 0%, 0.2);
     border-radius: 6px;
 }
 
 *::-webkit-scrollbar-thumb:vertical:hover {
-    background: rgba(0, 0, 0, 0.3);
+    background: hsla(0, 0%, 0%, 0.3);
 }
 
 [data-bs-theme="dark"] *::-webkit-scrollbar-thumb:vertical {
-    background: rgba(255, 255, 255, 0.2);
+    background: hsla(0, 0%, 100%, 0.2);
 }
 
 [data-bs-theme="dark"] *::-webkit-scrollbar-thumb:vertical:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: hsla(0, 0%, 100%, 0.3);
 }
 
 /* Для контейнеров с горизонтальной прокруткой (например, .table-responsive) - скрываем полосу, но разрешаем прокрутку */
@@ -144,18 +144,112 @@ body {
     margin-bottom: 0 !important;
 }
 
-/* Кнопка счетчика монет (n/N) */
+/* Кнопка счетчика монет */
 .cg-coins-counter {
-    /* Фиксированная ширина в em для двузначных чисел и слеша (например: "99/99") */
-    width: 5em;
-    min-width: 5em;
+    /* Фиксированная ширина 3em */
+    width: 3em;
+    min-width: 3em;
+    height: 3em;
+    padding: 0;
     text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    /* Прозрачный фон и рамки для всех состояний */
+    background-color: transparent !important;
+    border: none !important;
+    color: var(--bs-body-color);
+}
+
+.cg-coins-counter:hover,
+.cg-coins-counter:focus,
+.cg-coins-counter:active,
+.cg-coins-counter.active {
+    background-color: transparent !important;
+    border: none !important;
+    color: var(--bs-body-color);
+    box-shadow: none !important;
+}
+
+.cg-coins-counter:disabled {
+    background-color: transparent !important;
+    border: none !important;
+    opacity: 0.5;
+}
+
+/* Круговая диаграмма (разорванное кольцо) */
+.cg-counter-ring {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+}
+
+.cg-counter-ring-bg {
+    color: var(--bs-body-color);
+}
+
+.cg-counter-ring-progress {
+    /* Используем тот же цвет, что и у чекнутых чекбоксов Bootstrap */
+    /* Цвет берется из состояния :checked чекбокса - это border-color и background-color */
+    color: var(--bs-form-check-input-checked-border-color, var(--bs-form-check-input-checked-bg-color, var(--bs-primary)));
+}
+
+/* Число на кнопке */
+.cg-coins-counter > span {
+    position: relative;
+    z-index: var(--z-index-overlay);
+    font-weight: 600;
+}
+
+/* Выравнивание кнопки счетчика с чекбоксами в таблице */
+/* Карточка с классом for-coinsindicator: регулируем левый паддинг хедера для выравнивания */
+.card.avto-B7fN2kT.for-coinsindicator .card-header {
+    /* Левый паддинг для выравнивания кнопки счетчика с центром чекбоксов */
+    /* Чекбоксы находятся в первой колонке таблицы (width: 40px) */
+    /* Центр чекбокса от левого края карточки: паддинг card-body (1rem) + половина ширины колонки (20px) = 1rem + 20px */
+    /* Кнопка находится в начале хедера, центр кнопки от левого края хедера: 1.5em (половина ширины 3em) */
+    /* Для выравнивания: padding-left хедера = (1rem + 20px) - 1.8em */
+    /* Учитываем, что у хедера уже есть стандартный паддинг Bootstrap, поэтому переопределяем его */
+    padding-left: calc(1rem + 20px - 1.8em) !important;
+}
+
+/* Регулировка ширины кнопки для точного выравнивания */
+.card.avto-B7fN2kT.for-coinsindicator .cg-coins-counter {
+    /* Ширина 3em для выравнивания центра кнопки с центром чекбокса */
+    width: 3em;
+    min-width: 3em;
 }
 
 /* Кнопка обновления CoinGecko: фиксированная ширина для предотвращения "прыжков" интерфейса */
 .cg-update-btn {
-    min-width: 7em;
-    width: 7em;
+    min-width: 3em;
+    width: 3em;
+}
+
+/* На десктопе: ширина 7em для текста "Обновить" */
+@media (min-width: 768px) {
+    .cg-update-btn {
+        min-width: 7em;
+        width: 7em;
+    }
+}
+
+/* Кнопка архива CoinGecko: фиксированная ширина для мобильных */
+.cg-archive-btn {
+    min-width: 3em;
+    width: 3em;
+}
+
+/* На десктопе: ширина по контенту для текста "Архив" */
+@media (min-width: 768px) {
+    .cg-archive-btn {
+        min-width: auto;
+        width: auto;
+    }
 }
 
 /* Выделение числа отмеченных монет более контрастным цветом */
@@ -169,114 +263,74 @@ body {
 .card-header .btn {
     /* Используем цвет secondary для фона (адаптируется под тему) */
     background-color: var(--bs-secondary-bg);
-    border-color: #adb5bd; /* Высококонтрастная рамка для светлой темы */
+    border-color: var(--color-border);
     color: var(--bs-body-color);
     opacity: 1; /* Убираем любую прозрачность */
 }
 
-[data-bs-theme="dark"] .card-header .btn {
-    border-color: var(--bs-border-color); /* Для темной темы используем стандартный цвет */
-}
 
 .card-header .btn:hover:not(:disabled) {
     /* В светлой теме - темнее при наведении */
-    background-color: #d5d8dc;
-    border-color: #98a2ac; /* Очень контрастная рамка при наведении в светлой теме */
+    background-color: var(--color-button-hover);
+    border-color: var(--color-border-hover);
     color: var(--bs-body-color);
 }
 
-[data-bs-theme="dark"] .card-header .btn:hover:not(:disabled) {
-    /* В темной теме - заметно светлее при наведении */
-    background-color: #4a4d52;
-    border-color: var(--bs-border-color); /* Для темной темы используем стандартный цвет */
-    color: var(--bs-body-color);
-}
 
 .card-header .btn:focus:not(:disabled) {
     /* В светлой теме - темнее при фокусе */
-    background-color: #d5d8dc;
-    border-color: #98a2ac; /* Очень контрастная рамка при фокусе в светлой теме */
+    background-color: var(--color-button-hover);
+    border-color: var(--color-border-hover);
     color: var(--bs-body-color);
     box-shadow: 0 0 0 0.25rem rgba(var(--bs-secondary-rgb), 0.25);
 }
 
-[data-bs-theme="dark"] .card-header .btn:focus:not(:disabled) {
-    /* В темной теме - заметно светлее при фокусе */
-    background-color: #4a4d52;
-    border-color: var(--bs-border-color); /* Для темной темы используем стандартный цвет */
-    color: var(--bs-body-color);
-    box-shadow: 0 0 0 0.25rem rgba(var(--bs-secondary-rgb), 0.25);
-}
 
 .card-header .btn:active:not(:disabled) {
     background-color: var(--bs-secondary-bg);
-    border-color: #adb5bd; /* Высококонтрастная рамка при активном состоянии в светлой теме */
+    border-color: var(--color-border);
     color: var(--bs-body-color);
 }
 
-[data-bs-theme="dark"] .card-header .btn:active:not(:disabled) {
-    border-color: var(--bs-border-color); /* Для темной темы используем стандартный цвет */
-}
 
 .card-header .btn:disabled {
     background-color: var(--bs-secondary-bg);
-    border-color: #c1c9d1; /* Более светлая рамка для disabled в светлой теме */
+    border-color: var(--color-button-disabled);
     color: var(--bs-secondary-color);
     opacity: 0.65; /* Стандартная прозрачность для disabled */
 }
 
-[data-bs-theme="dark"] .card-header .btn:disabled {
-    border-color: var(--bs-border-color); /* Для темной темы используем стандартный цвет */
-}
 
 /* Текстовые инпуты в хедерах карточек: контрастные рамки как у кнопок */
 .card-header .form-control {
-    border-color: #adb5bd; /* Высококонтрастная рамка для светлой темы */
+    border-color: var(--color-border);
 }
 
-[data-bs-theme="dark"] .card-header .form-control {
-    border-color: var(--bs-border-color); /* Для темной темы используем стандартный цвет */
-}
 
 .card-header .form-control:focus {
-    border-color: #98a2ac; /* Очень контрастная рамка при фокусе в светлой теме */
+    border-color: var(--color-border-hover);
     box-shadow: 0 0 0 0.25rem rgba(var(--bs-secondary-rgb), 0.25);
 }
 
-[data-bs-theme="dark"] .card-header .form-control:focus {
-    border-color: var(--bs-border-color); /* Для темной темы используем стандартный цвет */
-}
 
 /* Селекты в хедерах карточек: контрастные рамки и hover эффекты */
 .card-header .form-select {
-    border-color: #adb5bd; /* Высококонтрастная рамка для светлой темы */
+    border-color: var(--color-border);
 }
 
-[data-bs-theme="dark"] .card-header .form-select {
-    border-color: var(--bs-border-color); /* Для темной темы используем стандартный цвет */
-}
 
 .card-header .form-select:hover {
     /* В светлой теме - темнее при наведении */
-    background-color: #d5d8dc;
-    border-color: #98a2ac;
+    background-color: var(--color-button-hover);
+    border-color: var(--color-border-hover);
 }
 
-[data-bs-theme="dark"] .card-header .form-select:hover {
-    /* В темной теме - заметно светлее при наведении */
-    background-color: #4a4d52;
-    border-color: var(--bs-border-color);
-}
 
 .card-header .form-select:focus {
-    border-color: #98a2ac; /* Очень контрастная рамка при фокусе в светлой теме */
+    border-color: var(--color-border-hover);
     box-shadow: 0 0 0 0.25rem rgba(var(--bs-secondary-rgb), 0.25);
 }
 
-[data-bs-theme="dark"] .card-header .form-select:focus {
-    border-color: var(--bs-border-color); /* Для темной темы используем стандартный цвет */
-    box-shadow: 0 0 0 0.25rem rgba(var(--bs-secondary-rgb), 0.25);
-}
 
 /* Глобальные стили для disabled полей ввода в темной теме */
 /* Bootstrap по умолчанию применяет белый фон для disabled элементов, что плохо видно в темной теме */
@@ -309,8 +363,8 @@ body {
 /* Цвет всех card-header: более стальной (темнее, в сторону стального серого с легким синеватым оттенком) */
 .card-header {
     /* Стальной серый оттенок для светлой темы - темнее и с легким синеватым оттенком */
-    background-color: #e8eaed;
-    border-bottom-color: #d1d5db;
+    background-color: var(--color-card-header);
+    border-bottom-color: var(--color-card-header-border);
     /* Увеличенные вертикальные паддинги */
     padding-top: 0.75rem;
     padding-bottom: 0.75rem;
@@ -318,8 +372,8 @@ body {
 
 [data-bs-theme="dark"] .card-header {
     /* Стальной серый оттенок для темной темы - темнее и с легким синеватым оттенком */
-    background-color: #2e3035;
-    border-bottom-color: #3d4046;
+    background-color: var(--color-card-header);
+    border-bottom-color: var(--color-card-header-border);
 }
 
 /* Глобально для всех выпадающих списков: одинаковый цвет текста и иконок во всех состояниях */
@@ -418,12 +472,14 @@ main .cg-counter-dropdown,
 main .cg-search-dropdown,
 main .cg-archive-dropdown,
 main .cg-context-menu {
+    /* Z-index для dropdown меню (совпадает с Bootstrap) */
+    z-index: var(--z-index-dropdown);
     /* Единый радиус скругления - 2.5px */
     border-radius: 2.5px !important;
     /* Более контрастная рамка */
-    border: 1px solid #adb5bd !important;
+    border: 1px solid var(--color-border) !important;
     /* Более контрастная тень */
-    box-shadow: 0 4px 8px -2px rgba(0, 0, 0, 0.15), 0 2px 6px -1px rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 4px 8px -2px hsla(0, 0%, 0%, 0.15), 0 2px 6px -1px hsla(0, 0%, 0%, 0.1) !important;
 }
 
 [data-bs-theme="dark"] main .cg-counter-dropdown,
@@ -431,29 +487,29 @@ main .cg-context-menu {
 [data-bs-theme="dark"] main .cg-archive-dropdown,
 [data-bs-theme="dark"] main .cg-context-menu {
     /* Более контрастная рамка для темной темы */
-    border-color: #5a5d62 !important;
+    border-color: var(--color-dropdown-border-dark) !important;
     /* Более контрастная тень для темной темы */
-    box-shadow: 0 4px 8px -2px rgba(0, 0, 0, 0.4), 0 2px 6px -1px rgba(0, 0, 0, 0.3) !important;
+    box-shadow: 0 4px 8px -2px hsla(0, 0%, 0%, 0.4), 0 2px 6px -1px hsla(0, 0%, 0%, 0.3) !important;
 }
 
 /* Кастомный цвет для бейджей неудачных тикеров (лучшая читабельность на светлом фоне) */
 .badge.bg-warning-dark {
-    background-color: #cc7700 !important; /* Темный оранжевый - тот же цвет, что и для текста */
-    color: #ffffff !important;
+    background-color: var(--color-warning-dark) !important;
+    color: var(--bs-white) !important;
 }
 
 [data-bs-theme="dark"] .badge.bg-warning-dark {
-    background-color: #ffb84d !important; /* Светлый оранжевый - тот же цвет, что и для текста */
-    color: #000000 !important;
+    background-color: var(--color-warning-dark) !important;
+    color: var(--bs-black) !important;
 }
 
 /* Кастомный цвет для текста предупреждений о неудачных тикерах */
 .text-warning-dark {
-    color: #cc7700 !important; /* Темный оранжевый для светлой темы */
+    color: var(--color-warning-dark) !important;
 }
 
 [data-bs-theme="dark"] .text-warning-dark {
-    color: #ffb84d !important; /* Светлый оранжевый для темной темы */
+    color: var(--color-warning-dark) !important;
 }
 
 /* Позиционирование панельки загрузки монет - верхний край вровень с верхней границей card-header */

@@ -1,0 +1,197 @@
+/* Кастомизация цветов темы Bootstrap через HSL */
+
+/* Светлая тема */
+:root,
+[data-bs-theme="light"] {
+    /* Базовые HSL значения для primary цвета - более приглушенный и мягкий синий */
+    --color-primary-h: 208; /* Чуть более мягкий синий тон (вместо 210) */
+    --color-primary-s: 12%;  /* Более приглушенная насыщенность для мягкости (вместо 20%) */
+    --color-primary-l: 42%;  /* Чуть темнее для лучшего контраста (вместо 45%) */
+    
+    /* Генерируем primary цвет из HSL */
+    --bs-primary: hsl(var(--color-primary-h), var(--color-primary-s), var(--color-primary-l));
+    
+    /* RGB для совместимости с Bootstrap (вычислено из HSL(208, 12%, 42%)) */
+    --bs-primary-rgb: 95, 110, 125;
+    
+    /* Общие значения для серых оттенков */
+    --color-theme-h: 210; /* Основной тон темы */
+    --color-muted-s: 5%;  /* Приглушенная насыщенность для нейтральных элементов */
+    --color-light-gray-l: 82%; /* Общий lightness для светло-серых элементов */
+    
+    /* Кастомные цвета для кнопок карточек (серые оттенки) */
+    --color-border-h: var(--color-theme-h);
+    --color-border-s: 10%;
+    --color-border-l: 70%;
+    --color-border: hsl(var(--color-border-h), var(--color-border-s), var(--color-border-l));
+    
+    --color-border-hover-h: var(--color-theme-h);
+    --color-border-hover-s: 8%;
+    --color-border-hover-l: 60%;
+    --color-border-hover: hsl(var(--color-border-hover-h), var(--color-border-hover-s), var(--color-border-hover-l));
+    
+    --color-button-hover-h: var(--color-theme-h);
+    --color-button-hover-s: var(--color-muted-s);
+    --color-button-hover-l: var(--color-light-gray-l);
+    --color-button-hover: hsl(var(--color-button-hover-h), var(--color-button-hover-s), var(--color-button-hover-l));
+    
+    --color-button-disabled-h: var(--color-theme-h);
+    --color-button-disabled-s: 8%;
+    --color-button-disabled-l: 75%;
+    --color-button-disabled: hsl(var(--color-button-disabled-h), var(--color-button-disabled-s), var(--color-button-disabled-l));
+    
+    /* Цвета для предупреждений (оранжевые) */
+    --color-warning-dark-h: 30;
+    --color-warning-dark-s: 100%;
+    --color-warning-dark-l: 40%;
+    --color-warning-dark: hsl(var(--color-warning-dark-h), var(--color-warning-dark-s), var(--color-warning-dark-l));
+    
+    /* Цвета для карточек */
+    --color-card-header-h: var(--color-theme-h);
+    --color-card-header-s: var(--color-muted-s);
+    --color-card-header-l: 91%;
+    --color-card-header: hsl(var(--color-card-header-h), var(--color-card-header-s), var(--color-card-header-l));
+    
+    --color-card-header-border-h: var(--color-theme-h);
+    --color-card-header-border-s: 8%;
+    --color-card-header-border-l: var(--color-light-gray-l);
+    --color-card-header-border: hsl(var(--color-card-header-border-h), var(--color-card-header-border-s), var(--color-card-header-border-l));
+    
+    /* Цвета для хедера (темный, независимо от темы приложения) */
+    --color-header-bg-h: 0;
+    --color-header-bg-s: 0%;
+    --color-header-bg-l: 17%;
+    --color-header-bg: hsl(var(--color-header-bg-h), var(--color-header-bg-s), var(--color-header-bg-l));
+    
+    /* HSL значения для белого цвета */
+    --color-white-h: 0;
+    --color-white-s: 0%;
+    --color-white-l: 100%;
+    
+    --color-header-text: hsl(var(--color-white-h), var(--color-white-s), var(--color-white-l));
+    --color-header-overlay: hsla(var(--color-white-h), var(--color-white-s), var(--color-white-l), 0.1);
+    --color-header-overlay-hover: hsla(var(--color-white-h), var(--color-white-s), var(--color-white-l), 0.15);
+    --color-header-border: hsla(var(--color-white-h), var(--color-white-s), var(--color-white-l), 0.2);
+    --color-header-border-strong: hsla(var(--color-white-h), var(--color-white-s), var(--color-white-l), 0.3);
+    --color-header-text-muted: hsla(var(--color-white-h), var(--color-white-s), var(--color-white-l), 0.5);
+    
+    /* HSL значения для черного цвета */
+    --color-black-h: 0;
+    --color-black-s: 0%;
+    --color-black-l: 0%;
+    
+    /* HSL значения для темно-серого текста */
+    --color-dark-text-h: 210;
+    --color-dark-text-s: 9%;
+    --color-dark-text-l: 15%;
+    
+    /* Цвета для dropdown в хедере (инверсны теме приложения) */
+    --color-dropdown-dark-bg: hsl(var(--color-header-bg-h), var(--color-header-bg-s), var(--color-header-bg-l));
+    --color-dropdown-dark-text: hsl(var(--color-white-h), var(--color-white-s), var(--color-white-l));
+    --color-dropdown-dark-overlay: hsla(var(--color-white-h), var(--color-white-s), var(--color-white-l), 0.1);
+    --color-dropdown-dark-border: hsla(var(--color-white-h), var(--color-white-s), var(--color-white-l), 0.12);
+    
+    --color-dropdown-light-bg: hsl(var(--color-white-h), var(--color-white-s), var(--color-white-l));
+    --color-dropdown-light-text: hsl(var(--color-dark-text-h), var(--color-dark-text-s), var(--color-dark-text-l));
+    --color-dropdown-light-overlay: hsla(var(--color-black-h), var(--color-black-s), var(--color-black-l), 0.08);
+    --color-dropdown-light-border: hsla(var(--color-black-h), var(--color-black-s), var(--color-black-l), 0.12);
+    
+    /* Цвет рамки для dropdown в основной области (темная тема) */
+    --color-dropdown-border-dark-h: var(--color-theme-h);
+    --color-dropdown-border-dark-s: var(--color-muted-s);
+    --color-dropdown-border-dark-l: 35%;
+    --color-dropdown-border-dark: hsl(var(--color-dropdown-border-dark-h), var(--color-dropdown-border-dark-s), var(--color-dropdown-border-dark-l));
+}
+
+/* Темная тема */
+[data-bs-theme="dark"] {
+    /* Более приглушенный и мягкий primary для темной темы */
+    --color-primary-h: 208; /* Тот же мягкий тон */
+    --color-primary-s: 10%; /* Еще более приглушенная насыщенность для мягкости (вместо 15%) */
+    --color-primary-l: 58%;  /* Чуть темнее для лучшего контраста (вместо 60%) */
+    
+    --bs-primary: hsl(var(--color-primary-h), var(--color-primary-s), var(--color-primary-l));
+    
+    /* RGB для совместимости с Bootstrap (вычислено из HSL(208, 10%, 58%)) */
+    --bs-primary-rgb: 133, 146, 158;
+    
+    /* Общие значения для серых оттенков */
+    --color-theme-h: 210;
+    --color-muted-s: 5%;
+    
+    /* Общий нейтральный серый для рамок, hover и disabled в темной теме (объединение дубликатов) */
+    --color-neutral-gray-h: var(--color-theme-h);
+    --color-neutral-gray-s: var(--color-muted-s);
+    --color-neutral-gray-l: 50%;
+    --color-neutral-gray: hsl(var(--color-neutral-gray-h), var(--color-neutral-gray-s), var(--color-neutral-gray-l));
+    
+    /* Кастомные цвета для кнопок карточек (темные оттенки) - используем общий нейтральный серый */
+    --color-border: var(--color-neutral-gray);
+    --color-border-hover: var(--color-neutral-gray);
+    --color-button-disabled: var(--color-neutral-gray);
+    
+    --color-button-hover-h: var(--color-theme-h);
+    --color-button-hover-s: var(--color-muted-s);
+    --color-button-hover-l: 32%;
+    --color-button-hover: hsl(var(--color-button-hover-h), var(--color-button-hover-s), var(--color-button-hover-l));
+    
+    /* Цвета для предупреждений (светлый оранжевый для темной темы) */
+    --color-warning-dark-h: 30;
+    --color-warning-dark-s: 100%;
+    --color-warning-dark-l: 65%;
+    --color-warning-dark: hsl(var(--color-warning-dark-h), var(--color-warning-dark-s), var(--color-warning-dark-l));
+    
+    /* Цвета для карточек */
+    --color-card-header-h: var(--color-theme-h);
+    --color-card-header-s: var(--color-muted-s);
+    --color-card-header-l: 18%;
+    --color-card-header: hsl(var(--color-card-header-h), var(--color-card-header-s), var(--color-card-header-l));
+    
+    --color-card-header-border-h: var(--color-theme-h);
+    --color-card-header-border-s: var(--color-muted-s);
+    --color-card-header-border-l: 24%;
+    --color-card-header-border: hsl(var(--color-card-header-border-h), var(--color-card-header-border-s), var(--color-card-header-border-l));
+    
+    /* Цвета для хедера (темный, независимо от темы приложения) - те же, что и для светлой темы */
+    --color-header-bg-h: 0;
+    --color-header-bg-s: 0%;
+    --color-header-bg-l: 17%;
+    --color-header-bg: hsl(var(--color-header-bg-h), var(--color-header-bg-s), var(--color-header-bg-l));
+    
+    /* HSL значения для белого и черного цветов - те же, что и для светлой темы */
+    --color-white-h: 0;
+    --color-white-s: 0%;
+    --color-white-l: 100%;
+    
+    --color-black-h: 0;
+    --color-black-s: 0%;
+    --color-black-l: 0%;
+    
+    --color-dark-text-h: 210;
+    --color-dark-text-s: 9%;
+    --color-dark-text-l: 15%;
+    
+    --color-header-text: hsl(var(--color-white-h), var(--color-white-s), var(--color-white-l));
+    --color-header-overlay: hsla(var(--color-white-h), var(--color-white-s), var(--color-white-l), 0.1);
+    --color-header-overlay-hover: hsla(var(--color-white-h), var(--color-white-s), var(--color-white-l), 0.15);
+    --color-header-border: hsla(var(--color-white-h), var(--color-white-s), var(--color-white-l), 0.2);
+    --color-header-border-strong: hsla(var(--color-white-h), var(--color-white-s), var(--color-white-l), 0.3);
+    --color-header-text-muted: hsla(var(--color-white-h), var(--color-white-s), var(--color-white-l), 0.5);
+    
+    /* Цвета для dropdown в хедере (инверсны теме приложения) - те же, что и для светлой темы */
+    --color-dropdown-dark-bg: hsl(var(--color-header-bg-h), var(--color-header-bg-s), var(--color-header-bg-l));
+    --color-dropdown-dark-text: hsl(var(--color-white-h), var(--color-white-s), var(--color-white-l));
+    --color-dropdown-dark-overlay: hsla(var(--color-white-h), var(--color-white-s), var(--color-white-l), 0.1);
+    --color-dropdown-dark-border: hsla(var(--color-white-h), var(--color-white-s), var(--color-white-l), 0.12);
+    
+    --color-dropdown-light-bg: hsl(var(--color-white-h), var(--color-white-s), var(--color-white-l));
+    --color-dropdown-light-text: hsl(var(--color-dark-text-h), var(--color-dark-text-s), var(--color-dark-text-l));
+    --color-dropdown-light-overlay: hsla(var(--color-black-h), var(--color-black-s), var(--color-black-l), 0.08);
+    --color-dropdown-light-border: hsla(var(--color-black-h), var(--color-black-s), var(--color-black-l), 0.12);
+    
+    /* Цвет рамки для dropdown в основной области (темная тема) - тот же, что и для светлой темы */
+    --color-dropdown-border-dark-h: var(--color-theme-h);
+    --color-dropdown-border-dark-s: var(--color-muted-s);
+    --color-dropdown-border-dark-l: 35%;
+    --color-dropdown-border-dark: hsl(var(--color-dropdown-border-dark-h), var(--color-dropdown-border-dark-s), var(--color-dropdown-border-dark-l));
+}

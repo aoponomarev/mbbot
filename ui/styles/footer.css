@@ -6,8 +6,8 @@
     bottom: 0;
     start: 0;
     width: 100%;
-    z-index: 1000;
-    box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1), 0 -2px 4px -1px rgba(0, 0, 0, 0.06);
+    z-index: var(--z-index-footer);
+    box-shadow: 0 -4px 6px -1px hsla(0, 0%, 0%, 0.1), 0 -2px 4px -1px hsla(0, 0%, 0%, 0.06);
 }
 
 /* Контейнер футера */
@@ -30,5 +30,14 @@
     -ms-overflow-style: none;
     -webkit-overflow-scrolling: touch;
     overflow-y: hidden;
+}
+
+/* Цвета иконок фреймворков в футере */
+.fa-vuejs {
+    color: hsl(152, 48%, 53%); /* #4FC08D */
+}
+
+.fa-bootstrap {
+    color: hsl(264, 45%, 47%); /* #7952B3 */
 }
 
