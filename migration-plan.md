@@ -92,25 +92,25 @@ CPT              CD                CGR
 **Цель**: Мигрировать базовые математические утилиты и функции расчета PRC-весов
 
 **Шаги**:
-1. Создать файл `mm/utils/math-helpers.js` с утилитами:
+1. Создать файл `mm/median/utils/math-helpers.js` с утилитами:
    - `clamp(x, min, max)` - ограничение значения в диапазоне
    - `safeNumber(x, def)` - безопасное преобразование в число
    - `tanh(x)` - гиперболический тангенс
    - `median(arr)` - вычисление медианы массива
-2. Создать файл `mm/core/prc-weights.js`:
+2. Создать файл `mm/median/core/prc-weights.js`:
    - Функция `computePRCWeights(hDays)` - расчет PRC-весов
    - Обновить `timeFramesDays` для новых интервалов: `[1/24, 1, 7, 14, 30, 200]`
-   - Экспортировать через `window.mmPRCWeights`
-3. Создать файл `mm/core/pv1h-clip.js`:
+   - Экспортировать через `window.mmMedianPRCWeights`
+3. Создать файл `mm/median/core/pv1h-clip.js`:
    - Функция `computePV1hClipThreshold(coins)` - расчет порога клиппинга
    - Функция `smoothPV1h(pv1h)` - сглаживание PV1h
-   - Экспортировать через `window.mmPV1hClip`
+   - Экспортировать через `window.mmMedianPV1hClip`
 
 **Проверка**:
 - Открыть DevTools → Console
-- Вызвать `window.mmPRCWeights.computePRCWeights(7)` - должен вернуть массив из 6 весов
+- Вызвать `window.mmMedianPRCWeights.computePRCWeights(7)` - должен вернуть массив из 6 весов
 - Проверить, что сумма весов ≈ 1.0
-- Вызвать `window.mmPV1hClip.computePV1hClipThreshold([...])` - должен вернуть число
+- Вызвать `window.mmMedianPV1hClip.computePV1hClipThreshold([...])` - должен вернуть число
 
 **Следующий элемент интерфейса для проверки**: Добавить отладочную панель с отображением PRC-весов для текущего горизонта прогноза
 
@@ -121,11 +121,11 @@ CPT              CD                CGR
 **Цель**: Мигрировать расчет потенциала монеты
 
 **Шаги**:
-1. Создать файл `mm/metrics/cpt.js`:
+1. Создать файл `mm/median/metrics/cpt.js`:
    - Функция `computeEnhancedCPT(values, hDays)` - расчет CPT
    - Функция `formatEnhancedCPT(value)` - форматирование CPT
    - **ВАЖНО**: Адаптировать базовые веса `baseW` для новых интервалов (14d, 200d вместо 60d, 90d)
-   - Экспортировать через `window.mmCPT`
+   - Экспортировать через `window.mmMedianCPT`
 2. Интегрировать в компонент CoinGecko:
    - Добавить метод `calculateCPT()` в `ui/api/coingecko.js`
    - Вызывать при обновлении данных монет
@@ -133,7 +133,7 @@ CPT              CD                CGR
 
 **Проверка**:
 - Открыть DevTools → Console
-- Вызвать `window.mmCPT.computeEnhancedCPT([1, 2, 3, 4, 5, 6], 7)` - должен вернуть число
+- Вызвать `window.mmMedianCPT.computeEnhancedCPT([1, 2, 3, 4, 5, 6], 7)` - должен вернуть число
 - Проверить объект монеты: должен содержать `enhancedCpt` и `enhancedCptFormatted`
 
 **Следующий элемент интерфейса для проверки**: Добавить колонку "CPT" в таблицу монет с отображением `enhancedCptFormatted`
@@ -145,10 +145,10 @@ CPT              CD                CGR
 **Цель**: Мигрировать расчет накопительной дельты
 
 **Шаги**:
-1. Создать файл `mm/metrics/cd.js`:
+1. Создать файл `mm/median/metrics/cd.js`:
    - Функция `calculateCDsWeighted(pvs, prcWeights)` - расчет CD (сырых и взвешенных)
    - Функция `approximateCDHFromSeries(series, hDays)` - аппроксимация CDH
-   - Экспортировать через `window.mmCD`
+   - Экспортировать через `window.mmMedianCD`
 2. Интегрировать в компонент CoinGecko:
    - Добавить метод `calculateCD()` в `ui/api/coingecko.js`
    - Вызывать после расчета CPT
@@ -160,7 +160,7 @@ CPT              CD                CGR
 
 **Проверка**:
 - Открыть DevTools → Console
-- Вызвать `window.mmCD.calculateCDsWeighted([1, 2, 3, 4, 5, 6], [0.1, 0.2, 0.3, 0.2, 0.15, 0.05])`
+- Вызвать `window.mmMedianCD.calculateCDsWeighted([1, 2, 3, 4, 5, 6], [0.1, 0.2, 0.3, 0.2, 0.15, 0.05])`
 - Должен вернуть объект `{cdRaw: [...], cdW: [...]}` с массивами из 6 элементов
 - Проверить объект монеты: должен содержать `cd1`..`cd6`, `cd1w`..`cd6w`, `cdh`, `cdhw`
 
@@ -173,10 +173,10 @@ CPT              CD                CGR
 **Цель**: Мигрировать расчет медианного фона рынка
 
 **Шаги**:
-1. Создать файл `mm/metrics/cmd.js`:
+1. Создать файл `mm/median/metrics/cmd.js`:
    - Функция `computeMDVectors(allCoins)` - расчет медианных PV по каждому временному узлу
    - Функция `computeCMDLevels(md, prcWeights)` - расчет уровней CMD
-   - Экспортировать через `window.mmCMD`
+   - Экспортировать через `window.mmMedianCMD`
 2. Интегрировать в компонент CoinGecko:
    - Добавить метод `calculateCMD()` в `ui/api/coingecko.js`
    - Вызывать после расчета CD для всех монет
@@ -184,7 +184,7 @@ CPT              CD                CGR
 
 **Проверка**:
 - Открыть DevTools → Console
-- Вызвать `window.mmCMD.computeMDVectors([...])` с массивом монет
+- Вызвать `window.mmMedianCMD.computeMDVectors([...])` с массивом монет
 - Должен вернуть массив из 6 медианных PV
 - Проверить `window.__CMDH__` - должно быть число (CDH от медианных PV)
 
@@ -197,11 +197,11 @@ CPT              CD                CGR
 **Цель**: Мигрировать расчет градиента монеты
 
 **Шаги**:
-1. Создать файл `mm/metrics/cgr.js`:
+1. Создать файл `mm/median/metrics/cgr.js`:
    - Функция `computeCGR(values, hDays)` - расчет CGR (углы и наклоны)
    - Функция `computeWeightedCGR(angles, slopes, hDays)` - агрегация CGR2..CGR6
    - **ВАЖНО**: Адаптировать индексы для новых интервалов (pvs[3] теперь 14d, pvs[4] - 30d, pvs[5] - 200d)
-   - Экспортировать через `window.mmCGR`
+   - Экспортировать через `window.mmMedianCGR`
 2. Интегрировать в компонент CoinGecko:
    - Добавить метод `calculateCGR()` в `ui/api/coingecko.js`
    - Вызывать после расчета CD
@@ -212,7 +212,7 @@ CPT              CD                CGR
 
 **Проверка**:
 - Открыть DevTools → Console
-- Вызвать `window.mmCGR.computeCGR([1, 2, 3, 4, 5, 6], 7)`
+- Вызвать `window.mmMedianCGR.computeCGR([1, 2, 3, 4, 5, 6], 7)`
 - Должен вернуть объект `{angles: [...], slopes: [...]}` с массивами из 5 элементов
 - Проверить объект монеты: должен содержать `cgr2`..`cgr6`, `cgrDeg`, `cgrSlope`
 
@@ -225,11 +225,11 @@ CPT              CD                CGR
 **Цель**: Мигрировать расчет индекса дивергенции
 
 **Шаги**:
-1. Создать файл `mm/metrics/din.js`:
+1. Создать файл `mm/median/metrics/din.js`:
    - Функция `calculateSimpleCorrelation(pvs1, pvs2)` - упрощенная корреляция по знакам
    - Функция `computeDivergenceIndices(allCoins, horizonDays, marketIndicators)` - расчет DIN для всех монет
    - **ВАЖНО**: Использовать рыночные индикаторы из `core/api/market-metrics.js`
-   - Экспортировать через `window.mmDIN`
+   - Экспортировать через `window.mmMedianDIN`
 2. Интегрировать в компонент CoinGecko:
    - Добавить метод `calculateDIN()` в `ui/api/coingecko.js`
    - Вызывать после расчета CMD и CGR
@@ -241,7 +241,7 @@ CPT              CD                CGR
 **Проверка**:
 - Открыть DevTools → Console
 - Проверить, что рыночные индикаторы доступны (FGI, VIX, BTC Dom, OI, FR, LSR)
-- Вызвать `window.mmDIN.computeDivergenceIndices([...], 7, {...})`
+- Вызвать `window.mmMedianDIN.computeDivergenceIndices([...], 7, {...})`
 - Проверить объект монеты: должен содержать `divergenceIndex`, `divergenceAbs`
 
 **Следующий элемент интерфейса для проверки**: Добавить колонку "DIN" в таблицу монет
@@ -253,12 +253,13 @@ CPT              CD                CGR
 **Цель**: Мигрировать расчет комплексного скора монеты
 
 **Шаги**:
-1. Создать файл `mm/metrics/agr.js`:
+1. Создать файл `mm/median/metrics/agr.js`:
    - Функция `calculateAGR(coin, CMD, medianDIN)` - базовый расчет AGR (A.I.R. модель)
    - Функция `formatAGRForDisplay(value)` - форматирование AGR
    - Функция `recalculateAGR(allCoins, CMD, medianDIN)` - пересчет AGR для всех монет
+   - **ВАЖНО**: AGR - это конечный показатель пригодности монеты к торговле (в разных масштабах и размерностях для разных математических моделей)
    - **ВАЖНО**: AGR использует CDH, CMD, CGR, CPT, DIN, medianDIN
-   - Экспортировать через `window.mmAGR`
+   - Экспортировать через `window.mmMedianAGR`
 2. Интегрировать в компонент CoinGecko:
    - Добавить метод `calculateAGR()` в `ui/api/coingecko.js`
    - Вызывать после расчета DIN и вычисления medianDIN
@@ -268,7 +269,7 @@ CPT              CD                CGR
 
 **Проверка**:
 - Открыть DevTools → Console
-- Вызвать `window.mmAGR.calculateAGR({...}, 10, 5)` с объектом монеты
+- Вызвать `window.mmMedianAGR.calculateAGR({...}, 10, 5)` с объектом монеты
 - Должен вернуть объект `{raw: number, formatted: string}`
 - Проверить объект монеты: должен содержать `AGR` и `AGR_formatted`
 
@@ -281,11 +282,11 @@ CPT              CD                CGR
 **Цель**: Мигрировать расчет прогноза направления рынка
 
 **Шаги**:
-1. Создать файл `mm/metrics/mdn.js`:
+1. Создать файл `mm/median/metrics/mdn.js`:
    - Функция `calculateMDN(hours, allCoins, marketIndicators)` - расчет MDN для заданного горизонта
    - **ВАЖНО**: MDN независим от пользовательского горизонта прогноза (horizonDays)
    - **ВАЖНО**: Использует фиксированные временные окна для разных горизонтов (4h, 8h, 12h)
-   - Экспортировать через `window.mmMDN`
+   - Экспортировать через `window.mmMedianMDN`
 2. Интегрировать в компонент CoinGecko:
    - Добавить метод `calculateMDN()` в `ui/api/coingecko.js`
    - Вызывать после расчета всех метрик
@@ -293,7 +294,7 @@ CPT              CD                CGR
 
 **Проверка**:
 - Открыть DevTools → Console
-- Вызвать `window.mmMDN.calculateMDN(8, [...], {...})` для горизонта 8 часов
+- Вызвать `window.mmMedianMDN.calculateMDN(8, [...], {...})` для горизонта 8 часов
 - Должен вернуть целое число от -100 до 100
 - Проверить значения для всех горизонтов (4h, 8h, 12h)
 
@@ -306,10 +307,10 @@ CPT              CD                CGR
 **Цель**: Мигрировать расчет медианных значений и сегментированного анализа
 
 **Шаги**:
-1. Создать файл `mm/metrics/medians.js`:
+1. Создать файл `mm/median/metrics/medians.js`:
    - Функция `calculateAllMedians(allCoins, CMD)` - расчет всех медиан
    - Функция `calculateSegmentedMedians(allCoins, getValue)` - сегментированный анализ
-   - Экспортировать через `window.mmMedians`
+   - Экспортировать через `window.mmMedianMedians`
 2. Интегрировать в компонент CoinGecko:
    - Добавить метод `calculateMedians()` в `ui/api/coingecko.js`
    - Вызывать после расчета всех метрик
@@ -317,7 +318,7 @@ CPT              CD                CGR
 
 **Проверка**:
 - Открыть DevTools → Console
-- Вызвать `window.mmMedians.calculateAllMedians([...], 10)`
+- Вызвать `window.mmMedianMedians.calculateAllMedians([...], 10)`
 - Должен вернуть объект с медианами и сегментами
 - Проверить значения: `medianCD`, `medianCDH`, `medianCGR`, `medianAGR`
 
@@ -330,7 +331,7 @@ CPT              CD                CGR
 **Цель**: Создать главную функцию пересчета всех метрик
 
 **Шаги**:
-1. Создать файл `mm/core/recalculate-all.js`:
+1. Создать файл `mm/median/core/recalculate-all.js`:
    - Функция `recalculateAllDerivedMath(allCoins, horizonDays, marketIndicators)` - главная функция пересчета
    - Последовательность вызовов:
      1. PRC Weights
@@ -341,10 +342,10 @@ CPT              CD                CGR
      6. CGR для каждой монеты
      7. DIN для всех монет
      8. medianDIN
-     9. AGR для всех монет
+     9. AGR для всех монет (конечный показатель пригодности)
      10. MDN (опционально)
      11. Медианы
-   - Экспортировать через `window.mmRecalculate`
+   - Экспортировать через `window.mmMedianRecalculate`
 2. Интегрировать в компонент CoinGecko:
    - Добавить метод `recalculateAllMetrics()` в `ui/api/coingecko.js`
    - Вызывать при обновлении данных монет или изменении горизонта прогноза
@@ -352,7 +353,7 @@ CPT              CD                CGR
 
 **Проверка**:
 - Открыть DevTools → Console
-- Вызвать `window.mmRecalculate.recalculateAllDerivedMath([...], 7, {...})`
+- Вызвать `window.mmMedianRecalculate.recalculateAllDerivedMath([...], 7, {...})`
 - Проверить, что все метрики рассчитаны для всех монет
 - Проверить производительность (время выполнения)
 
@@ -493,28 +494,37 @@ CPT              CD                CGR
 
 ### Структура файлов математической модели
 
+**ВАЖНО**: В приложении будет несколько математических моделей (в отличие от старого приложения, где была только одна). Каждая модель имеет свою папку с подпапками `utils/`, `core/`, `metrics/`.
+
+**Текущая модель**: "median" - модель расчета AGR по медианам (из старого приложения)
+
 ```
 mm/
-├── utils/
-│   └── math-helpers.js       # Базовые математические утилиты
-├── core/
-│   ├── prc-weights.js         # PRC-веса
-│   ├── pv1h-clip.js          # Клиппинг PV1h
-│   └── recalculate-all.js    # Главная функция пересчета
-└── metrics/
-    ├── cpt.js                 # Coin Potential
-    ├── cd.js                  # Cumulative Delta
-    ├── cmd.js                 # Composite Market Delta
-    ├── cgr.js                 # Coin Gradient
-    ├── din.js                 # Divergence Index
-    ├── agr.js                 # Aggregated Score
-    ├── mdn.js                 # Market Direction Now
-    └── medians.js             # Медианы и сегментированный анализ
+└── median/                    # Модель расчета AGR по медианам
+    ├── utils/
+    │   └── math-helpers.js       # Базовые математические утилиты
+    ├── core/
+    │   ├── prc-weights.js         # PRC-веса
+    │   ├── pv1h-clip.js          # Клиппинг PV1h
+    │   └── recalculate-all.js    # Главная функция пересчета
+    └── metrics/
+        ├── cpt.js                 # Coin Potential
+        ├── cd.js                  # Cumulative Delta
+        ├── cmd.js                 # Composite Market Delta
+        ├── cgr.js                 # Coin Gradient
+        ├── din.js                 # Divergence Index
+        ├── agr.js                 # Aggregated Score (конечный показатель пригодности)
+        ├── mdn.js                 # Market Direction Now
+        └── medians.js             # Медианы и сегментированный анализ
 ```
+
+**Примечание**: В будущем могут быть добавлены другие модели (например, `mm/momentum/`, `mm/trend/` и т.д.), каждая со своей структурой и логикой расчета AGR.
 
 ### Интеграция с Vue компонентом
 
-Все функции математической модели должны быть доступны через `window.mm*` для использования в Vue компонентах. Компонент `ui/api/coingecko.js` будет вызывать эти функции и сохранять результаты в реактивные свойства Vue.
+Все функции математической модели "median" должны быть доступны через `window.mmMedian*` для использования в Vue компонентах. Компонент `ui/api/coingecko.js` будет вызывать эти функции и сохранять результаты в реактивные свойства Vue.
+
+**Примечание**: В будущем, при добавлении других математических моделей, каждая модель будет иметь свой префикс (например, `window.mmMomentum*`, `window.mmTrend*` и т.д.).
 
 ---
 
