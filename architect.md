@@ -1,4 +1,4 @@
-# Архитектурный план (BOT)
+# Архитектурный план
 
 Цели: запуск без бэкенда (CDN Vue + локальные файлы), работа из папки/`file://`, получение данных из публичных API (CoinGecko и др.), всё состояние и история — локально (localStorage/IndexedDB).
 
@@ -420,7 +420,7 @@ if (settings.secureData.apiKeyPerplexity) {
 
 Структура проекта
 ```
-BOT/
+Root/
 ├── index.html          # Главный HTML файл
 ├── .git/              # Git репозиторий
 ├── .vscode/           # Настройки VS Code (для совместимости с Cursor)
