@@ -183,16 +183,16 @@
     console.warn('window.cmpHeaderCoins not found');
   }
 
-  // Регистрация компонента таблицы "Компл. дельты"
-  if (window.cmpComplexDeltas) {
+  // Регистрация компонента сортируемого заголовка
+  if (window.cmpSortableHeader) {
     try {
-      app.component('app-complex-deltas', window.cmpComplexDeltas);
-      console.log('Complex deltas component registered');
+      app.component('sortable-header', window.cmpSortableHeader);
+      console.log('Sortable header component registered');
     } catch (error) {
-      console.error('Ошибка при регистрации компонента комплексных дельт:', error);
+      console.error('Ошибка при регистрации компонента сортируемого заголовка:', error);
     }
   } else {
-    console.warn('window.cmpComplexDeltas not found');
+    console.warn('window.cmpSortableHeader not found');
   }
 
   // Сохраняем ссылку на приложение в window для доступа из компонентов

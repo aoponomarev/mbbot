@@ -42,11 +42,10 @@ window.cmpHeader = {
       if (root) {
         root.activeTab = tabId;
         
-        // При переключении на вкладку "%" всегда показываем CoinGecko (закрываем настройки)
-        if (tabId === 'percent') {
+        // При переключении на вкладку "%" или "Компл. дельты" всегда показываем CoinGecko (закрываем настройки)
+        if (tabId === 'percent' || tabId === 'complex-deltas') {
           root.showSettings = false;
         }
-        // TODO: для других вкладок реализовать переключение контента
       }
       
       this.showTabDropdown = false;
@@ -227,10 +226,6 @@ window.cmpHeader = {
       const activeTab = root && root.activeTab ? root.activeTab : 'percent';
       const tab = this.displayTabs.find(t => t.id === activeTab);
       if (!tab) return '%';
-      // В мобильной версии "Компл. дельты" заменяем на "Дельты"
-      if (tab.id === 'complex-deltas') {
-        return 'Дельты';
-      }
       return tab.label;
     },
 

@@ -13,5 +13,5 @@ window.appConfig = {
     { value: 'llama-3.1-sonar-small-128k-online', label: 'llama-3.1-sonar-small-128k-online' },
     { value: 'llama-3.1-sonar-large-128k-online', label: 'llama-3.1-sonar-large-128k-online' }
   ],
-  lastCommitMessage: 'Add reusable column visibility mixin and document view switching pattern'
+  lastCommitMessage: 'Refactor: remove complex-deltas component, add reusable sortable-header and table-coin-row components'
 };
