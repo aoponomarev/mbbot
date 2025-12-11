@@ -32,6 +32,16 @@ body {
     background: transparent;
 }
 
+/* Стили для таблицы "Компл. дельты" */
+.cdh-column {
+  color: hsl(200, 44%, 55%);
+  font-weight: bold;
+}
+
+[data-bs-theme="dark"] .cdh-column {
+  color: hsl(200, 50%, 65%);
+}
+
 /* Восстанавливаем вертикальную полосу прокрутки */
 *::-webkit-scrollbar:vertical {
     width: 12px;

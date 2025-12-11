@@ -55,6 +55,9 @@
 
                 <!-- Компонент виджета CoinGecko (показывается по умолчанию и при вкладке "%") -->
                 <app-coingecko v-if="!showSettings && activeTab === 'percent'"></app-coingecko>
+                
+                <!-- Компонент таблицы "Компл. дельты" (показывается при вкладке "Компл. дельты") -->
+                <app-complex-deltas v-if="!showSettings && activeTab === 'complex-deltas'"></app-complex-deltas>
             </main>
         </div>
     </div>
@@ -841,8 +844,83 @@
         </footer>
     </script>
 
+    <!-- X-Template для компонента таблицы "Компл. дельты" (должен быть ДО загрузки Vue и компонентов) -->
+    <script type="text/x-template" id="complex-deltas-template">
+        <div class="col-12 mb-4">
+            <div class="card avto-Cd8K2mN">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-area me-2"></i>Комплексные дельты
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div v-if="sortedCoins.length === 0" class="text-center text-muted py-4">
+                        <i class="fas fa-info-circle me-2"></i>Нет монет. Добавьте монеты через поиск на вкладке "%".
+                    </div>
+                    <div v-else class="table-responsive">
+                        <table class="table table-sm table-hover align-middle" id="complex-deltas-table">
+                            <thead>
+                                <tr>
+                                    <th>№</th>
+                                    <th>Тикер</th>
+                                    <th 
+                                        v-for="header in cdHeaders" 
+                                        :key="header"
+                                        :class="{ 'cdh-column': header === 'CDH' }"
+                                        @click="handleSort(header)"
+                                        style="cursor: pointer;"
+                                    >
+                                        {{ header }}
+                                        <i v-if="sortColumn === header" 
+                                           :class="sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'"
+                                           class="ms-1"></i>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(coin, index) in sortedCoins" :key="coin.id || coin.symbol">
+                                    <td>{{ index + 1 }}</td>
+                                    <td>
+                                        <a 
+                                            :href="getBybitLink(coin.symbol || coin.id)" 
+                                            target="_blank"
+                                            :title="coin.name"
+                                        >
+                                            {{ coin.symbol || coin.id }}
+                                        </a>
+                                    </td>
+                                    <td 
+                                        v-for="header in cdHeaders" 
+                                        :key="header"
+                                        :class="{ 'cdh-column': header === 'CDH' }"
+                                    >
+                                        {{ formatValue(getCDValue(coin, header)) }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div v-if="useStub" class="alert alert-info alert-sm mt-3 mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <small>Используются заглушки для CD значений. Реальные расчеты будут доступны после миграции Этапа 3 (CD).</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
+
     <!-- Vue.js 3 (глобальный скрипт) -->
     <script src="https://unpkg.com/vue@3.5.25/dist/vue.global.prod.js"></script>
+    
+    <!-- Математическая модель "median" - Этап 1: Утилиты и базовые функции -->
+    <!-- Порядок загрузки важен: helpers → prc-weights → pv1h-clip (зависимости) -->
+    <script src="mm/median/utils/math-helpers.js"></script>
+    <script src="mm/median/core/prc-weights.js"></script>
+    <script src="mm/median/core/pv1h-clip.js"></script>
+    
+    <!-- Математическая модель "median" - Этап 2: CPT (Coin Potential) -->
+    <script src="mm/median/metrics/cpt.js"></script>
+    
     <!-- Компоненты и приложение (обычные скрипты, совместимо с file://) -->
     <script src="./core/security/u-sec-obfuscate.js"></script>
     <script src="./core/cfg-app.js"></script>
@@ -855,6 +933,7 @@
     <script src="./ui/api/import-export.js"></script>
     <script src="./ui/components/header-coins.js"></script>
     <script src="./ui/api/coingecko.js"></script>
+    <script src="./ui/api/complex-deltas.js"></script>
     <script src="./app/app-ui-root.js"></script>
 </body>
 </html>

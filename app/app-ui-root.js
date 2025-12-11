@@ -183,6 +183,18 @@
     console.warn('window.cmpHeaderCoins not found');
   }
 
+  // Регистрация компонента таблицы "Компл. дельты"
+  if (window.cmpComplexDeltas) {
+    try {
+      app.component('app-complex-deltas', window.cmpComplexDeltas);
+      console.log('Complex deltas component registered');
+    } catch (error) {
+      console.error('Ошибка при регистрации компонента комплексных дельт:', error);
+    }
+  } else {
+    console.warn('window.cmpComplexDeltas not found');
+  }
+
   // Сохраняем ссылку на приложение в window для доступа из компонентов
   window.app = app;
 

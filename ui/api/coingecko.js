@@ -109,6 +109,31 @@ window.cmpCoinGecko = {
       loadedCoins = loadedCoins.map(coin => transformCoinGeckoToPV(coin));
     }
     
+    // Рассчитываем CPT для загруженных монет (если еще не рассчитан)
+    // Источник: Этап 2 миграции математической модели
+    // ВАЖНО: В data() нет доступа к this, поэтому используем прямую функцию из window
+    if (loadedCoins.length > 0 && window.mmMedianCPT && window.mmMedianCPT.computeEnhancedCPT) {
+      const horizonDays = 2;
+      loadedCoins = loadedCoins.map(coin => {
+        // Если CPT уже рассчитан - не пересчитываем
+        if (coin.enhancedCpt !== undefined && coin.enhancedCptFormatted !== undefined) {
+          return coin;
+        }
+        // Проверяем наличие массива pvs
+        if (!coin.pvs || !Array.isArray(coin.pvs) || coin.pvs.length !== 6) {
+          return coin;
+        }
+        // Рассчитываем CPT
+        const cptValue = window.mmMedianCPT.computeEnhancedCPT(coin.pvs, horizonDays);
+        const cptFormatted = window.mmMedianCPT.formatEnhancedCPT(cptValue);
+        return {
+          ...coin,
+          enhancedCpt: cptValue,
+          enhancedCptFormatted: cptFormatted
+        };
+      });
+    }
+    
     return {
       // Состояние сортировки (переопределяем из mixin для загрузки из localStorage)
       sortBy: savedSortBy || null,
@@ -239,6 +264,13 @@ window.cmpCoinGecko = {
         // Источник трансформации: old_app_not_write/parsing.js
         // Это обеспечивает преемственность с математической моделью из старого приложения
         this.cgCoins = Array.isArray(data) ? data.map(coin => transformCoinGeckoToPV(coin)) : [];
+        
+        // Рассчитываем CPT (Coin Potential) для каждой монеты
+        // Источник: Этап 2 миграции математической модели
+        // Используем горизонт прогноза по умолчанию 2 дня (как в старом приложении)
+        const horizonDays = 2;
+        this.cgCoins = this.cgCoins.map(coin => this.calculateCPT(coin, horizonDays));
+        
         this.cgLastUpdated = new Date().toISOString(); // Сохраняем ISO строку для парсинга
         
         // Очищаем выбранные монеты, так как список мог измениться
@@ -276,6 +308,42 @@ window.cmpCoinGecko = {
       if (value > 0) return 'text-success';
       if (value < 0) return 'text-danger';
       return '';
+    },
+    
+    /**
+     * calculateCPT(coin, hDays)
+     * Расчет CPT (Coin Potential) для монеты
+     * Источник: Этап 2 миграции математической модели
+     * 
+     * @param {Object} coin - Объект монеты с полем pvs (массив из 6 значений PV)
+     * @param {number} hDays - Горизонт прогноза в днях (по умолчанию 2 дня)
+     * @returns {Object} Объект монеты с добавленными полями enhancedCpt и enhancedCptFormatted
+     */
+    calculateCPT(coin, hDays = 2) {
+      // Проверяем доступность функции расчета CPT
+      if (!window.mmMedianCPT || !window.mmMedianCPT.computeEnhancedCPT) {
+        console.warn('mmMedianCPT.computeEnhancedCPT не доступна. CPT не будет рассчитан.');
+        return coin;
+      }
+      
+      // Проверяем наличие массива pvs
+      if (!coin.pvs || !Array.isArray(coin.pvs) || coin.pvs.length !== 6) {
+        console.warn('Монета не содержит корректный массив pvs. CPT не будет рассчитан.', coin);
+        return coin;
+      }
+      
+      // Рассчитываем CPT используя функцию из математической модели
+      const cptValue = window.mmMedianCPT.computeEnhancedCPT(coin.pvs, hDays);
+      
+      // Форматируем значение CPT
+      const cptFormatted = window.mmMedianCPT.formatEnhancedCPT(cptValue);
+      
+      // Добавляем поля к объекту монеты
+      return {
+        ...coin,
+        enhancedCpt: cptValue,
+        enhancedCptFormatted: cptFormatted
+      };
     },
     
     // Парсинг строки на тикеры (разделители: любые символы кроме букв)
@@ -878,9 +946,14 @@ window.cmpCoinGecko = {
         // Источник трансформации: old_app_not_write/parsing.js
         const coins = Array.isArray(data) ? data.map(coin => transformCoinGeckoToPV(coin)) : [];
         
+        // Рассчитываем CPT (Coin Potential) для каждой монеты
+        // Источник: Этап 2 миграции математической модели
+        const horizonDays = 2;
+        const coinsWithCPT = coins.map(coin => this.calculateCPT(coin, horizonDays));
+        
         // Добавляем все монеты в список выбранных (если их еще нет)
         const newCoinIds = [];
-        coins.forEach(coin => {
+        coinsWithCPT.forEach(coin => {
           if (!this.cgSelectedCoins.includes(coin.id)) {
             this.cgSelectedCoins.push(coin.id);
             newCoinIds.push(coin.id);
@@ -931,9 +1004,14 @@ window.cmpCoinGecko = {
         // Источник трансформации: old_app_not_write/parsing.js
         const coins = Array.isArray(data) ? data.map(coin => transformCoinGeckoToPV(coin)) : [];
         
+        // Рассчитываем CPT (Coin Potential) для каждой монеты
+        // Источник: Этап 2 миграции математической модели
+        const horizonDays = 2;
+        const coinsWithCPT = coins.map(coin => this.calculateCPT(coin, horizonDays));
+        
         // Добавляем все монеты в список выбранных (если их еще нет)
         const newCoinIds = [];
-        coins.forEach(coin => {
+        coinsWithCPT.forEach(coin => {
           if (!this.cgSelectedCoins.includes(coin.id)) {
             this.cgSelectedCoins.push(coin.id);
             newCoinIds.push(coin.id);
@@ -1638,8 +1716,65 @@ window.cmpCoinGecko = {
   },
 
   mounted() {
+    console.log('🔍 CoinGecko component mounted');
     // Проверяем и очищаем дубликаты между таблицей и архивом при загрузке
     this.syncAllCoinsWithArchive();
+    
+    // Рассчитываем CPT для монет, загруженных из localStorage (если еще не рассчитан)
+    // Источник: Этап 2 миграции математической модели
+    // ВАЖНО: Выполняем в mounted(), чтобы гарантировать загрузку всех модулей
+    // Используем setTimeout для гарантии, что все модули загружены
+    setTimeout(() => {
+      console.log('🔍 Проверка расчета CPT в mounted():');
+      console.log('  - Монет в cgCoins:', this.cgCoins?.length || 0);
+      console.log('  - mmMedianCPT доступен:', !!window.mmMedianCPT);
+      console.log('  - computeEnhancedCPT доступен:', !!window.mmMedianCPT?.computeEnhancedCPT);
+      
+      if (this.cgCoins && this.cgCoins.length > 0) {
+        if (!window.mmMedianCPT || !window.mmMedianCPT.computeEnhancedCPT) {
+          console.warn('⚠️ mmMedianCPT не доступен. CPT не будет рассчитан.');
+          return;
+        }
+        
+        const horizonDays = 2;
+        let needsUpdate = false;
+        let calculatedCount = 0;
+        const updatedCoins = this.cgCoins.map(coin => {
+          // Если CPT уже рассчитан - не пересчитываем
+          if (coin.enhancedCpt !== undefined && coin.enhancedCptFormatted !== undefined) {
+            return coin;
+          }
+          // Проверяем наличие массива pvs
+          if (!coin.pvs || !Array.isArray(coin.pvs) || coin.pvs.length !== 6) {
+            console.warn(`⚠️ Монета ${coin.symbol || coin.id} не содержит корректный массив pvs. CPT не будет рассчитан.`);
+            return coin;
+          }
+          // Рассчитываем CPT
+          const cptValue = window.mmMedianCPT.computeEnhancedCPT(coin.pvs, horizonDays);
+          const cptFormatted = window.mmMedianCPT.formatEnhancedCPT(cptValue);
+          needsUpdate = true;
+          calculatedCount++;
+          return {
+            ...coin,
+            enhancedCpt: cptValue,
+            enhancedCptFormatted: cptFormatted
+          };
+        });
+        
+        // Обновляем реактивные данные
+        this.cgCoins = updatedCoins;
+        
+        // Сохраняем обновленные данные в localStorage, если были изменения
+        if (needsUpdate) {
+          localStorage.setItem('cgCoins', JSON.stringify(this.cgCoins));
+          console.log(`✅ CPT рассчитан для ${calculatedCount} монет из ${updatedCoins.length}`);
+        } else {
+          console.log('ℹ️ CPT уже рассчитан для всех монет или нет монет для расчета');
+        }
+      } else {
+        console.log('ℹ️ Нет монет для расчета CPT');
+      }
+    }, 100); // Небольшая задержка для гарантии загрузки всех модулей
     
     this.handleUnlock = () => {
       // Загружаем данные только если нет сохраненных данных

@@ -7,8 +7,8 @@
 ## Текущий статус миграции
 
 **Дата начала**: 2025-12-11  
-**Текущий этап**: Подготовка - трансформация данных CoinGecko в формат со старыми переменными  
-**Прогресс**: ✅ Завершено - данные CoinGecko трансформируются в формат `pvs` (PV1h, PV24h, PV7d, PV14d, PV30d, PV200d)
+**Текущий этап**: Этап 2 - CPT (Coin Potential)  
+**Прогресс**: ✅ Завершено - созданы функции расчета CPT, интегрированы в компонент CoinGecko
 
 ## Обзор математической модели
 
@@ -87,17 +87,17 @@ CPT              CD                CGR
 
 ---
 
-### Этап 1: Утилиты и базовые функции
+### Этап 1: Утилиты и базовые функции ✅ ЗАВЕРШЕНО
 
 **Цель**: Мигрировать базовые математические утилиты и функции расчета PRC-весов
 
 **Шаги**:
-1. Создать файл `mm/median/utils/math-helpers.js` с утилитами:
+1. ✅ Создать файл `mm/median/utils/math-helpers.js` с утилитами:
    - `clamp(x, min, max)` - ограничение значения в диапазоне
    - `safeNumber(x, def)` - безопасное преобразование в число
    - `tanh(x)` - гиперболический тангенс
    - `median(arr)` - вычисление медианы массива
-2. Создать файл `mm/median/core/prc-weights.js`:
+2. ✅ Создать файл `mm/median/core/prc-weights.js`:
    - Функция `computePRCWeights(hDays)` - расчет PRC-весов
    - Обновить `timeFramesDays` для новых интервалов: `[1/24, 1, 7, 14, 30, 200]`
    - Экспортировать через `window.mmMedianPRCWeights`
@@ -116,19 +116,20 @@ CPT              CD                CGR
 
 ---
 
-### Этап 2: CPT (Coin Potential)
+### Этап 2: CPT (Coin Potential) ✅ ЗАВЕРШЕНО
 
 **Цель**: Мигрировать расчет потенциала монеты
 
 **Шаги**:
-1. Создать файл `mm/median/metrics/cpt.js`:
+1. ✅ Создать файл `mm/median/metrics/cpt.js`:
    - Функция `computeEnhancedCPT(values, hDays)` - расчет CPT
    - Функция `formatEnhancedCPT(value)` - форматирование CPT
    - **ВАЖНО**: Адаптировать базовые веса `baseW` для новых интервалов (14d, 200d вместо 60d, 90d)
    - Экспортировать через `window.mmMedianCPT`
-2. Интегрировать в компонент CoinGecko:
+2. ✅ Интегрировать в компонент CoinGecko:
    - Добавить метод `calculateCPT()` в `ui/api/coingecko.js`
-   - Вызывать при обновлении данных монет
+   - Вызывать при обновлении данных монет (fetchCoinGecko, addTopCoinsByMarketCap, addTopCoinsByVolume)
+   - Вызывать при загрузке из localStorage (если CPT еще не рассчитан)
    - Сохранять результат в `coin.enhancedCpt` и `coin.enhancedCptFormatted`
 
 **Проверка**:
@@ -531,6 +532,17 @@ mm/
 ## История изменений
 
 - **2025-12-11**: Создан план миграции, завершен Этап 0 (трансформация данных CoinGecko)
+- **2025-12-11**: Завершен Этап 1 (утилиты и базовые функции):
+  - Создан `mm/median/utils/math-helpers.js` с базовыми утилитами (clamp, safeNumber, tanh, median)
+  - Создан `mm/median/core/prc-weights.js` с функцией `computePRCWeights` и обновленными `timeFramesDays` для новых интервалов
+  - Создан `mm/median/core/pv1h-clip.js` с функциями `computePV1hClipThreshold` и `smoothPV1h`
+  - Все файлы подключены в `index.html` в правильном порядке
+- **2025-12-11**: Завершен Этап 2 (CPT - Coin Potential):
+  - Создан `mm/median/metrics/cpt.js` с функциями `computeEnhancedCPT` и `formatEnhancedCPT`
+  - Адаптированы базовые веса `baseW` для новых интервалов CoinGecko (14d, 200d вместо 60d, 90d)
+  - Интегрирован расчет CPT в компонент CoinGecko (метод `calculateCPT`)
+  - CPT рассчитывается при обновлении данных монет и при загрузке из localStorage
+  - Создана вкладка "Комплексные дельты" с заглушками для визуализации данных
 
 ---
 
