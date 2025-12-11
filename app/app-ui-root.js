@@ -171,6 +171,18 @@
     console.warn('window.cmpCoinGecko not found');
   }
 
+  // Регистрация компонента хедера индикатора монет
+  if (window.cmpHeaderCoins) {
+    try {
+      app.component('header-coins', window.cmpHeaderCoins);
+      console.log('Header coins component registered');
+    } catch (error) {
+      console.error('Ошибка при регистрации компонента хедера индикатора:', error);
+    }
+  } else {
+    console.warn('window.cmpHeaderCoins not found');
+  }
+
   // Сохраняем ссылку на приложение в window для доступа из компонентов
   window.app = app;
 

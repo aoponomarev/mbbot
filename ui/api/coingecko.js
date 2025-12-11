@@ -9,12 +9,8 @@ window.cmpCoinGecko = {
     const savedCoins = localStorage.getItem('cgCoins');
     const savedLastUpdated = localStorage.getItem('cgLastUpdated');
     
-    // Загружаем список выбранных монет (по умолчанию топ-10)
+    // Загружаем список выбранных монет
     const savedSelectedCoins = localStorage.getItem('cgSelectedCoins');
-    const defaultCoins = [
-      'bitcoin', 'ethereum', 'solana', 'binancecoin', 'ripple',
-      'cardano', 'dogecoin', 'tron', 'avalanche-2', 'polkadot'
-    ];
     
     // Загружаем кэш иконок
     const iconsCache = JSON.parse(localStorage.getItem('cgIconsCache') || '{}');
@@ -56,7 +52,7 @@ window.cmpCoinGecko = {
       cgIsLoading: false,
       cgError: null,
       cgLastUpdated: savedLastUpdated || null,
-      cgSelectedCoins: savedSelectedCoins ? JSON.parse(savedSelectedCoins) : defaultCoins,
+      cgSelectedCoins: savedSelectedCoins ? JSON.parse(savedSelectedCoins) : [],
       cgArchivedCoins: archivedCoins, // Архив монет: массив объектов {id, symbol, name}
       cgIconsCache: iconsCache, // Кэш иконок в data для реактивности
       // Поиск монет
@@ -551,6 +547,36 @@ window.cmpCoinGecko = {
         return;
       }
       
+      // Проверяем, является ли запрос числом (для загрузки топ N монет)
+      const trimmedQuery = query.trim();
+      const numberMatch = trimmedQuery.match(/^\d+$/);
+      if (numberMatch) {
+        const count = parseInt(numberMatch[0], 10);
+        if (count > 0 && count <= 250) { // CoinGecko API ограничивает до 250
+          // Показываем кастомные пункты для выбора типа сортировки
+          this.cgSearchResults = [
+            {
+              id: 'top-by-cap',
+              type: 'top-by-cap',
+              count: count,
+              symbol: 'TOP',
+              name: `Топ ${count} по капитализации`,
+              thumb: null
+            },
+            {
+              id: 'top-by-volume',
+              type: 'top-by-volume',
+              count: count,
+              symbol: 'TOP',
+              name: `Топ ${count} по дневному объему`,
+              thumb: null
+            }
+          ];
+          this.cgSearching = false;
+          return;
+        }
+      }
+      
       // Проверяем, является ли запрос режимом парсинга
       if (this.isParseMode(query)) {
         // Если это режим парсинга - запускаем парсинг вместо поиска
@@ -688,6 +714,9 @@ window.cmpCoinGecko = {
           this.cgSelectedCoins.splice(tableIndex, 1);
           localStorage.setItem('cgSelectedCoins', JSON.stringify(this.cgSelectedCoins));
         }
+        // Удаляем из отображаемых данных таблицы
+        this.cgCoins = this.cgCoins.filter(coin => coin.id !== coinId);
+        localStorage.setItem('cgCoins', JSON.stringify(this.cgCoins));
       }
     },
     
@@ -752,6 +781,124 @@ window.cmpCoinGecko = {
       // Очищаем поиск
       this.cgSearchQuery = '';
       this.cgSearchResults = [];
+    },
+    
+    // Добавление топ N монет по капитализации
+    async addTopCoinsByMarketCap(count) {
+      if (!count || count <= 0 || count > 250) return;
+      
+      if (this.cgIsLoading) return;
+      this.cgError = null;
+      
+      try {
+        const priceChangeParams = '1h,24h,7d,14d,30d,200d';
+        const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=${count}&page=1&price_change_percentage=${priceChangeParams}`;
+        const res = await fetch(url);
+        
+        if (!res.ok) {
+          if (res.status === 429) {
+            this.increaseAdaptiveTimeout();
+            throw new Error(`HTTP ${res.status}`);
+          }
+          throw new Error(`HTTP ${res.status}`);
+        }
+        
+        this.decreaseAdaptiveTimeout();
+        
+        const data = await res.json();
+        const coins = Array.isArray(data) ? data : [];
+        
+        // Добавляем все монеты в список выбранных (если их еще нет)
+        const newCoinIds = [];
+        coins.forEach(coin => {
+          if (!this.cgSelectedCoins.includes(coin.id)) {
+            this.cgSelectedCoins.push(coin.id);
+            newCoinIds.push(coin.id);
+            // Синхронизация: удаляем из архива, если монета там есть
+            this.syncCoinWithArchive(coin.id, 'add');
+          }
+        });
+        
+        if (newCoinIds.length > 0) {
+          localStorage.setItem('cgSelectedCoins', JSON.stringify(this.cgSelectedCoins));
+          // Обновляем данные (не устанавливаем cgIsLoading, так как fetchCoinGecko сам управляет этим флагом)
+          await this.fetchCoinGecko();
+        }
+        
+        // Очищаем поиск
+        this.cgSearchQuery = '';
+        this.cgSearchResults = [];
+      } catch (error) {
+        console.error('Error adding top coins by market cap:', error);
+        this.cgError = error.message || 'Ошибка загрузки топ монет';
+      }
+    },
+    
+    // Добавление топ N монет по дневному объему
+    async addTopCoinsByVolume(count) {
+      if (!count || count <= 0 || count > 250) return;
+      
+      if (this.cgIsLoading) return;
+      this.cgError = null;
+      
+      try {
+        const priceChangeParams = '1h,24h,7d,14d,30d,200d';
+        const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=volume_desc&per_page=${count}&page=1&price_change_percentage=${priceChangeParams}`;
+        const res = await fetch(url);
+        
+        if (!res.ok) {
+          if (res.status === 429) {
+            this.increaseAdaptiveTimeout();
+            throw new Error(`HTTP ${res.status}`);
+          }
+          throw new Error(`HTTP ${res.status}`);
+        }
+        
+        this.decreaseAdaptiveTimeout();
+        
+        const data = await res.json();
+        const coins = Array.isArray(data) ? data : [];
+        
+        // Добавляем все монеты в список выбранных (если их еще нет)
+        const newCoinIds = [];
+        coins.forEach(coin => {
+          if (!this.cgSelectedCoins.includes(coin.id)) {
+            this.cgSelectedCoins.push(coin.id);
+            newCoinIds.push(coin.id);
+            // Синхронизация: удаляем из архива, если монета там есть
+            this.syncCoinWithArchive(coin.id, 'add');
+          }
+        });
+        
+        if (newCoinIds.length > 0) {
+          localStorage.setItem('cgSelectedCoins', JSON.stringify(this.cgSelectedCoins));
+          // Обновляем данные (не устанавливаем cgIsLoading, так как fetchCoinGecko сам управляет этим флагом)
+          await this.fetchCoinGecko();
+        }
+        
+        // Очищаем поиск
+        this.cgSearchQuery = '';
+        this.cgSearchResults = [];
+      } catch (error) {
+        console.error('Error adding top coins by volume:', error);
+        this.cgError = error.message || 'Ошибка загрузки топ монет';
+      }
+    },
+    
+    // Обработчик добавления монеты (для использования в шаблоне)
+    handleAddCoin(coinId) {
+      // Проверяем, является ли это кастомным пунктом (топ N монет)
+      const result = this.cgSearchResults.find(r => r.id === coinId);
+      if (result && result.type) {
+        if (result.type === 'top-by-cap') {
+          this.addTopCoinsByMarketCap(result.count);
+        } else if (result.type === 'top-by-volume') {
+          this.addTopCoinsByVolume(result.count);
+        }
+        return;
+      }
+      // Обычное добавление монеты
+      this.addCoin(coinId);
     },
     
     // Удаление монеты из списка
@@ -986,11 +1133,13 @@ window.cmpCoinGecko = {
       
       // Архивируем каждую отмеченную монету
       coinsToArchive.forEach(coinId => {
+        // Находим монету в текущих данных ПЕРЕД синхронизацией (которая удалит её из cgCoins)
+        const coin = this.cgCoins.find(c => c.id === coinId);
+        
         // Синхронизация: удаляем из таблицы, если монета там есть
         this.syncCoinWithArchive(coinId, 'archive');
         
-        // Находим монету в текущих данных
-        const coin = this.cgCoins.find(c => c.id === coinId);
+        // Добавляем в архив, если монета была найдена
         if (coin) {
           // Проверяем, нет ли уже этой монеты в архиве
           const existsInArchive = this.cgArchivedCoins.some(archived => archived.id === coinId);
@@ -1005,7 +1154,7 @@ window.cmpCoinGecko = {
         }
       });
       
-      // Сохраняем архив и список выбранных (если были изменения)
+      // Сохраняем архив
       localStorage.setItem('cgArchivedCoins', JSON.stringify(this.cgArchivedCoins));
       
       // Удаляем монеты из списка выбранных для запроса (если еще не удалены синхронизацией)
@@ -1016,16 +1165,12 @@ window.cmpCoinGecko = {
         }
       });
       
-      // Удаляем монеты из отображаемых данных
-      this.cgCoins = this.cgCoins.filter(coin => !coinsToArchive.includes(coin.id));
+      // Сохраняем изменения (cgCoins уже обновлен в syncCoinWithArchive)
+      localStorage.setItem('cgSelectedCoins', JSON.stringify(this.cgSelectedCoins));
+      localStorage.setItem('cgCoins', JSON.stringify(this.cgCoins));
       
       // Очищаем список отмеченных
       this.selectedCoinIds = [];
-      
-      // Сохраняем изменения
-      localStorage.setItem('cgArchivedCoins', JSON.stringify(this.cgArchivedCoins));
-      localStorage.setItem('cgSelectedCoins', JSON.stringify(this.cgSelectedCoins));
-      localStorage.setItem('cgCoins', JSON.stringify(this.cgCoins));
       localStorage.setItem('cgSelectedCoinIds', JSON.stringify(this.selectedCoinIds));
       
       this.closeCounterDropdown();
@@ -1061,7 +1206,7 @@ window.cmpCoinGecko = {
       const coin = this.cgCoins.find(c => c.id === this.contextMenuCoin);
       if (!coin) return;
       
-      // Синхронизация: удаляем из таблицы, если монета там есть
+      // Синхронизация: удаляем из таблицы и отображаемых данных, если монета там есть
       this.syncCoinWithArchive(this.contextMenuCoin, 'archive');
       
       // Проверяем, нет ли уже этой монеты в архиве
@@ -1077,8 +1222,15 @@ window.cmpCoinGecko = {
         localStorage.setItem('cgArchivedCoins', JSON.stringify(this.cgArchivedCoins));
       }
       
-      // Удаляем из активного списка (если еще не удалена синхронизацией)
-      this.removeCoin(this.contextMenuCoin);
+      // Удаляем монету из выбранных чекбоксами, если она была отмечена
+      const selectedIndex = this.selectedCoinIds.indexOf(this.contextMenuCoin);
+      if (selectedIndex > -1) {
+        this.selectedCoinIds.splice(selectedIndex, 1);
+        localStorage.setItem('cgSelectedCoinIds', JSON.stringify(this.selectedCoinIds));
+      }
+      
+      // Закрываем контекстное меню
+      this.closeContextMenu();
     },
     
     // Восстановление монеты из архива (старый метод для совместимости)
@@ -1306,13 +1458,26 @@ window.cmpCoinGecko = {
     },
     
     // Обработчик ввода в поле поиска
-    handleSearchInput(event) {
+    // Обработчик фокуса на поле поиска
+    handleSearchFocus() {
+      if (!this.isAddingTickers && this.cgSearchResults.length > 0) {
+        return; // Не выполняем поиск, если уже есть результаты
+      }
+      // Выполняем поиск, если поле не пустое
+      if (this.cgSearchQuery) {
+        this.searchCoins(this.cgSearchQuery);
+      }
+    },
+    
+    handleSearchInput(value) {
       // Если идет процесс добавления - игнорируем ввод
       if (this.isAddingTickers) {
         return;
       }
       // Иначе обновляем обычный запрос поиска
-      this.cgSearchQuery = event.target.value;
+      // value может быть строкой (из header-coins) или объектом события (для обратной совместимости)
+      const query = typeof value === 'string' ? value : (value?.target?.value || '');
+      this.cgSearchQuery = query;
     },
     
     // Получение отображения оставшихся тикеров для поля поиска
@@ -1347,7 +1512,41 @@ window.cmpCoinGecko = {
         return;
       }
       
-      if (!newQuery || newQuery.length < 2) {
+      if (!newQuery || newQuery.length < 1) {
+        this.cgSearchResults = [];
+        return;
+      }
+      
+      // Проверяем, является ли запрос числом (для загрузки топ N монет)
+      const trimmedQuery = newQuery.trim();
+      const numberMatch = trimmedQuery.match(/^\d+$/);
+      if (numberMatch) {
+        const count = parseInt(numberMatch[0], 10);
+        if (count > 0 && count <= 250) {
+          // Показываем кастомные пункты сразу без задержки
+          this.cgSearchResults = [
+            {
+              id: 'top-by-cap',
+              type: 'top-by-cap',
+              count: count,
+              symbol: 'TOP',
+              name: `Топ ${count} по капитализации`,
+              thumb: null
+            },
+            {
+              id: 'top-by-volume',
+              type: 'top-by-volume',
+              count: count,
+              symbol: 'TOP',
+              name: `Топ ${count} по дневному объему`,
+              thumb: null
+            }
+          ];
+          return;
+        }
+      }
+      
+      if (newQuery.length < 2) {
         this.cgSearchResults = [];
         return;
       }

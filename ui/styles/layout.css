@@ -193,9 +193,8 @@ body {
 }
 
 .cg-counter-ring-progress {
-    /* Используем тот же цвет, что и у чекнутых чекбоксов Bootstrap */
-    /* Цвет берется из состояния :checked чекбокса - это border-color и background-color */
-    color: var(--bs-form-check-input-checked-border-color, var(--bs-form-check-input-checked-bg-color, var(--bs-primary)));
+    /* Чистый Primary цвет (синий) без прозрачности */
+    color: var(--bs-primary);
 }
 
 /* Число на кнопке */

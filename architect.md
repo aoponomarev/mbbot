@@ -30,7 +30,7 @@
 - **core/api/market-metrics.js** — утилита для получения метрик рынка (FGI, VIX, BTC Dominance, Open Interest, Funding Rate, Long/Short Ratio). Независимый модуль, экспортирует функции через `window.marketMetrics`.
 - **ui/api/import-export.js** — экспорт/импорт настроек.
 - **ui/api/perplexity.js** (или **ui/api/settings.js**) — компонент общих настроек проекта (включая Perplexity AI).
-- **ui/api/coingecko.js** — компонент виджета CoinGecko с поиском монет, архивом, сортировкой таблиц, кэшированием иконок.
+- **ui/api/coingecko.js** — компонент виджета CoinGecko с поиском монет, архивом, сортировкой таблиц, кэшированием иконок, добавлением топ N монет по капитализации и объему.
 - **ui/interaction/splash.js** — сплэш-экран с защитой PIN-кодом и настройкой API-ключа.
 - **ui/interaction/theme.js** — применение темы.
 - **ui/interaction/chat.js** — чат Perplexity.
