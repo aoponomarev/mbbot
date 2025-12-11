@@ -13,5 +13,5 @@ window.appConfig = {
     { value: 'llama-3.1-sonar-small-128k-online', label: 'llama-3.1-sonar-small-128k-online' },
     { value: 'llama-3.1-sonar-large-128k-online', label: 'llama-3.1-sonar-large-128k-online' }
   ],
-  lastCommitMessage: 'Stage 2: Migrate CPT calculation and create Complex Deltas tab with stubs'
+  lastCommitMessage: 'Add reusable column visibility mixin and document view switching pattern'
 };

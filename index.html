@@ -53,11 +53,8 @@
                 <!-- Компонент общих настроек проекта (показывается при клике на гамбургер) -->
                 <app-settings v-if="showSettings"></app-settings>
 
-                <!-- Компонент виджета CoinGecko (показывается по умолчанию и при вкладке "%") -->
-                <app-coingecko v-if="!showSettings && activeTab === 'percent'"></app-coingecko>
-                
-                <!-- Компонент таблицы "Компл. дельты" (показывается при вкладке "Компл. дельты") -->
-                <app-complex-deltas v-if="!showSettings && activeTab === 'complex-deltas'"></app-complex-deltas>
+                <!-- Компонент виджета CoinGecko (показывается на вкладках "%" и "Компл. дельты") -->
+                <app-coingecko v-if="!showSettings && (activeTab === 'percent' || activeTab === 'complex-deltas')"></app-coingecko>
             </main>
         </div>
     </div>
@@ -412,6 +409,22 @@
                     </div>
                     <div class="table-responsive">
                         <table class="table table-sm align-middle cg-coins-table">
+                            <colgroup>
+                                <col class="col-checkbox" :class="columnVisibilityClasses['col-checkbox']">
+                                <col class="col-coin" :class="columnVisibilityClasses['col-coin']">
+                                <col class="col-percent-1h" :class="columnVisibilityClasses['col-percent-1h']">
+                                <col class="col-percent-24h" :class="columnVisibilityClasses['col-percent-24h']">
+                                <col class="col-percent-7d" :class="columnVisibilityClasses['col-percent-7d']">
+                                <col class="col-percent-14d" :class="columnVisibilityClasses['col-percent-14d']">
+                                <col class="col-percent-30d" :class="columnVisibilityClasses['col-percent-30d']">
+                                <col class="col-percent-200d" :class="columnVisibilityClasses['col-percent-200d']">
+                                <col 
+                                    v-for="(header, index) in cdHeaders" 
+                                    :key="'col-cd-' + index"
+                                    class="col-cd" 
+                                    :class="columnVisibilityClasses['col-cd']"
+                                ></col>
+                            </colgroup>
                             <thead>
                                 <tr>
                                     <th style="width: 40px;">
@@ -463,35 +476,85 @@
                                             </div>
                                         </div>
                                     </th>
-                                    <th class="text-end" style="cursor: pointer;" @click="handleSort('price_change_percentage_1h_in_currency')">
-                                        1h %
+                                    <th class="text-end col-percent-1h" :class="columnVisibilityClasses['col-percent-1h']">
+                                        <sortable-header 
+                                            field="price_change_percentage_1h_in_currency"
+                                            label="1h %"
+                                            :sort-by="sortBy"
+                                            :sort-order="sortOrder"
+                                            @sort="handleSort"
+                                        ></sortable-header>
                                     </th>
-                                    <th class="text-end" style="cursor: pointer;" @click="handleSort('price_change_percentage_24h_in_currency')">
-                                        24h %
+                                    <th class="text-end col-percent-24h" :class="columnVisibilityClasses['col-percent-24h']">
+                                        <sortable-header 
+                                            field="price_change_percentage_24h_in_currency"
+                                            label="24h %"
+                                            :sort-by="sortBy"
+                                            :sort-order="sortOrder"
+                                            @sort="handleSort"
+                                        ></sortable-header>
                                     </th>
-                                    <th class="text-end" style="cursor: pointer;" @click="handleSort('price_change_percentage_7d_in_currency')">
-                                        7d %
+                                    <th class="text-end col-percent-7d" :class="columnVisibilityClasses['col-percent-7d']">
+                                        <sortable-header 
+                                            field="price_change_percentage_7d_in_currency"
+                                            label="7d %"
+                                            :sort-by="sortBy"
+                                            :sort-order="sortOrder"
+                                            @sort="handleSort"
+                                        ></sortable-header>
                                     </th>
-                                    <th class="text-end" style="cursor: pointer;" @click="handleSort('price_change_percentage_14d_in_currency')">
-                                        14d %
+                                    <th class="text-end col-percent-14d" :class="columnVisibilityClasses['col-percent-14d']">
+                                        <sortable-header 
+                                            field="price_change_percentage_14d_in_currency"
+                                            label="14d %"
+                                            :sort-by="sortBy"
+                                            :sort-order="sortOrder"
+                                            @sort="handleSort"
+                                        ></sortable-header>
                                     </th>
-                                    <th class="text-end" style="cursor: pointer;" @click="handleSort('price_change_percentage_30d_in_currency')">
-                                        30d %
+                                    <th class="text-end col-percent-30d" :class="columnVisibilityClasses['col-percent-30d']">
+                                        <sortable-header 
+                                            field="price_change_percentage_30d_in_currency"
+                                            label="30d %"
+                                            :sort-by="sortBy"
+                                            :sort-order="sortOrder"
+                                            @sort="handleSort"
+                                        ></sortable-header>
                                     </th>
-                                    <th class="text-end" style="cursor: pointer;" @click="handleSort('price_change_percentage_200d_in_currency')">
-                                        200d %
+                                    <th class="text-end col-percent-200d" :class="columnVisibilityClasses['col-percent-200d']">
+                                        <sortable-header 
+                                            field="price_change_percentage_200d_in_currency"
+                                            label="200d %"
+                                            :sort-by="sortBy"
+                                            :sort-order="sortOrder"
+                                            @sort="handleSort"
+                                        ></sortable-header>
+                                    </th>
+                                    <th 
+                                        v-for="(header, index) in cdHeaders" 
+                                        :key="'cd-header-' + index"
+                                        class="text-end col-cd" 
+                                        :class="columnVisibilityClasses['col-cd']"
+                                    >
+                                        <sortable-header 
+                                            :field="getCDField(header, index)"
+                                            :label="header"
+                                            :sort-by="sortBy"
+                                            :sort-order="sortOrder"
+                                            @sort="handleSort"
+                                        ></sortable-header>
                                     </th>
                                 </tr>
                             </thead>
                             <tbody v-if="cgIsLoading || sortedCoins.length === 0">
                                 <tr v-if="cgIsLoading">
-                                    <td colspan="8" class="text-center text-muted">
+                                    <td colspan="16" class="text-center text-muted">
                                         <span class="spinner-border spinner-border-sm me-2" role="status"></span>
                                         Загрузка данных с CoinGecko...
                                     </td>
                                 </tr>
                                 <tr v-else-if="sortedCoins.length === 0">
-                                    <td colspan="8" class="text-center text-muted">Нет данных</td>
+                                    <td colspan="16" class="text-center text-muted">Нет данных</td>
                                 </tr>
                             </tbody>
                             <transition-group v-else name="coin-row" tag="tbody">
@@ -518,12 +581,20 @@
                                             <span class="text-uppercase fw-semibold">{{ coin.symbol }}</span>
                                         </div>
                                     </td>
-                                    <td class="text-end" :class="cgChangeClass(coin.price_change_percentage_1h_in_currency)">{{ cgFormatPercent(coin.price_change_percentage_1h_in_currency) }}</td>
-                                    <td class="text-end" :class="cgChangeClass(coin.price_change_percentage_24h_in_currency)">{{ cgFormatPercent(coin.price_change_percentage_24h_in_currency) }}</td>
-                                    <td class="text-end" :class="cgChangeClass(coin.price_change_percentage_7d_in_currency)">{{ cgFormatPercent(coin.price_change_percentage_7d_in_currency) }}</td>
-                                    <td class="text-end" :class="cgChangeClass(coin.price_change_percentage_14d_in_currency)">{{ cgFormatPercent(coin.price_change_percentage_14d_in_currency) }}</td>
-                                    <td class="text-end" :class="cgChangeClass(coin.price_change_percentage_30d_in_currency)">{{ cgFormatPercent(coin.price_change_percentage_30d_in_currency) }}</td>
-                                    <td class="text-end" :class="cgChangeClass(coin.price_change_percentage_200d_in_currency)">{{ cgFormatPercent(coin.price_change_percentage_200d_in_currency) }}</td>
+                                    <td class="text-end col-percent-1h" :class="[cgChangeClass(coin.price_change_percentage_1h_in_currency), columnVisibilityClasses['col-percent-1h']]">{{ cgFormatPercent(coin.price_change_percentage_1h_in_currency) }}</td>
+                                    <td class="text-end col-percent-24h" :class="[cgChangeClass(coin.price_change_percentage_24h_in_currency), columnVisibilityClasses['col-percent-24h']]">{{ cgFormatPercent(coin.price_change_percentage_24h_in_currency) }}</td>
+                                    <td class="text-end col-percent-7d" :class="[cgChangeClass(coin.price_change_percentage_7d_in_currency), columnVisibilityClasses['col-percent-7d']]">{{ cgFormatPercent(coin.price_change_percentage_7d_in_currency) }}</td>
+                                    <td class="text-end col-percent-14d" :class="[cgChangeClass(coin.price_change_percentage_14d_in_currency), columnVisibilityClasses['col-percent-14d']]">{{ cgFormatPercent(coin.price_change_percentage_14d_in_currency) }}</td>
+                                    <td class="text-end col-percent-30d" :class="[cgChangeClass(coin.price_change_percentage_30d_in_currency), columnVisibilityClasses['col-percent-30d']]">{{ cgFormatPercent(coin.price_change_percentage_30d_in_currency) }}</td>
+                                    <td class="text-end col-percent-200d" :class="[cgChangeClass(coin.price_change_percentage_200d_in_currency), columnVisibilityClasses['col-percent-200d']]">{{ cgFormatPercent(coin.price_change_percentage_200d_in_currency) }}</td>
+                                    <td 
+                                        v-for="(header, index) in cdHeaders" 
+                                        :key="'cd-cell-' + index"
+                                        class="text-end col-cd" 
+                                        :class="[cgChangeClass(getCDValue(coin, getCDField(header, index))), columnVisibilityClasses['col-cd']]"
+                                    >
+                                        {{ cgFormatCD(getCDValue(coin, getCDField(header, index))) }}
+                                    </td>
                                 </tr>
                             </transition-group>
                         </table>
@@ -556,14 +627,14 @@
 
     <!-- X-Template для компонента хедера индикатора монет (должен быть ДО загрузки Vue и компонентов) -->
     <script type="text/x-template" id="header-coins-template">
-        <div class="card-header d-flex align-items-center gap-2">
+                <div class="card-header d-flex align-items-center gap-2">
             <!-- Кнопка счетчика монет с выпадающим меню -->
-            <div class="position-relative">
-                <button 
-                    class="btn btn-sm cg-coins-counter" 
-                    type="button"
+                    <div class="position-relative">
+                        <button 
+                            class="btn btn-sm cg-coins-counter" 
+                            type="button"
                     @click.stop="handleToggleCounterDropdown"
-                >
+                        >
                     <!-- Круговая диаграмма (разорванное кольцо) при выбранных чекбоксах -->
                     <svg v-if="selectedCoinsCount > 0" class="cg-counter-ring" viewBox="0 0 36 36">
                         <circle
@@ -592,177 +663,177 @@
                     </svg>
                     <!-- Число: выбранные или общее -->
                     <span>{{ selectedCoinsCount > 0 ? selectedCoinsCount : totalCoinsCount }}</span>
-                </button>
-                <!-- Выпадающее меню счетчика -->
-                <div 
-                    v-if="showCounterDropdown" 
+                        </button>
+                        <!-- Выпадающее меню счетчика -->
+                        <div 
+                            v-if="showCounterDropdown" 
                     class="position-absolute bg-body border rounded shadow-sm cg-counter-dropdown avto-2CCdUy" 
                     style="top: 100%; margin-top: 4px; min-width: 200px;"
-                    @click.stop
-                >
-                    <div class="list-group list-group-flush">
-                        <button 
-                            class="list-group-item list-group-item-action py-2 px-3 border-0" 
+                            @click.stop
+                        >
+                            <div class="list-group list-group-flush">
+                                <button 
+                                    class="list-group-item list-group-item-action py-2 px-3 border-0" 
                             @click="handleSelectAllCoins"
-                            :disabled="selectedCoinsCount === totalCoinsCount && totalCoinsCount > 0"
-                        >
-                            <i class="fas fa-check-square me-2"></i>Выбрать все
-                        </button>
-                        <button 
-                            class="list-group-item list-group-item-action py-2 px-3 border-0" 
+                                    :disabled="selectedCoinsCount === totalCoinsCount && totalCoinsCount > 0"
+                                >
+                                    <i class="fas fa-check-square me-2"></i>Выбрать все
+                                </button>
+                                <button 
+                                    class="list-group-item list-group-item-action py-2 px-3 border-0" 
                             @click="handleDeselectAllCoins"
-                            :disabled="selectedCoinsCount === 0"
-                        >
-                            <i class="fas fa-square me-2"></i>Отменить все
-                        </button>
-                        <div class="dropdown-divider my-0"></div>
-                        <button 
-                            class="list-group-item list-group-item-action py-2 px-3 border-0" 
+                                    :disabled="selectedCoinsCount === 0"
+                                >
+                                    <i class="fas fa-square me-2"></i>Отменить все
+                                </button>
+                                <div class="dropdown-divider my-0"></div>
+                                <button 
+                                    class="list-group-item list-group-item-action py-2 px-3 border-0" 
                             @click="handleDeleteSelectedCoins"
-                            :disabled="selectedCoinsCount === 0"
-                        >
-                            <i class="fas fa-trash me-2"></i>Удалить отмеченные
-                        </button>
-                        <button 
-                            class="list-group-item list-group-item-action py-2 px-3 border-0" 
+                                    :disabled="selectedCoinsCount === 0"
+                                >
+                                    <i class="fas fa-trash me-2"></i>Удалить отмеченные
+                                </button>
+                                <button 
+                                    class="list-group-item list-group-item-action py-2 px-3 border-0" 
                             @click="handleArchiveSelectedCoins"
-                            :disabled="selectedCoinsCount === 0"
-                        >
-                            <i class="fas fa-archive me-2"></i>Архивировать отмеченные
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="flex-grow-1 position-relative">
-                <input
-                    type="text"
-                    class="form-control form-control-sm cg-search-input"
-                    :class="{'bg-light': isAddingTickers}"
-                    :placeholder="isAddingTickers ? 'Добавление монет...' : 'Поиск монет или вставка списка тикеров (например: BTC, ETH, SOL)...'"
-                    :value="searchQueryDisplay"
-                    @input="handleSearchInput"
-                    :disabled="isAddingTickers"
-                    @focus="handleSearchFocus"
-                >
-                <!-- Индикатор прогресса добавления тикеров -->
-                <div v-if="isAddingTickers" class="position-absolute w-100 bg-body border rounded shadow-sm cg-search-dropdown avto-H8nL3qT cg-loading-panel" style="top: 100%; margin-top: 4px; padding: 0.75rem;">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <div class="small">
-                            <i class="fas fa-spinner fa-spin me-2"></i>
-                            <span v-if="currentAddingTicker">
-                                <strong>Добавление: {{ currentAddingTicker }}</strong>
-                            </span>
-                            <span v-else class="text-muted">Подготовка...</span>
+                                    :disabled="selectedCoinsCount === 0"
+                                >
+                                    <i class="fas fa-archive me-2"></i>Архивировать отмеченные
+                                </button>
+                            </div>
                         </div>
-                        <button 
-                            class="btn btn-sm btn-outline-danger" 
+                    </div>
+                    <div class="flex-grow-1 position-relative">
+                        <input
+                            type="text"
+                            class="form-control form-control-sm cg-search-input"
+                            :class="{'bg-light': isAddingTickers}"
+                            :placeholder="isAddingTickers ? 'Добавление монет...' : 'Поиск монет или вставка списка тикеров (например: BTC, ETH, SOL)...'"
+                            :value="searchQueryDisplay"
+                            @input="handleSearchInput"
+                            :disabled="isAddingTickers"
+                    @focus="handleSearchFocus"
+                        >
+                        <!-- Индикатор прогресса добавления тикеров -->
+                <div v-if="isAddingTickers" class="position-absolute w-100 bg-body border rounded shadow-sm cg-search-dropdown avto-H8nL3qT cg-loading-panel" style="top: 100%; margin-top: 4px; padding: 0.75rem;">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="small">
+                                    <i class="fas fa-spinner fa-spin me-2"></i>
+                                    <span v-if="currentAddingTicker">
+                                        <strong>Добавление: {{ currentAddingTicker }}</strong>
+                                    </span>
+                                    <span v-else class="text-muted">Подготовка...</span>
+                                </div>
+                                <button 
+                                    class="btn btn-sm btn-outline-danger" 
                             @click="handleStopAddingTickers"
-                            title="Остановить процесс добавления"
-                        >
-                            <i class="fas fa-stop me-1"></i>Остановить
-                        </button>
-                    </div>
-                    <div v-if="getRemainingTickersCount() > 0" class="small text-muted mb-2">
-                        Осталось: {{ getRemainingTickersCount() }} {{ getRemainingTickersCount() === 1 ? 'монета' : getRemainingTickersCount() < 5 ? 'монеты' : 'монет' }}
-                    </div>
-                    <div v-if="getRemainingTickersDisplay().length > 0" class="d-flex flex-wrap gap-1 mb-2">
-                        <span 
-                            v-for="ticker in getRemainingTickersDisplay().slice(0, 15)" 
-                            :key="ticker"
-                            class="badge"
-                            :class="{
-                                'bg-primary': ticker === currentAddingTicker, 
-                                'bg-secondary': ticker !== currentAddingTicker && !failedTickers.includes(ticker),
-                                'bg-warning-dark': failedTickers.includes(ticker)
-                            }"
-                            :title="failedTickers.includes(ticker) ? `Попытка ${tickerAttempts[ticker] || 0} из 5` : ''"
-                        >
-                            {{ ticker }}
-                            <span v-if="failedTickers.includes(ticker) && (tickerAttempts[ticker] || 0) > 0" class="ms-1">
-                                ({{ tickerAttempts[ticker] || 0 }}/5)
-                            </span>
-                        </span>
-                        <span v-if="getRemainingTickersDisplay().length > 15" class="badge bg-light text-dark">
-                            +{{ getRemainingTickersDisplay().length - 15 }}...
-                        </span>
-                    </div>
-                    <div v-if="failedTickers.length > 0" class="small text-warning-dark">
-                        <i class="fas fa-exclamation-triangle me-1"></i>
-                        Неудачные тикеры будут отправлены в архив после 5 попыток
-                    </div>
-                </div>
-                <!-- Выпадающий список результатов поиска -->
+                                    title="Остановить процесс добавления"
+                                >
+                                    <i class="fas fa-stop me-1"></i>Остановить
+                                </button>
+                            </div>
+                            <div v-if="getRemainingTickersCount() > 0" class="small text-muted mb-2">
+                                Осталось: {{ getRemainingTickersCount() }} {{ getRemainingTickersCount() === 1 ? 'монета' : getRemainingTickersCount() < 5 ? 'монеты' : 'монет' }}
+                            </div>
+                            <div v-if="getRemainingTickersDisplay().length > 0" class="d-flex flex-wrap gap-1 mb-2">
+                                <span 
+                                    v-for="ticker in getRemainingTickersDisplay().slice(0, 15)" 
+                                    :key="ticker"
+                                    class="badge"
+                                    :class="{
+                                        'bg-primary': ticker === currentAddingTicker, 
+                                        'bg-secondary': ticker !== currentAddingTicker && !failedTickers.includes(ticker),
+                                        'bg-warning-dark': failedTickers.includes(ticker)
+                                    }"
+                                    :title="failedTickers.includes(ticker) ? `Попытка ${tickerAttempts[ticker] || 0} из 5` : ''"
+                                >
+                                    {{ ticker }}
+                                    <span v-if="failedTickers.includes(ticker) && (tickerAttempts[ticker] || 0) > 0" class="ms-1">
+                                        ({{ tickerAttempts[ticker] || 0 }}/5)
+                                    </span>
+                                </span>
+                                <span v-if="getRemainingTickersDisplay().length > 15" class="badge bg-light text-dark">
+                                    +{{ getRemainingTickersDisplay().length - 15 }}...
+                                </span>
+                            </div>
+                            <div v-if="failedTickers.length > 0" class="small text-warning-dark">
+                                <i class="fas fa-exclamation-triangle me-1"></i>
+                                Неудачные тикеры будут отправлены в архив после 5 попыток
+                            </div>
+                        </div>
+                        <!-- Выпадающий список результатов поиска -->
                 <div v-if="cgSearchResults.length > 0 && !isAddingTickers" class="position-absolute w-100 bg-body border rounded shadow-sm cg-search-dropdown avto-H8nL3qT" style="max-height: 300px; overflow-y: auto; top: 100%; margin-top: 4px;">
-                    <div 
-                        v-for="result in cgSearchResults" 
-                        :key="result.id"
-                        class="p-2 border-bottom cg-search-item"
+                            <div 
+                                v-for="result in cgSearchResults" 
+                                :key="result.id"
+                                class="p-2 border-bottom cg-search-item"
                         @click="handleAddCoin(result.id)"
                         :class="{'cg-search-item-selected': !result.type && cgSelectedCoins.includes(result.id)}"
-                    >
-                        <div class="d-flex align-items-center gap-2">
-                            <img v-if="result.thumb" :src="result.thumb" :alt="result.symbol" width="20" height="20">
-                            <div class="flex-grow-1">
+                            >
+                                <div class="d-flex align-items-center gap-2">
+                                    <img v-if="result.thumb" :src="result.thumb" :alt="result.symbol" width="20" height="20">
+                                    <div class="flex-grow-1">
                                 <div v-if="result.type" class="fw-semibold small">{{ result.name }}</div>
                                 <template v-else>
-                                    <div class="fw-semibold small text-uppercase">{{ result.symbol }}</div>
-                                    <small class="text-muted">{{ result.name }}</small>
+                                        <div class="fw-semibold small text-uppercase">{{ result.symbol }}</div>
+                                        <small class="text-muted">{{ result.name }}</small>
                                 </template>
-                            </div>
+                                    </div>
                             <small v-if="!result.type && cgSelectedCoins.includes(result.id)">
-                                <i class="fas fa-check"></i>
-                            </small>
+                                        <i class="fas fa-check"></i>
+                                    </small>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
-            <div class="position-relative">
-                <button 
+                    <div class="position-relative">
+                        <button 
                     class="btn btn-sm cg-archive-btn" 
-                    type="button"
-                    :disabled="cgArchivedCoins.length === 0"
+                            type="button"
+                            :disabled="cgArchivedCoins.length === 0"
                     @click.stop="handleToggleArchiveDropdown"
-                >
+                        >
                     <i class="fas fa-archive d-inline d-md-none"></i>
                     <span class="d-none d-md-inline">Архив</span>
-                </button>
-                <!-- Выпадающий список архива -->
-                <div 
-                    v-if="showArchiveDropdown && cgArchivedCoins.length > 0" 
-                    class="position-absolute bg-body border rounded shadow-sm cg-archive-dropdown avto-P4rM7wX" 
+                        </button>
+                        <!-- Выпадающий список архива -->
+                        <div 
+                            v-if="showArchiveDropdown && cgArchivedCoins.length > 0" 
+                            class="position-absolute bg-body border rounded shadow-sm cg-archive-dropdown avto-P4rM7wX" 
                     style="max-height: 300px; overflow-y: auto; top: 100%; margin-top: 4px; width: auto; min-width: fit-content; right: 0;"
-                    @click.stop
-                >
-                    <div 
-                        v-for="archivedCoin in cgArchivedCoins" 
-                        :key="getArchivedCoinId(archivedCoin)"
-                        class="p-2 border-bottom cg-search-item"
-                        :title="getArchivedCoinName(archivedCoin)"
+                            @click.stop
+                        >
+                            <div 
+                                v-for="archivedCoin in cgArchivedCoins" 
+                                :key="getArchivedCoinId(archivedCoin)"
+                                class="p-2 border-bottom cg-search-item"
+                                :title="getArchivedCoinName(archivedCoin)"
                         @click="handleRestoreFromArchive(getArchivedCoinId(archivedCoin))"
-                    >
-                        <div class="d-flex align-items-center gap-2">
-                            <!-- Иконка рефреша для автоматически заархивированных монет (неудачные попытки) -->
-                            <i v-if="isFailedArchivedCoin(archivedCoin)" class="fas fa-sync-alt text-muted" style="width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 14px;"></i>
-                            <!-- Обычная иконка монеты для вручную заархивированных -->
-                            <img v-else-if="getArchivedCoinIcon(archivedCoin)" :src="getArchivedCoinIcon(archivedCoin)" :alt="getArchivedCoinId(archivedCoin)" width="20" height="20">
-                            <div class="flex-grow-1">
-                                <div class="fw-semibold small text-uppercase">{{ getArchivedCoinSymbol(archivedCoin) }}</div>
+                            >
+                                <div class="d-flex align-items-center gap-2">
+                                    <!-- Иконка рефреша для автоматически заархивированных монет (неудачные попытки) -->
+                                    <i v-if="isFailedArchivedCoin(archivedCoin)" class="fas fa-sync-alt text-muted" style="width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 14px;"></i>
+                                    <!-- Обычная иконка монеты для вручную заархивированных -->
+                                    <img v-else-if="getArchivedCoinIcon(archivedCoin)" :src="getArchivedCoinIcon(archivedCoin)" :alt="getArchivedCoinId(archivedCoin)" width="20" height="20">
+                                    <div class="flex-grow-1">
+                                        <div class="fw-semibold small text-uppercase">{{ getArchivedCoinSymbol(archivedCoin) }}</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
             <small class="text-muted d-none d-md-block" v-if="cgLastUpdated" style="line-height: 1.2;">
-                <div>{{ formatLastUpdatedDate(cgLastUpdated) }}</div>
-                <div>{{ formatLastUpdatedTime(cgLastUpdated) }}</div>
-            </small>
+                        <div>{{ formatLastUpdatedDate(cgLastUpdated) }}</div>
+                        <div>{{ formatLastUpdatedTime(cgLastUpdated) }}</div>
+                    </small>
             <button class="btn btn-sm cg-update-btn" @click="handleFetchCoins" :disabled="cgIsLoading">
                 <span v-if="cgIsLoading" class="spinner-border spinner-border-sm" role="status"></span>
                 <template v-else>
                     <i class="fas fa-sync-alt d-inline d-md-none"></i>
                     <span class="d-none d-md-inline">Обновить</span>
                 </template>
-            </button>
+                    </button>
         </div>
     </script>
 
@@ -844,68 +915,11 @@
         </footer>
     </script>
 
-    <!-- X-Template для компонента таблицы "Компл. дельты" (должен быть ДО загрузки Vue и компонентов) -->
-    <script type="text/x-template" id="complex-deltas-template">
-        <div class="col-12 mb-4">
-            <div class="card avto-Cd8K2mN">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-chart-area me-2"></i>Комплексные дельты
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div v-if="sortedCoins.length === 0" class="text-center text-muted py-4">
-                        <i class="fas fa-info-circle me-2"></i>Нет монет. Добавьте монеты через поиск на вкладке "%".
-                    </div>
-                    <div v-else class="table-responsive">
-                        <table class="table table-sm table-hover align-middle" id="complex-deltas-table">
-                            <thead>
-                                <tr>
-                                    <th>№</th>
-                                    <th>Тикер</th>
-                                    <th 
-                                        v-for="header in cdHeaders" 
-                                        :key="header"
-                                        :class="{ 'cdh-column': header === 'CDH' }"
-                                        @click="handleSort(header)"
-                                        style="cursor: pointer;"
-                                    >
-                                        {{ header }}
-                                        <i v-if="sortColumn === header" 
-                                           :class="sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'"
-                                           class="ms-1"></i>
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="(coin, index) in sortedCoins" :key="coin.id || coin.symbol">
-                                    <td>{{ index + 1 }}</td>
-                                    <td>
-                                        <a 
-                                            :href="getBybitLink(coin.symbol || coin.id)" 
-                                            target="_blank"
-                                            :title="coin.name"
-                                        >
-                                            {{ coin.symbol || coin.id }}
-                                        </a>
-                                    </td>
-                                    <td 
-                                        v-for="header in cdHeaders" 
-                                        :key="header"
-                                        :class="{ 'cdh-column': header === 'CDH' }"
-                                    >
-                                        {{ formatValue(getCDValue(coin, header)) }}
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div v-if="useStub" class="alert alert-info alert-sm mt-3 mb-0">
-                        <i class="fas fa-info-circle me-2"></i>
-                        <small>Используются заглушки для CD значений. Реальные расчеты будут доступны после миграции Этапа 3 (CD).</small>
-                    </div>
-                </div>
-            </div>
+    <!-- X-Template для компонента сортируемого заголовка (должен быть ДО загрузки Vue и компонентов) -->
+    <script type="text/x-template" id="sortable-header-template">
+        <div class="for-sorting" style="cursor: pointer;" @click="handleClick">
+            <span>{{ label }}</span>
+            <i :class="sortIcon" class="ms-1"></i>
         </div>
     </script>
 
@@ -932,8 +946,9 @@
     <script src="./ui/api/perplexity.js"></script>
     <script src="./ui/api/import-export.js"></script>
     <script src="./ui/components/header-coins.js"></script>
+    <script src="./ui/components/sortable-header.js"></script>
+    <script src="./ui/utils/column-visibility-mixin.js"></script>
     <script src="./ui/api/coingecko.js"></script>
-    <script src="./ui/api/complex-deltas.js"></script>
     <script src="./app/app-ui-root.js"></script>
 </body>
 </html>

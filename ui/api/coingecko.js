@@ -56,7 +56,10 @@ function transformCoinGeckoToPV(coinGeckoCoin) {
 // Vue компонент с x-template шаблоном
 window.cmpCoinGecko = {
   template: '#coingecko-template',
-  mixins: [window.tableSortMixin], // Подключаем глобальный mixin для сортировки
+  mixins: [
+    window.tableSortMixin, // Подключаем глобальный mixin для сортировки
+    window.columnVisibilityMixin // Подключаем mixin для управления видимостью колонок
+  ],
 
   data() {
     // Загружаем сохраненные данные монет из localStorage
@@ -175,7 +178,23 @@ window.cmpCoinGecko = {
       adaptiveTimeout: 300, // Текущий таймаут в миллисекундах (базовое значение)
       adaptiveTimeoutBase: 300, // Базовое значение таймаута (300ms)
       adaptiveTimeoutMax: 10000, // Максимальный таймаут (10 секунд)
-      lastSuccessfulRequest: null // Время последнего успешного запроса (для постепенного уменьшения таймаута)
+      lastSuccessfulRequest: null, // Время последнего успешного запроса (для постепенного уменьшения таймаута)
+      // Горизонт прогноза в днях (по умолчанию 2 дня, как в старом приложении)
+      horizonDays: 2,
+      // Заглушка для CD значений (пока не мигрированы функции расчета)
+      useStub: true,
+      // Конфигурация видимости колонок в зависимости от активной вкладки
+      // Используется mixin columnVisibilityMixin для управления видимостью
+      columnVisibilityConfig: {
+        'percent': { 
+          // На вкладке "%" скрыть все колонки CD
+          hide: ['col-cd'] 
+        },
+        'complex-deltas': { 
+          // На вкладке "Компл. дельты" скрыть все колонки процентов
+          hide: ['col-percent'] 
+        }
+      }
     };
   },
   
@@ -209,10 +228,36 @@ window.cmpCoinGecko = {
     // Отображение значения в поле поиска (реактивное)
     searchQueryDisplay() {
       return this.isAddingTickers ? this.displayPendingTickers : this.cgSearchQuery;
-    }
+    },
+    
+    // =========================
+    // COMPUTED СВОЙСТВА ДЛЯ ЗАГОЛОВКОВ CD (Cumulative Delta)
+    // =========================
+    
+    // Заголовки колонок CD (статический порядок)
+    cdHeaders() {
+      return ['CDH', 'CD6', 'CD5', 'CD4', 'CD3', 'CDH', 'CD2', 'CD1'];
+    },
+    
   },
 
   methods: {
+    // Получить все классы колонок для управления видимостью
+    // Используется mixin columnVisibilityMixin для определения, какие колонки скрывать
+    getColumnClasses() {
+      return [
+        'col-checkbox',
+        'col-coin',
+        'col-percent-1h',
+        'col-percent-24h',
+        'col-percent-7d',
+        'col-percent-14d',
+        'col-percent-30d',
+        'col-percent-200d',
+        'col-cd' // Префикс для всех CD колонок (col-cd применяется ко всем через v-for)
+      ];
+    },
+    
     // Переопределяем handleSort из mixin для сброса сортировки монет при сортировке других колонок
     handleSort(field) {
       // Если сортируем не колонку монет - сбрасываем сортировку монет
@@ -233,6 +278,16 @@ window.cmpCoinGecko = {
       } else {
         localStorage.removeItem('cgSortOrder');
       }
+    },
+    
+    // Переопределяем getSortValue из mixin для обработки CD полей
+    getSortValue(item, field) {
+      // Если поле начинается с 'cd' (cdh, cdh2, cd1, cd2, и т.д.) - используем getCDValue
+      if (field && field.toLowerCase().startsWith('cd')) {
+        return this.getCDValue(item, field);
+      }
+      // Для остальных полей используем стандартную логику из mixin
+      return window.tableSortMixin.methods.getSortValue.call(this, item, field);
     },
     
     async fetchCoinGecko() {
@@ -308,6 +363,109 @@ window.cmpCoinGecko = {
       if (value > 0) return 'text-success';
       if (value < 0) return 'text-danger';
       return '';
+    },
+    
+    // =========================
+    // МЕТОДЫ ПОЛУЧЕНИЯ CD (Cumulative Delta) - ВРЕМЕННО ИСПОЛЬЗУЮТ ЗАГЛУШКИ
+    // Источник: ui/api/complex-deltas.js (методы getCDH, getCD, getCDValue)
+    // ВАЖНО: После миграции Этапа 3 будут использоваться реальные вычисления
+    // =========================
+    
+    /**
+     * getCDH(coin)
+     * Получить CDH (CD на горизонте) для монеты
+     * ВАЖНО: Пока используется заглушка, после миграции Этапа 3 будет реальный расчет
+     * 
+     * @param {Object} coin - Объект монеты с полем pvs
+     * @returns {number} CDH значение (пока сумма всех pvs как заглушка)
+     */
+    getCDH(coin) {
+      if (this.useStub) {
+        // Заглушка: используем сумму pvs как приблизительное значение CDH
+        if (coin.pvs && Array.isArray(coin.pvs)) {
+          return coin.pvs.reduce((sum, pv) => sum + (parseFloat(pv) || 0), 0);
+        }
+        return 0;
+      }
+      // После миграции: return parseFloat(coin.cdhw) || 0;
+      return parseFloat(coin.cdhw) || 0;
+    },
+    
+    /**
+     * getCD(coin, index)
+     * Получить CD значение по индексу (1-6)
+     * ВАЖНО: Пока используется заглушка, после миграции Этапа 3 будет реальный расчет
+     * 
+     * @param {Object} coin - Объект монеты с полем pvs
+     * @param {number} index - Индекс CD (1-6)
+     * @returns {number|string} CD значение (пока частичная сумма pvs как заглушка)
+     */
+    getCD(coin, index) {
+      if (this.useStub) {
+        // Заглушка: используем частичную сумму pvs
+        if (coin.pvs && Array.isArray(coin.pvs)) {
+          const sum = coin.pvs.slice(0, index).reduce((sum, pv) => sum + (parseFloat(pv) || 0), 0);
+          return sum;
+        }
+        return 0;
+      }
+      // После миграции: return coin[`cd${index}`] || coin[`cd${index}w`] || 0;
+      const cdValue = coin[`cd${index}`] || coin[`cd${index}w`];
+      return cdValue !== undefined ? cdValue : 0;
+    },
+    
+    /**
+     * getCDValue(coin, field)
+     * Получить значение CD для отображения в таблице по полю сортировки
+     * 
+     * @param {Object} coin - Объект монеты
+     * @param {string} field - Поле сортировки ('cdh', 'cdh2', 'cd1', 'cd2', 'cd3', 'cd4', 'cd5', 'cd6')
+     * @returns {number} CD значение
+     */
+    getCDValue(coin, field) {
+      if (field === 'cdh' || field === 'cdh2') {
+        return this.getCDH(coin);
+      }
+      // Извлекаем индекс из поля (cd1 -> 1, cd2 -> 2, и т.д.)
+      const index = parseInt(field.replace('cd', ''));
+      if (index >= 1 && index <= 6) {
+        return this.getCD(coin, index);
+      }
+      return 0;
+    },
+    
+    /**
+     * cgFormatCD(value)
+     * Форматирование CD значения для отображения
+     * 
+     * @param {number} value - CD значение
+     * @returns {string} Отформатированное значение
+     */
+    cgFormatCD(value) {
+      if (value === null || value === undefined || value === 0) return '—';
+      const num = parseFloat(value);
+      if (Number.isFinite(num)) {
+        return num.toFixed(2);
+      }
+      return '—';
+    },
+    
+    /**
+     * getCDField(header, index)
+     * Получить поле для сортировки по заголовку CD колонки
+     * Обрабатывает два CDH: первый как 'cdh', второй как 'cdh2'
+     * 
+     * @param {string} header - Заголовок колонки ('CDH', 'CD1', 'CD2', и т.д.)
+     * @param {number} index - Индекс колонки в массиве cdHeaders
+     * @returns {string} Поле для сортировки ('cdh', 'cdh2', 'cd1', 'cd2', и т.д.)
+     */
+    getCDField(header, index) {
+      const headerLower = header.toLowerCase();
+      if (headerLower === 'cdh') {
+        // Первый CDH (индекс 0) -> 'cdh', второй -> 'cdh2'
+        return index === 0 ? 'cdh' : 'cdh2';
+      }
+      return headerLower;
     },
     
     /**
