@@ -26,11 +26,6 @@ window.cmpHeaderCellCheck = {
       type: String,
       default: ''
     },
-    // CSS классы для чекбокса
-    checkboxClass: {
-      type: String,
-      default: 'form-check-input'
-    },
     // Отключен ли чекбокс
     disabled: {
       type: Boolean,

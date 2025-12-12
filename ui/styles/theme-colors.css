@@ -14,31 +14,36 @@
     /* RGB для совместимости с Bootstrap (вычислено из HSL(208, 12%, 42%)) */
     --bs-primary-rgb: 95, 110, 125;
     
-    /* Цвета для ошибок (danger) - темно-вишневый, как в Prism Light Theme */
-    --color-danger-h: 0; /* Красный тон */
-    --color-danger-s: 65%; /* Высокая насыщенность для вишневого оттенка */
-    --color-danger-l: 45%; /* Темный оттенок для вишневого цвета */
+    /* Цвета для ошибок (danger) - малиновый оттенок */
+    --color-danger-h: 340; /* Малиновый тон (пурпурно-розовый) */
+    --color-danger-s: 100%; /* Максимальная насыщенность */
+    --color-danger-l: 40%; /* Темный оттенок для малинового цвета */
     
     /* Генерируем danger цвет из HSL */
     --bs-danger: hsl(var(--color-danger-h), var(--color-danger-s), var(--color-danger-l));
+    --color-danger: hsl(var(--color-danger-h), var(--color-danger-s), var(--color-danger-l));
     
-    /* RGB для совместимости с Bootstrap (вычислено из HSL(0, 65%, 45%)) */
-    --bs-danger-rgb: 191, 33, 33;
+    /* RGB для совместимости с Bootstrap (вычислено из HSL(340, 100%, 40%)) */
+    --bs-danger-rgb: 204, 0, 102;
     
-    /* Цвета для успеха (success) - салатовый, как в Prism Light Theme */
-    --color-success-h: 130; /* Зеленый тон с легким смещением к салатовому */
-    --color-success-s: 55%; /* Умеренная насыщенность для салатового оттенка */
-    --color-success-l: 50%; /* Средняя яркость для салатового цвета */
+    /* Цвета для успеха (success) - салатовый оттенок */
+    --color-success-h: 90; /* Зеленый тон (салатовый) */
+    --color-success-s: 100%; /* Максимальная насыщенность */
+    --color-success-l: 30%; /* Темный оттенок для салатового цвета */
     
     /* Генерируем success цвет из HSL */
     --bs-success: hsl(var(--color-success-h), var(--color-success-s), var(--color-success-l));
+    --color-success: hsl(var(--color-success-h), var(--color-success-s), var(--color-success-l));
     
-    /* RGB для совместимости с Bootstrap (вычислено из HSL(130, 55%, 50%)) */
-    --bs-success-rgb: 57, 179, 89;
+    /* RGB для совместимости с Bootstrap (вычислено из HSL(90, 100%, 30%)) */
+    --bs-success-rgb: 0, 153, 0;
     
     /* Общие значения для серых оттенков */
     --color-theme-h: 210; /* Основной тон темы */
     --color-muted-s: 5%;  /* Приглушенная насыщенность для нейтральных элементов */
+    --color-muted-h: 0; /* Нейтральный тон (серый) */
+    --color-muted-l: 50%; /* Средняя яркость для нейтрального цвета */
+    --color-muted: hsl(var(--color-muted-h), var(--color-muted-s), var(--color-muted-l));
     --color-light-gray-l: 82%; /* Общий lightness для светло-серых элементов */
     
     /* Оттенок для подсветки выбранных строк (зеленовато-бирюзовый, ближе к зеленому) */
@@ -140,29 +145,34 @@
     /* RGB для совместимости с Bootstrap (вычислено из HSL(208, 10%, 58%)) */
     --bs-primary-rgb: 133, 146, 158;
     
-    /* Цвета для ошибок (danger) - более светлый вишневый для темной темы */
-    --color-danger-h: 0;
-    --color-danger-s: 60%; /* Чуть менее насыщенный для темной темы */
+    /* Цвета для ошибок (danger) - более светлый малиновый для темной темы */
+    --color-danger-h: 340; /* Малиновый тон (пурпурно-розовый) */
+    --color-danger-s: 100%; /* Максимальная насыщенность */
     --color-danger-l: 60%; /* Светлее для лучшего контраста на темном фоне */
     
     --bs-danger: hsl(var(--color-danger-h), var(--color-danger-s), var(--color-danger-l));
+    --color-danger: hsl(var(--color-danger-h), var(--color-danger-s), var(--color-danger-l));
     
-    /* RGB для совместимости с Bootstrap (вычислено из HSL(0, 60%, 60%)) */
-    --bs-danger-rgb: 245, 98, 98;
+    /* RGB для совместимости с Bootstrap (вычислено из HSL(340, 100%, 60%)) */
+    --bs-danger-rgb: 255, 51, 153;
     
     /* Цвета для успеха (success) - более светлый салатовый для темной темы */
-    --color-success-h: 130;
-    --color-success-s: 50%; /* Чуть менее насыщенный для темной темы */
+    --color-success-h: 90; /* Зеленый тон (салатовый) */
+    --color-success-s: 100%; /* Максимальная насыщенность */
     --color-success-l: 60%; /* Светлее для лучшего контраста на темном фоне */
     
     --bs-success: hsl(var(--color-success-h), var(--color-success-s), var(--color-success-l));
+    --color-success: hsl(var(--color-success-h), var(--color-success-s), var(--color-success-l));
     
-    /* RGB для совместимости с Bootstrap (вычислено из HSL(130, 50%, 60%)) */
-    --bs-success-rgb: 87, 204, 122;
+    /* RGB для совместимости с Bootstrap (вычислено из HSL(90, 100%, 60%)) */
+    --bs-success-rgb: 51, 255, 51;
     
     /* Общие значения для серых оттенков */
     --color-theme-h: 210;
     --color-muted-s: 5%;
+    --color-muted-h: 0; /* Нейтральный тон (серый) */
+    --color-muted-l: 50%; /* Средняя яркость для нейтрального цвета */
+    --color-muted: hsl(var(--color-muted-h), var(--color-muted-s), var(--color-muted-l));
     
     /* Оттенок для подсветки выбранных строк (зеленовато-бирюзовый, ближе к зеленому) */
     --color-selected-h: 170; /* Зеленовато-бирюзовый оттенок, еще ближе к зеленому */

@@ -141,6 +141,21 @@ window.cmpCellNum = {
     cellId: {
       type: String,
       default: null
+    },
+    // Включить автоматическую цветизацию на основе знака значения
+    // При включении все дочерние <span> элементы получат цвет в зависимости от знака:
+    // - positive: --color-success
+    // - negative: --color-danger
+    // - zero (|value| < 1): --color-muted
+    colorize: {
+      type: Boolean,
+      default: false
+    },
+    // Округление до 0.5 (0.0, 0.5, 1.0, 1.5, 2.0, 2.5 и т.д.)
+    // При включении автоматически использует rounding: 'step' с roundingStep: 0.5 и precision: 1
+    roundToHalf: {
+      type: Boolean,
+      default: false
     }
   },
   
@@ -155,6 +170,24 @@ window.cmpCellNum = {
         return 'avto-00000000';
       }
       return window.hashGenerator.generateMarkupClass(this.cellId);
+    },
+    
+    // Эффективный precision с учетом roundToHalf и больших чисел
+    // При roundToHalf всегда используем precision: 1 (один знак после запятой)
+    // Для чисел с абсолютным значением >= 10 округляем до целых (precision: 0)
+    effectivePrecision() {
+      // Если значение >= 10 по модулю, округляем до целых
+      if (!this.isEmpty && !this.isInfinite) {
+        const absValue = Math.abs(this.value);
+        if (absValue >= 10) {
+          return 0;
+        }
+      }
+      
+      if (this.roundToHalf) {
+        return 1;
+      }
+      return this.precision;
     },
     // Проверка, является ли значение пустым или некорректным
     isEmpty() {
@@ -174,7 +207,46 @@ window.cmpCellNum = {
     
     // Префикс
     numberPrefix() {
-      return this.prefix || '';
+      // Если есть обычный префикс через prop, используем его
+      if (this.prefix) {
+        return this.prefix;
+      }
+      
+      // Если значение округлилось до 0, но изначально не было 0, добавляем префикс "~"
+      if (!this.isEmpty && !this.isInfinite) {
+        const rounded = this.roundedValue;
+        const original = this.value;
+        
+        // Проверяем, что округленное значение равно 0 (или очень близко к 0)
+        // И исходное значение не было 0 (чтобы не показывать "~" для настоящего нуля)
+        if (Math.abs(rounded) < 0.01 && Math.abs(original) >= 0.01) {
+          return '~';
+        }
+      }
+      
+      return '';
+    },
+    
+    // Текст для всплывающей подсказки (tooltip)
+    tooltipText() {
+      // Если значение округлилось до 0, но изначально не было 0, показываем точное значение
+      if (!this.isEmpty && !this.isInfinite) {
+        const rounded = this.roundedValue;
+        const original = this.value;
+        
+        // Проверяем, что округленное значение равно 0 (или очень близко к 0)
+        // И исходное значение не было 0 (чтобы не показывать tooltip для настоящего нуля)
+        if (Math.abs(rounded) < 0.01 && Math.abs(original) >= 0.01) {
+          return original.toString();
+        }
+      }
+      
+      // В остальных случаях, если showTooltip включен, показываем значение
+      if (this.showTooltip) {
+        return this.value;
+      }
+      
+      return null;
     },
     
     // Знак числа
@@ -249,19 +321,24 @@ window.cmpCellNum = {
     hasFractionPart() {
       if (this.isEmpty || this.isInfinite) return false;
       if (this.type === 'integer') return false;
-      if (this.precision <= 0) return false;
+      if (this.effectivePrecision <= 0) return false;
       
       const value = this.roundedValue;
       const absValue = Math.abs(value);
       const fracPart = absValue - Math.floor(absValue);
       
+      // Для roundToHalf проверяем, есть ли дробная часть (0.5)
+      if (this.roundToHalf) {
+        return fracPart > 0.01; // Учитываем погрешность округления
+      }
+      
       // Проверяем, есть ли значащие цифры в дробной части
-      const fracStr = fracPart.toFixed(this.precision);
+      const fracStr = fracPart.toFixed(this.effectivePrecision);
       const fracDigits = fracStr.substring(2);
       
-      if (this.rounding === 'precision') {
+      if (this.rounding === 'precision' || this.roundToHalf) {
         // Для precision показываем если precision > 0
-        return this.precision > 0;
+        return this.effectivePrecision > 0;
       }
       
       // Для других типов округления - если есть ненулевые цифры
@@ -278,7 +355,14 @@ window.cmpCellNum = {
       const absValue = Math.abs(value);
       const fracPart = absValue - Math.floor(absValue);
       
-      const fracStr = fracPart.toFixed(this.precision);
+      // Для roundToHalf всегда показываем один знак (0 или 5)
+      if (this.roundToHalf) {
+        const fracStr = fracPart.toFixed(this.effectivePrecision);
+        const fracDigits = fracStr.substring(2);
+        return fracDigits; // Всегда один знак: "0" или "5"
+      }
+      
+      const fracStr = fracPart.toFixed(this.effectivePrecision);
       const fracDigits = fracStr.substring(2);
       
       // Убираем лишние нули в конце только если precision позволяет
@@ -289,7 +373,7 @@ window.cmpCellNum = {
       }
       
       // Если после удаления нулей ничего не осталось, но precision требует знаки
-      if (trimmedFrac.length === 0 && this.precision > 0 && this.rounding === 'precision') {
+      if (trimmedFrac.length === 0 && this.effectivePrecision > 0 && (this.rounding === 'precision' || this.roundToHalf)) {
         return fracDigits;
       }
       
@@ -387,7 +471,21 @@ window.cmpCellNum = {
       // Целая часть наследует цвет от сектора (text-danger, text-success и т.д.)
       const sectorClass = this.cellClass || '';
       const custom = this.cssClasses?.integer || '';
-      return `${sectorClass} ${custom}`.trim();
+      
+      // Добавляем жирный шрифт для положительных чисел с целой частью >= 1 при включенной цветизации
+      let boldClass = '';
+      if (this.colorize && !this.isEmpty && !this.isInfinite) {
+        const value = this.roundedValue;
+        const absValue = Math.abs(value);
+        const intPart = Math.floor(absValue);
+        
+        // Если значение положительное и целая часть >= 1
+        if (value > 0 && intPart >= 1) {
+          boldClass = 'fw-bold'; // Bootstrap класс для жирного текста
+        }
+      }
+      
+      return `${sectorClass} ${custom} ${boldClass}`.trim();
     },
     
     // Разделитель: приглушенный Bootstrap класс
@@ -410,12 +508,64 @@ window.cmpCellNum = {
       const base = 'text-muted small'; // Bootstrap классы для приглушенного и меньшего текста
       const custom = this.cssClasses?.unit || '';
       return `${base} ${custom}`.trim();
+    },
+    
+    // Класс для цветизации (применяется к корневому элементу)
+    // Определяет знак значения и применяет соответствующий класс
+    colorizeClass() {
+      if (!this.colorize) return '';
+      
+      // Определяем знак значения
+      if (this.isEmpty || this.isInfinite) return '';
+      
+      const value = this.roundedValue;
+      const absValue = Math.abs(value);
+      
+      // Если значение близко к нулю (< 1), используем muted
+      if (absValue < 1) {
+        return 'num-coin-colorize';
+      }
+      
+      // Иначе используем класс в зависимости от знака
+      return 'num-coin-colorize';
+    },
+    
+    // Data-атрибут для определения знака значения (для CSS селекторов)
+    colorizeDataAttr() {
+      if (!this.colorize) return null;
+      
+      // Определяем знак значения
+      if (this.isEmpty || this.isInfinite) return null;
+      
+      const value = this.roundedValue;
+      const absValue = Math.abs(value);
+      
+      // Если значение близко к нулю (< 1), используем 'zero'
+      if (absValue < 1) {
+        return 'zero';
+      }
+      
+      // Иначе определяем по знаку
+      if (value > 0) {
+        return 'positive';
+      } else if (value < 0) {
+        return 'negative';
+      } else {
+        return 'zero';
+      }
     }
   },
   
   methods: {
     // Применение округления в зависимости от типа
     applyRounding(value) {
+      // Приоритет: roundToHalf переопределяет обычное округление
+      if (this.roundToHalf) {
+        // Округление до 0.5 (0.0, 0.5, 1.0, 1.5, 2.0, 2.5 и т.д.)
+        // Умножаем на 2, округляем, делим на 2
+        return Math.round(value * 2) / 2;
+      }
+      
       if (this.rounding === 'precision') {
         // Округление до N знаков после запятой
         const factor = Math.pow(10, this.precision);
@@ -450,22 +600,22 @@ window.cmpCellNum = {
       let formatted = this.addThousandsSeparator(intPart.toString());
       
       // Добавляем дробную часть
-      if (this.precision > 0) {
+      if (this.effectivePrecision > 0) {
         // Используем toFixed для получения нужного количества знаков
-        const fracStr = fracPart.toFixed(this.precision);
+        const fracStr = fracPart.toFixed(this.effectivePrecision);
         const fracDigits = fracStr.substring(2); // Убираем "0."
         
         // Убираем лишние нули в конце только если precision позволяет
         let trimmedFrac = fracDigits;
-        if (this.rounding === 'precision') {
-          // Для precision оставляем точное количество знаков, но убираем лишние нули
+        if (this.rounding === 'precision' || this.roundToHalf) {
+          // Для precision и roundToHalf оставляем точное количество знаков, но убираем лишние нули
           trimmedFrac = fracDigits.replace(/0+$/, '');
         }
         
         // Добавляем дробную часть, если она есть
         if (trimmedFrac.length > 0) {
           formatted += this.decimalSeparator + trimmedFrac;
-        } else if (this.precision > 0 && this.rounding === 'precision') {
+        } else if (this.effectivePrecision > 0 && (this.rounding === 'precision' || this.roundToHalf)) {
           // Если precision требует знаки, но они все нули, добавляем их
           formatted += this.decimalSeparator + fracDigits;
         }

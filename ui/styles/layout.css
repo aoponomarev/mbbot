@@ -262,9 +262,9 @@ table td.col-hidden {
 
 /* На десктопе: ширина 7em для текста "Обновить" */
 @media (min-width: 768px) {
-    .cg-update-btn {
-        min-width: 7em;
-        width: 7em;
+.cg-update-btn {
+    min-width: 7em;
+    width: 7em;
     }
 }
 
@@ -380,6 +380,69 @@ table td.col-hidden {
 [data-bs-theme="dark"] .form-check-input:disabled {
     background-color: var(--bs-secondary-bg) !important;
     opacity: 0.65;
+}
+
+/* =========================
+   СТАНДАРТНЫЕ РАЗМЕРЫ ЧЕКБОКСОВ
+   Все чекбоксы в проекте должны иметь единый стандартный размер 13x13px
+   ========================= */
+/* Фиксируем стандартные размеры и стили для всех чекбоксов */
+/* Обеспечиваем единообразие внешнего вида всех чекбоксов в проекте */
+.form-check-input {
+    /* Стандартные размеры */
+    width: 13px !important;
+    height: 13px !important;
+    min-width: 13px !important;
+    min-height: 13px !important;
+    max-width: 13px !important;
+    max-height: 13px !important;
+    /* Стандартные стили для единообразия */
+    border-radius: 0.25rem !important;
+    border: 1px solid var(--bs-border-color) !important;
+    background-color: var(--bs-body-bg) !important;
+    background-image: none !important;
+    /* Убираем любые кастомные стили, которые могут перебивать стандартный вид */
+    appearance: auto !important;
+    -webkit-appearance: checkbox !important;
+    -moz-appearance: checkbox !important;
+    /* Фиксируем цвет для checked состояния */
+    accent-color: var(--bs-primary) !important;
+}
+
+/* Состояния чекбокса для единообразия */
+.form-check-input:checked {
+    background-color: var(--bs-primary) !important;
+    border-color: var(--bs-primary) !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10l3 3l6-6'/%3e%3c/svg%3e") !important;
+}
+
+.form-check-input:indeterminate {
+    background-color: var(--bs-primary) !important;
+    border-color: var(--bs-primary) !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10h8'/%3e%3c/svg%3e") !important;
+}
+
+.form-check-input:focus {
+    border-color: var(--bs-primary) !important;
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25) !important;
+}
+
+/* =========================
+   ЦВЕТИЗАЦИЯ ЧИСЛОВЫХ ЯЧЕЕК (cell-num)
+   Автоматическая цветизация всех дочерних <span> элементов на основе знака значения
+   ========================= */
+/* Применяется к корневому элементу cell-num с классом num-coin-colorize */
+/* Все дочерние <span> элементы получают цвет в зависимости от data-value-sign */
+.num-coin-colorize[data-value-sign="positive"] > span {
+    color: var(--color-success) !important;
+}
+
+.num-coin-colorize[data-value-sign="negative"] > span {
+    color: var(--color-danger) !important;
+}
+
+.num-coin-colorize[data-value-sign="zero"] > span {
+    color: var(--color-muted) !important;
 }
 
 /* Дополнительно для textarea */

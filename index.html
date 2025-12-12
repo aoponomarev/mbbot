@@ -803,7 +803,7 @@
 
     <!-- X-Template для компонента числовой ячейки (должен быть ДО загрузки Vue и компонентов) -->
     <script type="text/x-template" id="cell-num-template">
-        <span :class="[cellClass, instanceHash, cssClasses.cell].filter(Boolean)" :title="showTooltip ? value : null">
+        <span :class="[cellClass, instanceHash, cssClasses.cell, colorizeClass].filter(Boolean)" :data-value-sign="colorizeDataAttr" :title="tooltipText">
             <!-- Отображение для пустых значений или бесконечности -->
             <template v-if="emptyOrInfiniteDisplay !== null">
                 <span>{{ emptyOrInfiniteDisplay }}</span>
@@ -875,7 +875,7 @@
         <div :class="[headerContainerClass, instanceHash]">
             <input 
                 type="checkbox" 
-                :class="checkboxClass"
+                class="form-check-input"
                 :checked="checked"
                 :disabled="disabled"
                 @change="handleChange"

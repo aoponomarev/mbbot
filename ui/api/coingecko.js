@@ -243,6 +243,8 @@ window.cmpCoinGecko = {
             precision: 2,
             rounding: 'precision',
             unit: '%',
+            colorize: true,
+            roundToHalf: true,
             sectors: [
               { range: [-Infinity, 0], cssClass: 'text-danger' },
               { range: [0, Infinity], cssClass: 'text-success' }
@@ -264,6 +266,8 @@ window.cmpCoinGecko = {
             precision: 2,
             rounding: 'precision',
             unit: '%',
+            colorize: true,
+            roundToHalf: true,
             sectors: [
               { range: [-Infinity, 0], cssClass: 'text-danger' },
               { range: [0, Infinity], cssClass: 'text-success' }
@@ -285,6 +289,8 @@ window.cmpCoinGecko = {
             precision: 2,
             rounding: 'precision',
             unit: '%',
+            colorize: true,
+            roundToHalf: true,
             sectors: [
               { range: [-Infinity, 0], cssClass: 'text-danger' },
               { range: [0, Infinity], cssClass: 'text-success' }
@@ -306,6 +312,8 @@ window.cmpCoinGecko = {
             precision: 2,
             rounding: 'precision',
             unit: '%',
+            colorize: true,
+            roundToHalf: true,
             sectors: [
               { range: [-Infinity, 0], cssClass: 'text-danger' },
               { range: [0, Infinity], cssClass: 'text-success' }
@@ -327,6 +335,8 @@ window.cmpCoinGecko = {
             precision: 2,
             rounding: 'precision',
             unit: '%',
+            colorize: true,
+            roundToHalf: true,
             sectors: [
               { range: [-Infinity, 0], cssClass: 'text-danger' },
               { range: [0, Infinity], cssClass: 'text-success' }
@@ -348,6 +358,8 @@ window.cmpCoinGecko = {
             precision: 2,
             rounding: 'precision',
             unit: '%',
+            colorize: true,
+            roundToHalf: true,
             sectors: [
               { range: [-Infinity, 0], cssClass: 'text-danger' },
               { range: [0, Infinity], cssClass: 'text-success' }
@@ -370,6 +382,8 @@ window.cmpCoinGecko = {
             type: 'decimal',
             precision: 2,
             rounding: 'precision',
+            colorize: true,
+            roundToHalf: true,
             sectors: [
               { range: [-Infinity, 0], cssClass: 'text-danger' },
               { range: [0, Infinity], cssClass: 'text-success' }
@@ -746,6 +760,8 @@ window.cmpCoinGecko = {
         type: 'decimal',
         precision: 2,
         rounding: 'precision',
+        colorize: true,
+        roundToHalf: true,
         sectors: [
           { range: [-Infinity, 0], cssClass: 'text-danger' },
           { range: [0, Infinity], cssClass: 'text-success' }
