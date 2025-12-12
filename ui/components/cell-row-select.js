@@ -82,6 +82,16 @@ window.cmpCellRowSelect = {
   },
   
   computed: {
+    // Детерминированный хэш экземпляра на основе rowId
+    // Стабилен между сессиями - один и тот же rowId всегда дает один и тот же хэш
+    instanceHash() {
+      if (!window.hashGenerator) {
+        console.warn('hashGenerator not found, using fallback');
+        return 'avto-00000000';
+      }
+      return window.hashGenerator.generateMarkupClass(this.rowId);
+    },
+    
     // Преобразование checked в boolean для нативного чекбокса
     isChecked() {
       return this.checked === 'true';

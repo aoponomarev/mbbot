@@ -78,6 +78,18 @@ window.cmpHeaderCell = {
   },
   
   computed: {
+    // Детерминированный хэш экземпляра на основе sortField или label
+    // Стабилен между сессиями - один и тот же идентификатор всегда дает один и тот же хэш
+    instanceHash() {
+      if (!window.hashGenerator) {
+        console.warn('hashGenerator not found, using fallback');
+        return 'avto-00000000';
+      }
+      // Используем sortField если есть, иначе label
+      const uniqueId = this.sortField || this.label || 'header-cell';
+      return window.hashGenerator.generateMarkupClass(uniqueId);
+    },
+    
     // Определяет, активна ли сортировка для этого поля
     isSortActive() {
       return this.sortable && this.sortBy === this.sortField && this.sortOrder !== null;

@@ -135,10 +135,27 @@ window.cmpCellNum = {
         fraction: '',
         unit: ''
       })
+    },
+    // Уникальный идентификатор ячейки (для генерации детерминированного хэша)
+    // Если не передан, хэш не генерируется
+    cellId: {
+      type: String,
+      default: null
     }
   },
   
   computed: {
+    // Детерминированный хэш экземпляра на основе cellId
+    // Стабилен между сессиями - один и тот же cellId всегда дает один и тот же хэш
+    // Если cellId не передан, возвращает null (хэш не добавляется)
+    instanceHash() {
+      if (!this.cellId) return null;
+      if (!window.hashGenerator) {
+        console.warn('hashGenerator not found, using fallback');
+        return 'avto-00000000';
+      }
+      return window.hashGenerator.generateMarkupClass(this.cellId);
+    },
     // Проверка, является ли значение пустым или некорректным
     isEmpty() {
       return this.value === null || this.value === undefined || isNaN(this.value);

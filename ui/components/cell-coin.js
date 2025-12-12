@@ -45,6 +45,18 @@ window.cmpCellCoin = {
     }
   },
   
+  computed: {
+    // Детерминированный хэш экземпляра на основе coinId
+    // Стабилен между сессиями - один и тот же coinId всегда дает один и тот же хэш
+    instanceHash() {
+      if (!window.hashGenerator) {
+        console.warn('hashGenerator not found, using fallback');
+        return 'avto-00000000';
+      }
+      return window.hashGenerator.generateMarkupClass(this.coinId);
+    }
+  },
+  
   methods: {
     // Обработка клика - эмитим событие для открытия контекстного меню
     handleClick(event) {

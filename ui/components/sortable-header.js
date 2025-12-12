@@ -34,6 +34,16 @@ window.cmpSortableHeader = {
   },
   
   computed: {
+    // Детерминированный хэш экземпляра на основе field
+    // Стабилен между сессиями - один и тот же field всегда дает один и тот же хэш
+    instanceHash() {
+      if (!window.hashGenerator) {
+        console.warn('hashGenerator not found, using fallback');
+        return 'avto-00000000';
+      }
+      return window.hashGenerator.generateMarkupClass(this.field);
+    },
+    
     // Определяет, активна ли сортировка для этого поля
     isActive() {
       return this.sortBy === this.field && this.sortOrder !== null;

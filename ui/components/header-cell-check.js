@@ -39,6 +39,18 @@ window.cmpHeaderCellCheck = {
   },
   
   computed: {
+    // Детерминированный хэш экземпляра на основе уникального идентификатора
+    // Стабилен между сессиями - один и тот же идентификатор всегда дает один и тот же хэш
+    // Для header-cell-check используем статический идентификатор, так как обычно используется один раз
+    instanceHash() {
+      if (!window.hashGenerator) {
+        console.warn('hashGenerator not found, using fallback');
+        return 'avto-00000000';
+      }
+      // Используем статический идентификатор для мультичекбокса
+      return window.hashGenerator.generateMarkupClass('header-cell-check-all');
+    },
+    
     // Классы для контейнера
     headerContainerClass() {
       return this.containerClass || '';
