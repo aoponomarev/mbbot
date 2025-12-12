@@ -48,6 +48,10 @@
             style="display: none;"
         >
 
+    
+
+
+
         <div class="container-fluid app-main-container avto-X7pL2nQ">
             <main class="avto-K9mP4rT row justify-content-center">
                 <!-- Компонент общих настроек проекта (показывается при клике на гамбургер) -->
@@ -407,198 +411,61 @@
                     <div v-if="cgError" class="alert alert-danger" role="alert">
                         <small><i class="fas fa-exclamation-circle me-1"></i>{{ cgError }}</small>
                     </div>
-                    <div class="table-responsive">
-                        <table class="table table-sm align-middle cg-coins-table">
-                            <colgroup>
-                                <col class="col-checkbox" :class="columnVisibilityClasses['col-checkbox']">
-                                <col class="col-coin" :class="columnVisibilityClasses['col-coin']">
-                                <col class="col-percent-1h" :class="columnVisibilityClasses['col-percent-1h']">
-                                <col class="col-percent-24h" :class="columnVisibilityClasses['col-percent-24h']">
-                                <col class="col-percent-7d" :class="columnVisibilityClasses['col-percent-7d']">
-                                <col class="col-percent-14d" :class="columnVisibilityClasses['col-percent-14d']">
-                                <col class="col-percent-30d" :class="columnVisibilityClasses['col-percent-30d']">
-                                <col class="col-percent-200d" :class="columnVisibilityClasses['col-percent-200d']">
-                                <col 
-                                    v-for="(header, index) in cdHeaders" 
-                                    :key="'col-cd-' + index"
-                                    class="col-cd" 
-                                    :class="columnVisibilityClasses['col-cd']"
-                                ></col>
-                            </colgroup>
-                            <thead>
-                                <tr>
-                                    <th style="width: 40px;">
-                                        <input 
-                                            type="checkbox" 
-                                            class="form-check-input"
-                                            @change="toggleAllCoins($event)"
-                                            :checked="selectedCoinIds.length === sortedCoins.length && sortedCoins.length > 0"
-                                        >
-                                    </th>
-                                    <th class="position-relative" style="cursor: pointer;" @click.stop="toggleCoinSortDropdown">
-                                        Монета
-                                        <!-- Выпадающее меню сортировки монет -->
-                                        <div 
-                                            v-if="showCoinSortDropdown" 
-                                            class="position-absolute bg-body border rounded shadow-sm cg-coin-sort-dropdown avto-2pRMDy" 
-                                            style="top: 100%; left: 0; margin-top: 4px; min-width: 200px; z-index: var(--z-index-dropdown);"
-                                            @click.stop
-                                        >
-                                            <div class="list-group list-group-flush">
-                                                <button 
-                                                    class="list-group-item list-group-item-action py-2 px-3 border-0" 
-                                                    @click="setCoinSortType('market_cap')"
-                                                    :class="{'active': coinSortType === 'market_cap'}"
-                                                >
-                                                    По капитализации
-                                                </button>
-                                                <button 
-                                                    class="list-group-item list-group-item-action py-2 px-3 border-0" 
-                                                    @click="setCoinSortType('total_volume')"
-                                                    :class="{'active': coinSortType === 'total_volume'}"
-                                                >
-                                                    По дневному объему
-                                                </button>
-                                                <button 
-                                                    class="list-group-item list-group-item-action py-2 px-3 border-0" 
-                                                    @click="setCoinSortType('alphabet')"
-                                                    :class="{'active': coinSortType === 'alphabet'}"
-                                                >
-                                                    По алфавиту
-                                                </button>
-                                                <button 
-                                                    class="list-group-item list-group-item-action py-2 px-3 border-0" 
-                                                    @click="setCoinSortType('selected')"
-                                                    :class="{'active': coinSortType === 'selected'}"
-                                                >
-                                                    Выбранные
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </th>
-                                    <th class="text-end col-percent-1h" :class="columnVisibilityClasses['col-percent-1h']">
-                                        <sortable-header 
-                                            field="price_change_percentage_1h_in_currency"
-                                            label="1h %"
-                                            :sort-by="sortBy"
-                                            :sort-order="sortOrder"
-                                            @sort="handleSort"
-                                        ></sortable-header>
-                                    </th>
-                                    <th class="text-end col-percent-24h" :class="columnVisibilityClasses['col-percent-24h']">
-                                        <sortable-header 
-                                            field="price_change_percentage_24h_in_currency"
-                                            label="24h %"
-                                            :sort-by="sortBy"
-                                            :sort-order="sortOrder"
-                                            @sort="handleSort"
-                                        ></sortable-header>
-                                    </th>
-                                    <th class="text-end col-percent-7d" :class="columnVisibilityClasses['col-percent-7d']">
-                                        <sortable-header 
-                                            field="price_change_percentage_7d_in_currency"
-                                            label="7d %"
-                                            :sort-by="sortBy"
-                                            :sort-order="sortOrder"
-                                            @sort="handleSort"
-                                        ></sortable-header>
-                                    </th>
-                                    <th class="text-end col-percent-14d" :class="columnVisibilityClasses['col-percent-14d']">
-                                        <sortable-header 
-                                            field="price_change_percentage_14d_in_currency"
-                                            label="14d %"
-                                            :sort-by="sortBy"
-                                            :sort-order="sortOrder"
-                                            @sort="handleSort"
-                                        ></sortable-header>
-                                    </th>
-                                    <th class="text-end col-percent-30d" :class="columnVisibilityClasses['col-percent-30d']">
-                                        <sortable-header 
-                                            field="price_change_percentage_30d_in_currency"
-                                            label="30d %"
-                                            :sort-by="sortBy"
-                                            :sort-order="sortOrder"
-                                            @sort="handleSort"
-                                        ></sortable-header>
-                                    </th>
-                                    <th class="text-end col-percent-200d" :class="columnVisibilityClasses['col-percent-200d']">
-                                        <sortable-header 
-                                            field="price_change_percentage_200d_in_currency"
-                                            label="200d %"
-                                            :sort-by="sortBy"
-                                            :sort-order="sortOrder"
-                                            @sort="handleSort"
-                                        ></sortable-header>
-                                    </th>
-                                    <th 
-                                        v-for="(header, index) in cdHeaders" 
-                                        :key="'cd-header-' + index"
-                                        class="text-end col-cd" 
-                                        :class="columnVisibilityClasses['col-cd']"
-                                    >
-                                        <sortable-header 
-                                            :field="getCDField(header, index)"
-                                            :label="header"
-                                            :sort-by="sortBy"
-                                            :sort-order="sortOrder"
-                                            @sort="handleSort"
-                                        ></sortable-header>
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody v-if="cgIsLoading || sortedCoins.length === 0">
-                                <tr v-if="cgIsLoading">
-                                    <td colspan="16" class="text-center text-muted">
-                                        <span class="spinner-border spinner-border-sm me-2" role="status"></span>
-                                        Загрузка данных с CoinGecko...
-                                    </td>
-                                </tr>
-                                <tr v-else-if="sortedCoins.length === 0">
-                                    <td colspan="16" class="text-center text-muted">Нет данных</td>
-                                </tr>
-                            </tbody>
-                            <transition-group v-else name="coin-row" tag="tbody">
-                                <tr v-for="coin in sortedCoins" :key="coin.id" class="coin-row-item" :class="{'coin-row-selected': selectedCoinIds.includes(coin.id)}">
-                                    <td @click.stop>
-                                        <input 
-                                            type="checkbox" 
-                                            class="form-check-input"
-                                            :value="coin.id"
-                                            :checked="selectedCoinIds.includes(coin.id)"
-                                            @change="toggleCoinSelection(coin.id, $event.target.checked)"
-                                            @click.stop
-                                        >
-                                    </td>
-                                    <td>
-                                        <div 
-                                            class="d-flex align-items-center gap-2 cg-coin-block" 
-                                            style="cursor: pointer;"
-                                            :title="coin.name"
-                                            @click.stop="openContextMenu($event, coin.id)"
-                                            @contextmenu.prevent.stop="openContextMenu($event, coin.id)"
-                                        >
-                                            <img v-if="getCoinIcon(coin)" :src="getCoinIcon(coin)" :alt="coin.symbol" width="20" height="20">
-                                            <span class="text-uppercase fw-semibold">{{ coin.symbol }}</span>
-                                        </div>
-                                    </td>
-                                    <td class="text-end col-percent-1h" :class="[cgChangeClass(coin.price_change_percentage_1h_in_currency), columnVisibilityClasses['col-percent-1h']]">{{ cgFormatPercent(coin.price_change_percentage_1h_in_currency) }}</td>
-                                    <td class="text-end col-percent-24h" :class="[cgChangeClass(coin.price_change_percentage_24h_in_currency), columnVisibilityClasses['col-percent-24h']]">{{ cgFormatPercent(coin.price_change_percentage_24h_in_currency) }}</td>
-                                    <td class="text-end col-percent-7d" :class="[cgChangeClass(coin.price_change_percentage_7d_in_currency), columnVisibilityClasses['col-percent-7d']]">{{ cgFormatPercent(coin.price_change_percentage_7d_in_currency) }}</td>
-                                    <td class="text-end col-percent-14d" :class="[cgChangeClass(coin.price_change_percentage_14d_in_currency), columnVisibilityClasses['col-percent-14d']]">{{ cgFormatPercent(coin.price_change_percentage_14d_in_currency) }}</td>
-                                    <td class="text-end col-percent-30d" :class="[cgChangeClass(coin.price_change_percentage_30d_in_currency), columnVisibilityClasses['col-percent-30d']]">{{ cgFormatPercent(coin.price_change_percentage_30d_in_currency) }}</td>
-                                    <td class="text-end col-percent-200d" :class="[cgChangeClass(coin.price_change_percentage_200d_in_currency), columnVisibilityClasses['col-percent-200d']]">{{ cgFormatPercent(coin.price_change_percentage_200d_in_currency) }}</td>
-                                    <td 
-                                        v-for="(header, index) in cdHeaders" 
-                                        :key="'cd-cell-' + index"
-                                        class="text-end col-cd" 
-                                        :class="[cgChangeClass(getCDValue(coin, getCDField(header, index))), columnVisibilityClasses['col-cd']]"
-                                    >
-                                        {{ cgFormatCD(getCDValue(coin, getCDField(header, index))) }}
-                                    </td>
-                                </tr>
-                            </transition-group>
-                        </table>
+
+<!--                     <code class="info-box" id="infoBox">
+                      Медианы<br>
+                      CD: <b id="medianCDValue">—</b><br>
+                      CDH: <b id="medianCDHValue">—</b><br>
+                      CGR: <b id="medianCGRValue">—</b><br>
+                      AGR: <b id="medianAGRValue">—</b><br>
+                      <br>Long/Short<br>
+                      CD1 <b id="ratioCD">—</b><br>
+                      CDH <b id="ratioCDH">—</b><br>
+                      CGR <b id="ratioCGR">—</b><br>
+                      AGR <b id="ratioAGR">—</b><br>
+                      <br>Market<br>Direction<br>
+                      MDN(4h): <b id="mdn4hValue">—</b><br>
+                      MDN(8h): <b id="mdn8hValue">—</b><br>
+                      MDN(12h): <b id="mdn12hValue">—</b><br>
+                      <div id="portfolioSection" style="display:none;">
+                        <br>Портфель<br>
+                        <div id="portfolioList"></div>
+                        <button id="portfolioFormButton" onclick="openPortfolioFormModal()" style="display:none;">Формировать</button>
+                      </div>
+                      <div id="savedPortfoliosSection" style="display:none;">
+                        <br>Сохраненные<br>портфели<br>
+                        <div id="savedPortfoliosList"></div>
+                      </div>
+                    </code> -->
+
+
+                    <!-- Состояние загрузки -->
+                    <div v-if="cgIsLoading" class="text-center text-muted py-4">
+                        <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                        Загрузка данных с CoinGecko...
                     </div>
+
+                    <!-- Компонент таблицы данных -->
+                    <table-data
+                        v-else
+                        :columns="allColumns"
+                        :data="sortedCoins"
+                        :sort-by="sortBy"
+                        :sort-order="sortOrder"
+                        :column-visibility-classes="columnVisibilityClasses"
+                        :selected-ids="selectedCoinIds"
+                        :on-toggle-all="toggleAllCoins"
+                        :on-toggle-item="toggleCoinSelection"
+                        :show-coin-sort-dropdown="showCoinSortDropdown"
+                        :coin-sort-type="coinSortType"
+                        :on-toggle-coin-sort-dropdown="toggleCoinSortDropdown"
+                        :on-set-coin-sort-type="setCoinSortType"
+                        :get-cell-value="getCellValue"
+                        :get-column-format-props="getColumnFormatProps"
+                        :on-sort="handleSort"
+                        :on-coin-click="openContextMenu"
+                        :get-coin-icon="getCoinIcon"
+                    ></table-data>
                 </div>
                 
                 <!-- Контекстное меню для операций с монетой -->
@@ -611,6 +478,16 @@
                     <div class="list-group list-group-flush">
                         <button class="list-group-item list-group-item-action py-1 px-3 border-0" @click="openCoinOnBybit()">
                             <i class="fas fa-external-link-alt me-2"></i>Открыть
+                        </button>
+                        <button 
+                            class="list-group-item list-group-item-action py-1 px-3 border-0" 
+                            @click="toggleFavorite(contextMenuCoin)"
+                        >
+                            <i 
+                                class="fas me-2"
+                                :class="isFavorite(contextMenuCoin) ? 'fa-star text-warning' : 'fa-star text-muted'"
+                            ></i>
+                            {{ isFavorite(contextMenuCoin) ? 'Убрать из избранного' : 'В избранное' }}
                         </button>
                         <div class="dropdown-divider my-0"></div>
                         <button class="list-group-item list-group-item-action py-1 px-3 border-0" @click="archiveCoin()">
@@ -923,6 +800,291 @@
         </div>
     </script>
 
+    <!-- X-Template для компонента числовой ячейки (должен быть ДО загрузки Vue и компонентов) -->
+    <script type="text/x-template" id="cell-num-template">
+        <span :class="[cellClass, cssClasses.cell]" :title="showTooltip ? value : null">
+            <!-- Отображение для пустых значений или бесконечности -->
+            <template v-if="emptyOrInfiniteDisplay !== null">
+                <span>{{ emptyOrInfiniteDisplay }}</span>
+            </template>
+            
+            <!-- Отображение обычного числа по частям -->
+            <template v-else>
+                <!-- Префикс -->
+                <span v-if="numberPrefix" :class="prefixClass">{{ numberPrefix }}</span>
+                
+                <!-- Знак -->
+                <span v-if="numberSign" :class="signClass">{{ numberSign }}</span>
+                
+                <!-- Целая часть -->
+                <span v-if="integerPart" :class="integerClass">{{ integerPart }}</span>
+                
+                <!-- Десятичный разделитель -->
+                <span v-if="decimalSeparatorDisplay" :class="separatorClass">{{ decimalSeparatorDisplay }}</span>
+                
+                <!-- Дробная часть -->
+                <span v-if="fractionPart" :class="fractionClass">{{ fractionPart }}</span>
+                
+                <!-- Единицы измерения -->
+                <span v-if="numberUnit" :class="unitClass">{{ numberUnit }}</span>
+            </template>
+        </span>
+    </script>
+
+    <!-- X-Template для компонента заголовка колонки (должен быть ДО загрузки Vue и компонентов) -->
+    <script type="text/x-template" id="header-cell-template">
+        <div 
+            :class="headerContainerClass" 
+            @click.stop="handleHeaderClick"
+        >
+            <!-- Текст заголовка -->
+            <span>{{ label }}</span>
+            
+            <!-- Индикация сортировки (если включена) -->
+            <i 
+                v-if="sortable && showSortIndicator && sortIcon" 
+                :class="['ms-1', sortIcon]"
+                @click.stop="handleSortClick"
+            ></i>
+            
+            <!-- Выпадающее меню -->
+            <div 
+                v-if="menuItems.length > 0 && showDropdown" 
+                class="position-absolute bg-body border rounded shadow-sm" 
+                :style="dropdownStyle"
+                @click.stop
+            >
+                <div class="list-group list-group-flush">
+                    <button 
+                        v-for="item in menuItems" 
+                        :key="item.id"
+                        class="list-group-item list-group-item-action py-2 px-3 border-0" 
+                        @click="handleMenuItemClick(item.id)"
+                        :class="{'active': isMenuItemActive(item)}"
+                    >
+                        {{ item.label }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <!-- X-Template для компонента заголовка колонки с чекбоксом (должен быть ДО загрузки Vue и компонентов) -->
+    <script type="text/x-template" id="header-cell-check-template">
+        <div :class="headerContainerClass">
+            <input 
+                type="checkbox" 
+                :class="checkboxClass"
+                :checked="checked"
+                :disabled="disabled"
+                @change="handleChange"
+                @click.stop
+            >
+        </div>
+    </script>
+
+    <!-- X-Template для компонента ячейки выбора строки (должен быть ДО загрузки Vue и компонентов) -->
+    <script type="text/x-template" id="cell-row-select-template">
+        <div :class="cellContainerClass">
+            <!-- Чекбокс -->
+            <input 
+                type="checkbox" 
+                :class="cssClasses.checkbox"
+                :checked="isChecked"
+                :disabled="disabled"
+                @change="handleChange"
+                @click.stop
+            >
+            
+            <!-- Номер строки (если включен) -->
+            <span v-if="showRowNumber && rowNumber !== null" :class="rowNumberClass">
+                #{{ rowNumber }}
+            </span>
+            
+            <!-- Статусы строки (badges) -->
+            <template v-if="badges.length > 0">
+                <span 
+                    v-for="(badge, index) in badges" 
+                    :key="index"
+                    :class="[getBadgeClass(badge.type), statusBadgeClass]"
+                    :title="badge.label"
+                >
+                    {{ badge.label }}
+                </span>
+            </template>
+            
+            <!-- Индикатор группы -->
+            <span v-if="groupId" :class="groupIndicatorClass">
+                {{ groupId }}
+            </span>
+        </div>
+    </script>
+
+    <!-- X-Template для компонента ячейки монеты (должен быть ДО загрузки Vue и компонентов) -->
+    <script type="text/x-template" id="cell-coin-template">
+        <div 
+            class="d-flex align-items-center gap-2 cg-coin-block"
+            :class="cssClasses.cell"
+            :title="fullName"
+            style="cursor: pointer;"
+            @click="handleClick"
+            @contextmenu.prevent="handleContextMenu"
+        >
+            <!-- Иконка -->
+            <img 
+                v-if="iconUrl"
+                :src="iconUrl" 
+                :alt="ticker"
+                :class="cssClasses.icon"
+                width="20" 
+                height="20"
+            />
+            
+            <!-- Тикер -->
+            <span 
+                class="text-uppercase fw-semibold"
+                :class="cssClasses.ticker"
+            >
+                {{ ticker }}
+            </span>
+        </div>
+    </script>
+
+    <!-- X-Template для компонента таблицы данных (должен быть ДО загрузки Vue и компонентов) -->
+    <script type="text/x-template" id="table-data-template">
+        <div class="table-responsive">
+            <table class="table table-sm align-middle cg-coins-table">
+                <colgroup>
+                    <col 
+                        v-for="column in columns" 
+                        :key="'col-' + column.id"
+                        :class="column.cssClass"
+                        :class="columnVisibilityClasses[column.cssClass]"
+                    >
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th 
+                            v-for="column in columns" 
+                            :key="'header-' + column.id"
+                            :class="[column.cssClass, columnVisibilityClasses[column.cssClass]]"
+                            :style="column.width ? { width: column.width } : {}"
+                        >
+                            <!-- Колонка чекбоксов -->
+                            <template v-if="column.type === 'checkbox'">
+                                <header-cell-check
+                                    :checked="allSelected"
+                                    :indeterminate="selectedIds.length > 0 && selectedIds.length < data.length"
+                                    :disabled="data.length === 0"
+                                    @change="handleToggleAll"
+                                ></header-cell-check>
+                            </template>
+                            
+                            <!-- Колонка монет -->
+                            <template v-else-if="column.type === 'coin'">
+                                <header-cell
+                                    :label="column.label"
+                                    :menu-items="column.menuItems || []"
+                                    :active-menu-item-id="coinSortType"
+                                    :show-dropdown="showCoinSortDropdown"
+                                    :sortable="column.sortable || false"
+                                    :sort-field="column.sortField"
+                                    :sort-by="sortBy"
+                                    :sort-order="sortOrder"
+                                    :show-sort-indicator="column.showSortIndicator !== false"
+                                    @menu-toggle="handleToggleCoinSortDropdown"
+                                    @menu-item-click="handleSetCoinSortType"
+                                    @sort="handleSort"
+                                ></header-cell>
+                            </template>
+                            
+                            <!-- Обычные сортируемые колонки -->
+                            <template v-else-if="column.sortable">
+                                <div class="text-end">
+                                    <sortable-header 
+                                        :field="column.field"
+                                        :label="column.label"
+                                        :sort-by="sortBy"
+                                        :sort-order="sortOrder"
+                                        @sort="handleSort"
+                                    ></sortable-header>
+                                </div>
+                            </template>
+                            
+                            <!-- Обычные не сортируемые колонки -->
+                            <template v-else>
+                                <div class="text-end">{{ column.label }}</div>
+                            </template>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody v-if="data.length === 0">
+                    <tr>
+                        <td :colspan="columns.length" class="text-center text-muted">Нет данных</td>
+                    </tr>
+                </tbody>
+                <transition-group v-else name="coin-row" tag="tbody">
+                    <tr 
+                        v-for="item in data" 
+                        :key="item.id" 
+                        class="coin-row-item"
+                        :class="{'coin-row-selected': isSelected(item.id)}"
+                    >
+                        <td 
+                            v-for="column in columns" 
+                            :key="`${item.id}-${column.id}`"
+                            :class="[column.cssClass, columnVisibilityClasses[column.cssClass]]"
+                        >
+                            <!-- Колонка чекбоксов -->
+                            <template v-if="column.type === 'checkbox'">
+                                <cell-row-select
+                                    :checked="isSelected(item.id) ? 'true' : 'false'"
+                                    :disabled="false"
+                                    :row-id="item.id"
+                                    :row-number="column.showRowNumber ? (index + 1) : null"
+                                    :show-row-number="column.showRowNumber !== false"
+                                    :row-status="item.rowStatus || 'normal'"
+                                    :selection-mode="column.selectionMode || 'multiple'"
+                                    :group-id="item.groupId || ''"
+                                    :badges="item.badges || []"
+                                    :css-classes="column.cssClasses || {}"
+                                    @change="handleToggleItem"
+                                ></cell-row-select>
+                            </template>
+                            
+                            <!-- Колонка монет -->
+                            <template v-else-if="column.type === 'coin'">
+                                <cell-coin
+                                    :icon-url="getCoinIcon && getCoinIcon(item) ? getCoinIcon(item) : ''"
+                                    :ticker="item.symbol"
+                                    :full-name="item.name"
+                                    :coin-id="item.id"
+                                    :css-classes="column.cssClasses || {}"
+                                    @context-menu="onCoinClick"
+                                ></cell-coin>
+                            </template>
+                            
+                            <!-- Числовые колонки с форматированием -->
+                            <template v-else-if="column.format && column.format.component === 'cell-num'">
+                                <div class="text-end">
+                                    <cell-num 
+                                        :value="getValue(item, column)"
+                                        v-bind="getFormatProps(column)"
+                                    ></cell-num>
+                                </div>
+                            </template>
+                            
+                            <!-- Обычные колонки -->
+                            <template v-else>
+                                <div class="text-end">{{ getValue(item, column) }}</div>
+                            </template>
+                        </td>
+                    </tr>
+                </transition-group>
+            </table>
+        </div>
+    </script>
+
     <!-- Vue.js 3 (глобальный скрипт) -->
     <script src="https://unpkg.com/vue@3.5.25/dist/vue.global.prod.js"></script>
     
@@ -947,6 +1109,12 @@
     <script src="./ui/api/import-export.js"></script>
     <script src="./ui/components/header-coins.js"></script>
     <script src="./ui/components/sortable-header.js"></script>
+    <script src="./ui/components/header-cell.js"></script>
+    <script src="./ui/components/header-cell-check.js"></script>
+    <script src="./ui/components/cell-num.js"></script>
+    <script src="./ui/components/cell-row-select.js"></script>
+    <script src="./ui/components/cell-coin.js"></script>
+    <script src="./ui/components/table-data.js"></script>
     <script src="./ui/utils/column-visibility-mixin.js"></script>
     <script src="./ui/api/coingecko.js"></script>
     <script src="./app/app-ui-root.js"></script>

@@ -129,7 +129,7 @@ window.cmpCoinGecko = {
         // Рассчитываем CPT
         const cptValue = window.mmMedianCPT.computeEnhancedCPT(coin.pvs, horizonDays);
         const cptFormatted = window.mmMedianCPT.formatEnhancedCPT(cptValue);
-        return {
+    return {
           ...coin,
           enhancedCpt: cptValue,
           enhancedCptFormatted: cptFormatted
@@ -162,6 +162,8 @@ window.cmpCoinGecko = {
       showArchiveDropdown: false, // Показать/скрыть выпадающий список архива
       // Отмеченные чекбоксами монеты
       selectedCoinIds: selectedCoinIds, // Массив ID отмеченных монет (загружается из localStorage)
+      // Избранные монеты
+      favoriteCoinIds: JSON.parse(localStorage.getItem('cgFavoriteCoinIds') || '[]'), // Массив ID избранных монет (загружается из localStorage)
       // Выпадающее меню кнопки счетчика
       showCounterDropdown: false, // Показать/скрыть выпадающее меню счетчика
       // Сортировка колонки монет
@@ -194,7 +196,190 @@ window.cmpCoinGecko = {
           // На вкладке "Компл. дельты" скрыть все колонки процентов
           hide: ['col-percent'] 
         }
-      }
+      },
+      // =========================
+      // КОНФИГУРАЦИЯ КОЛОНОК ТАБЛИЦЫ
+      // Централизованная конфигурация для будущего компонента таблицы
+      // Определяет: заголовки, поля сортировки, форматирование, видимость
+      // =========================
+      tableColumns: [
+        // Колонка чекбоксов - СПЕЦИАЛЬНАЯ (не через конфигурацию форматирования)
+        {
+          id: 'checkbox',
+          type: 'checkbox',
+          cssClass: 'col-checkbox',
+          width: '40px'
+        },
+        // Колонка монет - СПЕЦИАЛЬНАЯ (не через sortable-header)
+        {
+          id: 'coin',
+          type: 'coin',
+          label: 'Монета',
+          cssClass: 'col-coin',
+          sortable: false, // Использует кастомную сортировку через coinSortType
+          showSortIndicator: false, // Отключаем индикацию сортировки для кастомной сортировки
+          menuItems: [
+            { id: 'market_cap', label: 'По капитализации' },
+            { id: 'total_volume', label: 'По дневному объему' },
+            { id: 'alphabet', label: 'По алфавиту' },
+            { id: 'selected', label: 'Выбранные' }
+          ],
+          customSort: {
+            enabled: true,
+            sortType: 'custom'
+          }
+        },
+        // Процентные колонки - через конфигурацию форматирования
+        {
+          id: 'percent-1h',
+          type: 'numeric',
+          label: '1h %',
+          field: 'price_change_percentage_1h_in_currency',
+          cssClass: 'col-percent-1h',
+          sortable: true,
+          format: {
+            component: 'cell-num',
+            type: 'decimal',
+            precision: 2,
+            rounding: 'precision',
+            unit: '%',
+            sectors: [
+              { range: [-Infinity, 0], cssClass: 'text-danger' },
+              { range: [0, Infinity], cssClass: 'text-success' }
+            ],
+            decimalSeparator: ',',
+            thousandsSeparator: ' '
+          }
+        },
+        {
+          id: 'percent-24h',
+          type: 'numeric',
+          label: '24h %',
+          field: 'price_change_percentage_24h_in_currency',
+          cssClass: 'col-percent-24h',
+          sortable: true,
+          format: {
+            component: 'cell-num',
+            type: 'decimal',
+            precision: 2,
+            rounding: 'precision',
+            unit: '%',
+            sectors: [
+              { range: [-Infinity, 0], cssClass: 'text-danger' },
+              { range: [0, Infinity], cssClass: 'text-success' }
+            ],
+            decimalSeparator: ',',
+            thousandsSeparator: ' '
+          }
+        },
+        {
+          id: 'percent-7d',
+          type: 'numeric',
+          label: '7d %',
+          field: 'price_change_percentage_7d_in_currency',
+          cssClass: 'col-percent-7d',
+          sortable: true,
+          format: {
+            component: 'cell-num',
+            type: 'decimal',
+            precision: 2,
+            rounding: 'precision',
+            unit: '%',
+            sectors: [
+              { range: [-Infinity, 0], cssClass: 'text-danger' },
+              { range: [0, Infinity], cssClass: 'text-success' }
+            ],
+            decimalSeparator: ',',
+            thousandsSeparator: ' '
+          }
+        },
+        {
+          id: 'percent-14d',
+          type: 'numeric',
+          label: '14d %',
+          field: 'price_change_percentage_14d_in_currency',
+          cssClass: 'col-percent-14d',
+          sortable: true,
+          format: {
+            component: 'cell-num',
+            type: 'decimal',
+            precision: 2,
+            rounding: 'precision',
+            unit: '%',
+            sectors: [
+              { range: [-Infinity, 0], cssClass: 'text-danger' },
+              { range: [0, Infinity], cssClass: 'text-success' }
+            ],
+            decimalSeparator: ',',
+            thousandsSeparator: ' '
+          }
+        },
+        {
+          id: 'percent-30d',
+          type: 'numeric',
+          label: '30d %',
+          field: 'price_change_percentage_30d_in_currency',
+          cssClass: 'col-percent-30d',
+          sortable: true,
+          format: {
+            component: 'cell-num',
+            type: 'decimal',
+            precision: 2,
+            rounding: 'precision',
+            unit: '%',
+            sectors: [
+              { range: [-Infinity, 0], cssClass: 'text-danger' },
+              { range: [0, Infinity], cssClass: 'text-success' }
+            ],
+            decimalSeparator: ',',
+            thousandsSeparator: ' '
+          }
+        },
+        {
+          id: 'percent-200d',
+          type: 'numeric',
+          label: '200d %',
+          field: 'price_change_percentage_200d_in_currency',
+          cssClass: 'col-percent-200d',
+          sortable: true,
+          format: {
+            component: 'cell-num',
+            type: 'decimal',
+            precision: 2,
+            rounding: 'precision',
+            unit: '%',
+            sectors: [
+              { range: [-Infinity, 0], cssClass: 'text-danger' },
+              { range: [0, Infinity], cssClass: 'text-success' }
+            ],
+            decimalSeparator: ',',
+            thousandsSeparator: ' '
+          }
+        },
+        // CD колонки - динамические (будут развернуты через cdHeaders)
+        {
+          id: 'cd-dynamic',
+          type: 'numeric',
+          label: null, // Будет браться из cdHeaders
+          field: null, // Будет вычисляться через getCDField
+          cssClass: 'col-cd',
+          sortable: true,
+          dynamic: true, // Флаг для динамических колонок
+          format: {
+            component: 'cell-num',
+            type: 'decimal',
+            precision: 2,
+            rounding: 'precision',
+            sectors: [
+              { range: [-Infinity, 0], cssClass: 'text-danger' },
+              { range: [0, Infinity], cssClass: 'text-success' }
+            ],
+            decimalSeparator: ',',
+            thousandsSeparator: ' ',
+            emptyValue: '—'
+          }
+        }
+      ]
     };
   },
   
@@ -239,6 +424,32 @@ window.cmpCoinGecko = {
       return ['CDH', 'CD6', 'CD5', 'CD4', 'CD3', 'CD2', 'CD1'];
     },
     
+    // =========================
+    // COMPUTED СВОЙСТВА ДЛЯ РАБОТЫ С КОНФИГУРАЦИЕЙ КОЛОНОК
+    // =========================
+    
+    // Получить все статические колонки (не динамические)
+    staticColumns() {
+      return this.tableColumns.filter(col => !col.dynamic);
+    },
+    
+    // Получить все динамические колонки с развернутыми заголовками
+    dynamicColumns() {
+      const dynamicCol = this.tableColumns.find(col => col.dynamic);
+      if (!dynamicCol) return [];
+      
+      return this.cdHeaders.map((header, index) => ({
+        ...dynamicCol,
+        id: `${dynamicCol.id}-${index}`,
+        label: header,
+        field: this.getCDField(header, index)
+      }));
+    },
+    
+    // Все колонки (статические + динамические)
+    allColumns() {
+      return [...this.staticColumns, ...this.dynamicColumns];
+    }
   },
 
   methods: {
@@ -460,6 +671,89 @@ window.cmpCoinGecko = {
      */
     getCDField(header, index) {
       return header.toLowerCase();
+    },
+    
+    // =========================
+    // МЕТОДЫ ДЛЯ РАБОТЫ С КОНФИГУРАЦИЕЙ КОЛОНОК
+    // =========================
+    
+    /**
+     * getCellValue(coin, column)
+     * Получить значение для ячейки колонки
+     * 
+     * @param {Object} coin - Объект монеты
+     * @param {Object} column - Конфигурация колонки
+     * @returns {*} Значение для отображения
+     */
+    getCellValue(coin, column) {
+      // Для динамических CD колонок
+      if (column.dynamic) {
+        return this.getCDValue(coin, column.field);
+      }
+      // Для обычных колонок - используем field
+      if (column.field) {
+        return coin[column.field];
+      }
+      return null;
+    },
+    
+    /**
+     * getColumnFormatProps(column)
+     * Получить настройки форматирования для колонки (props для cell-num)
+     * 
+     * @param {Object} column - Конфигурация колонки
+     * @returns {Object} Props для компонента форматирования
+     */
+    getColumnFormatProps(column) {
+      if (!column.format) return {};
+      // Копируем все свойства format, кроме component
+      const { component, ...formatProps } = column.format;
+      return formatProps;
+    },
+    
+    /**
+     * getPercentFormat(precision)
+     * Получить формат для процентных колонок (helper для изменения precision)
+     * 
+     * @param {number} precision - Количество знаков после запятой (по умолчанию 2)
+     * @returns {Object} Конфигурация форматирования
+     */
+    getPercentFormat(precision = 2) {
+      return {
+        component: 'cell-num',
+        type: 'decimal',
+        precision: precision,
+        rounding: 'precision',
+        unit: '%',
+        sectors: [
+          { range: [-Infinity, 0], cssClass: 'text-danger' },
+          { range: [0, Infinity], cssClass: 'text-success' }
+        ],
+        decimalSeparator: ',',
+        thousandsSeparator: ' '
+      };
+    },
+    
+    /**
+     * getCDFormat()
+     * Получить формат для CD колонок
+     * 
+     * @returns {Object} Конфигурация форматирования
+     */
+    getCDFormat() {
+      return {
+        component: 'cell-num',
+        type: 'decimal',
+        precision: 2,
+        rounding: 'precision',
+        sectors: [
+          { range: [-Infinity, 0], cssClass: 'text-danger' },
+          { range: [0, Infinity], cssClass: 'text-success' }
+        ],
+        decimalSeparator: ',',
+        thousandsSeparator: ' ',
+        emptyValue: '—'
+      };
     },
     
     /**
@@ -1231,6 +1525,31 @@ window.cmpCoinGecko = {
       this.showContextMenu = true;
     },
     
+    // Проверка, является ли монета избранной
+    isFavorite(coinId) {
+      return this.favoriteCoinIds.includes(coinId);
+    },
+    
+    // Переключение избранного статуса монеты
+    toggleFavorite(coinId) {
+      if (!coinId) return;
+      
+      const index = this.favoriteCoinIds.indexOf(coinId);
+      if (index > -1) {
+        // Убираем из избранного
+        this.favoriteCoinIds.splice(index, 1);
+      } else {
+        // Добавляем в избранное
+        this.favoriteCoinIds.push(coinId);
+      }
+      
+      // Сохраняем в localStorage
+      localStorage.setItem('cgFavoriteCoinIds', JSON.stringify(this.favoriteCoinIds));
+      
+      // Закрываем контекстное меню
+      this.closeContextMenu();
+    },
+    
     // Открытие/закрытие dropdown архива
     toggleArchiveDropdown() {
       this.showArchiveDropdown = !this.showArchiveDropdown;
@@ -1272,8 +1591,13 @@ window.cmpCoinGecko = {
     },
     
     // Открытие/закрытие выпадающего меню сортировки монет
-    toggleCoinSortDropdown() {
-      this.showCoinSortDropdown = !this.showCoinSortDropdown;
+    toggleCoinSortDropdown(newState) {
+      // Если передан новый state - устанавливаем его, иначе переключаем
+      if (typeof newState === 'boolean') {
+        this.showCoinSortDropdown = newState;
+      } else {
+        this.showCoinSortDropdown = !this.showCoinSortDropdown;
+      }
     },
     
     // Закрытие выпадающего меню сортировки монет
@@ -1488,7 +1812,7 @@ window.cmpCoinGecko = {
         console.error('Монета не найдена или отсутствует тикер');
         this.closeContextMenu();
         return;
-      }
+          }
       
       // Формируем ссылку: https://www.bybit.com/trade/usdt/{тикер}USDT
       const ticker = coin.symbol.toUpperCase();

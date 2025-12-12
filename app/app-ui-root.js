@@ -195,6 +195,78 @@
     console.warn('window.cmpSortableHeader not found');
   }
 
+  // Регистрация компонента заголовка колонки
+  if (window.cmpHeaderCell) {
+    try {
+      app.component('header-cell', window.cmpHeaderCell);
+      console.log('Header cell component registered');
+    } catch (error) {
+      console.error('Ошибка при регистрации компонента заголовка колонки:', error);
+    }
+  } else {
+    console.warn('window.cmpHeaderCell not found');
+  }
+
+  // Регистрация компонента заголовка колонки с чекбоксом
+  if (window.cmpHeaderCellCheck) {
+    try {
+      app.component('header-cell-check', window.cmpHeaderCellCheck);
+      console.log('Header cell check component registered');
+    } catch (error) {
+      console.error('Ошибка при регистрации компонента заголовка колонки с чекбоксом:', error);
+    }
+  } else {
+    console.warn('window.cmpHeaderCellCheck not found');
+  }
+
+  // Регистрация компонента ячейки выбора строки
+  if (window.cmpCellRowSelect) {
+    try {
+      app.component('cell-row-select', window.cmpCellRowSelect);
+      console.log('Cell row select component registered');
+    } catch (error) {
+      console.error('Ошибка при регистрации компонента ячейки выбора строки:', error);
+    }
+  } else {
+    console.warn('window.cmpCellRowSelect not found');
+  }
+
+  // Регистрация компонента числовой ячейки
+  if (window.cmpCellNum) {
+    try {
+      app.component('cell-num', window.cmpCellNum);
+      console.log('Cell num component registered');
+    } catch (error) {
+      console.error('Ошибка при регистрации компонента числовой ячейки:', error);
+    }
+  } else {
+    console.warn('window.cmpCellNum not found');
+  }
+
+  // Регистрация компонента ячейки монеты
+  if (window.cmpCellCoin) {
+    try {
+      app.component('cell-coin', window.cmpCellCoin);
+      console.log('Cell coin component registered');
+    } catch (error) {
+      console.error('Ошибка при регистрации компонента ячейки монеты:', error);
+    }
+  } else {
+    console.warn('window.cmpCellCoin not found');
+  }
+
+  // Регистрация компонента таблицы данных
+  if (window.cmpTableData) {
+    try {
+      app.component('table-data', window.cmpTableData);
+      console.log('Table data component registered');
+    } catch (error) {
+      console.error('Ошибка при регистрации компонента таблицы данных:', error);
+    }
+  } else {
+    console.warn('window.cmpTableData not found');
+  }
+
   // Сохраняем ссылку на приложение в window для доступа из компонентов
   window.app = app;
 

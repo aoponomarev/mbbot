@@ -14,6 +14,28 @@
     /* RGB для совместимости с Bootstrap (вычислено из HSL(208, 12%, 42%)) */
     --bs-primary-rgb: 95, 110, 125;
     
+    /* Цвета для ошибок (danger) - темно-вишневый, как в Prism Light Theme */
+    --color-danger-h: 0; /* Красный тон */
+    --color-danger-s: 65%; /* Высокая насыщенность для вишневого оттенка */
+    --color-danger-l: 45%; /* Темный оттенок для вишневого цвета */
+    
+    /* Генерируем danger цвет из HSL */
+    --bs-danger: hsl(var(--color-danger-h), var(--color-danger-s), var(--color-danger-l));
+    
+    /* RGB для совместимости с Bootstrap (вычислено из HSL(0, 65%, 45%)) */
+    --bs-danger-rgb: 191, 33, 33;
+    
+    /* Цвета для успеха (success) - салатовый, как в Prism Light Theme */
+    --color-success-h: 130; /* Зеленый тон с легким смещением к салатовому */
+    --color-success-s: 55%; /* Умеренная насыщенность для салатового оттенка */
+    --color-success-l: 50%; /* Средняя яркость для салатового цвета */
+    
+    /* Генерируем success цвет из HSL */
+    --bs-success: hsl(var(--color-success-h), var(--color-success-s), var(--color-success-l));
+    
+    /* RGB для совместимости с Bootstrap (вычислено из HSL(130, 55%, 50%)) */
+    --bs-success-rgb: 57, 179, 89;
+    
     /* Общие значения для серых оттенков */
     --color-theme-h: 210; /* Основной тон темы */
     --color-muted-s: 5%;  /* Приглушенная насыщенность для нейтральных элементов */
@@ -117,6 +139,26 @@
     
     /* RGB для совместимости с Bootstrap (вычислено из HSL(208, 10%, 58%)) */
     --bs-primary-rgb: 133, 146, 158;
+    
+    /* Цвета для ошибок (danger) - более светлый вишневый для темной темы */
+    --color-danger-h: 0;
+    --color-danger-s: 60%; /* Чуть менее насыщенный для темной темы */
+    --color-danger-l: 60%; /* Светлее для лучшего контраста на темном фоне */
+    
+    --bs-danger: hsl(var(--color-danger-h), var(--color-danger-s), var(--color-danger-l));
+    
+    /* RGB для совместимости с Bootstrap (вычислено из HSL(0, 60%, 60%)) */
+    --bs-danger-rgb: 245, 98, 98;
+    
+    /* Цвета для успеха (success) - более светлый салатовый для темной темы */
+    --color-success-h: 130;
+    --color-success-s: 50%; /* Чуть менее насыщенный для темной темы */
+    --color-success-l: 60%; /* Светлее для лучшего контраста на темном фоне */
+    
+    --bs-success: hsl(var(--color-success-h), var(--color-success-s), var(--color-success-l));
+    
+    /* RGB для совместимости с Bootstrap (вычислено из HSL(130, 50%, 60%)) */
+    --bs-success-rgb: 87, 204, 122;
     
     /* Общие значения для серых оттенков */
     --color-theme-h: 210;
