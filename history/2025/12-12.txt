@@ -2,7 +2,7 @@
 
 ## UI (оформление)
 
-### Коммит: "Add cell-coin component and favorites system for coins"
+### Коммит: b8c5343 - "Add cell-coin component and favorites system for coins"
 - **Что сделано**: Создан переиспользуемый компонент `cell-coin.js` для отображения монет в ячейках таблицы и добавлена система избранного для монет
 - **Как сделано**:
   * Создан компонент `ui/components/cell-coin.js` с props: `iconUrl`, `ticker`, `fullName`, `coinId`, `cssClasses`
@@ -16,7 +16,7 @@
 
 ## UX (паттерны взаимодействий)
 
-### Коммит: "Add cell-coin component and favorites system for coins"
+### Коммит: b8c5343 - "Add cell-coin component and favorites system for coins"
 - **Что сделано**: Добавлена система избранного для монет с интеграцией в контекстное меню
 - **Как сделано**:
   * Добавлено реактивное свойство `favoriteCoinIds` в `data()` компонента `coingecko.js` с загрузкой из `localStorage` под ключом `cgFavoriteCoinIds`
@@ -29,7 +29,7 @@
 
 ## Architect (архитектура, настройки)
 
-### Коммит: "Add cell-coin component and favorites system for coins"
+### Коммит: b8c5343 - "Add cell-coin component and favorites system for coins"
 - **Что сделано**: Обновлена архитектурная документация с описанием системы компонентов ячеек таблицы и системы избранного
 - **Как сделано**:
   * Добавлено описание компонента `cell-coin.js` в раздел "Текущее размещение файлов" в `architect.md`
@@ -41,7 +41,7 @@
 
 ## Architect (архитектура, настройки)
 
-### Коммит: "Add rule for understanding 'внеси в правила' command"
+### Коммит: 2742f7f - "Add rule for understanding 'внеси в правила' command"
 - **Что сделано**: Добавлено правило понимания команды "внеси в правила" с распределением изменений по соответствующим документам
 - **Как сделано**:
   * Добавлен раздел "КРИТИЧЕСКИ ВАЖНО - Понимание команды 'внеси в правила'" в секцию "Сопровождение документации проекта" в `.cursorrules`
@@ -54,7 +54,7 @@
 
 ## Architect (архитектура, настройки)
 
-### Коммит: "Add deterministic hashes for all component instances"
+### Коммит: de8b2a5 - "Add deterministic hashes for all component instances"
 - **Что сделано**: Добавлены детерминированные уникальные хэши для всех экземпляров переиспользуемых компонентов и проведена ревизия всех компонентов
 - **Как сделано**:
   * Создана утилита `ui/utils/hash-generator.js` для генерации детерминированных Base58 хэшей из строк
@@ -76,7 +76,7 @@
 
 ## UI (оформление)
 
-### Коммит: "Add colorization, rounding features and color adjustments to cell-num"
+### Коммит: 19ebc7d - "Add colorization, rounding features and color adjustments to cell-num"
 - **Что сделано**: Добавлена автоматическая цветизация числовых ячеек на основе знака значения и обновлены цвета danger и success
 - **Как сделано**:
   * Добавлен prop `colorize: Boolean` в компонент `cell-num.js` для включения автоматической цветизации
@@ -91,7 +91,7 @@
 
 ## UX (паттерны взаимодействий)
 
-### Коммит: "Add colorization, rounding features and color adjustments to cell-num"
+### Коммит: 19ebc7d - "Add colorization, rounding features and color adjustments to cell-num"
 - **Что сделано**: Добавлена всплывающая подсказка с точным значением для чисел, округленных до 0
 - **Как сделано**:
   * Добавлено computed свойство `tooltipText()` в `cell-num.js` для определения текста всплывающей подсказки
@@ -101,7 +101,7 @@
 
 ## MM (математическая модель)
 
-### Коммит: "Add colorization, rounding features and color adjustments to cell-num"
+### Коммит: 19ebc7d - "Add colorization, rounding features and color adjustments to cell-num"
 - **Что сделано**: Добавлены функции округления до 0.5, округления больших чисел до целых и префикс "~" для округленных до 0
 - **Как сделано**:
   * Добавлен prop `roundToHalf: Boolean` в компонент `cell-num.js` для округления до 0.5 (0.0, 0.5, 1.0, 1.5 и т.д.)
@@ -116,7 +116,7 @@
 
 ## Architect (архитектура, настройки)
 
-### Коммит: "Add colorization, rounding features and color adjustments to cell-num"
+### Коммит: 19ebc7d - "Add colorization, rounding features and color adjustments to cell-num"
 - **Что сделано**: Обновлена конфигурация колонок таблицы с добавлением флагов цветизации и округления
 - **Как сделано**:
   * Добавлены флаги `colorize: true` и `roundToHalf: true` в объекты `format` всех процентных колонок (1h, 24h, 7d, 14d, 30d, 200d) в `tableColumns` в `coingecko.js`
