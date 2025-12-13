@@ -72,20 +72,66 @@ window.cmpCoinGecko = {
     // Загружаем кэш иконок
     const iconsCache = JSON.parse(localStorage.getItem('cgIconsCache') || '{}');
     
-    // Загружаем архив монет
-    const savedArchivedCoins = localStorage.getItem('cgArchivedCoins');
-    let archivedCoins = [];
-    if (savedArchivedCoins) {
+    // Загружаем избранные монеты (хранилище избранного)
+    // Миграция: проверяем оба ключа (старый cgFavoriteCoins и новый cgFavoriteCoins)
+    const savedFavoriteCoins = localStorage.getItem('cgFavoriteCoins');
+    const savedArchivedCoins = localStorage.getItem('cgArchivedCoins'); // Старый ключ для миграции
+    let favoriteCoins = [];
+    
+    // Если есть новый ключ - используем его
+    if (savedFavoriteCoins) {
+      const parsed = JSON.parse(savedFavoriteCoins);
+      // Обратная совместимость: если массив строк (старый формат) - преобразуем в объекты
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        if (typeof parsed[0] === 'string') {
+          // Старый формат: массив ID
+          favoriteCoins = parsed.map(id => ({ id, symbol: id.toUpperCase(), name: id }));
+        } else {
+          // Новый формат: массив объектов
+          favoriteCoins = parsed;
+        }
+      }
+    }
+    // Если нет нового ключа, но есть старый - мигрируем
+    else if (savedArchivedCoins) {
       const parsed = JSON.parse(savedArchivedCoins);
       // Обратная совместимость: если массив строк (старый формат) - преобразуем в объекты
       if (Array.isArray(parsed) && parsed.length > 0) {
         if (typeof parsed[0] === 'string') {
           // Старый формат: массив ID
-          archivedCoins = parsed.map(id => ({ id, symbol: id.toUpperCase(), name: id }));
+          favoriteCoins = parsed.map(id => ({ id, symbol: id.toUpperCase(), name: id }));
         } else {
           // Новый формат: массив объектов
-          archivedCoins = parsed;
+          favoriteCoins = parsed;
         }
+      }
+      // Сохраняем в новый ключ
+      localStorage.setItem('cgFavoriteCoins', JSON.stringify(favoriteCoins));
+      // Опционально: можно удалить старый ключ после миграции (закомментировано для безопасности)
+      // localStorage.removeItem('cgFavoriteCoins');
+    }
+    
+    // Миграция: объединяем старый favoriteCoinIds с избранным (если еще не было миграции)
+    const savedFavoriteCoinIds = localStorage.getItem('cgFavoriteCoinIds');
+    if (savedFavoriteCoinIds) {
+      const favoriteCoinIds = JSON.parse(savedFavoriteCoinIds);
+      if (Array.isArray(favoriteCoinIds) && favoriteCoinIds.length > 0) {
+        // Для каждого ID из избранного проверяем, есть ли он уже в избранном
+        favoriteCoinIds.forEach(coinId => {
+          const existsInFavorites = favoriteCoins.some(fav => fav.id === coinId);
+          if (!existsInFavorites) {
+            // Добавляем в избранное как объект
+            favoriteCoins.push({
+              id: coinId,
+              symbol: coinId.toUpperCase(), // Временное значение, будет обновлено при первой загрузке
+              name: coinId // Временное значение
+            });
+          }
+        });
+        // Сохраняем объединенный список
+        localStorage.setItem('cgFavoriteCoins', JSON.stringify(favoriteCoins));
+        // Удаляем старый ключ избранного (миграция завершена)
+        localStorage.removeItem('cgFavoriteCoinIds');
       }
     }
     
@@ -146,7 +192,7 @@ window.cmpCoinGecko = {
       cgError: null,
       cgLastUpdated: savedLastUpdated || null,
       cgSelectedCoins: savedSelectedCoins ? JSON.parse(savedSelectedCoins) : [],
-      cgArchivedCoins: archivedCoins, // Архив монет: массив объектов {id, symbol, name}
+      cgFavoriteCoins: favoriteCoins, // Избранные монеты (хранилище избранного): массив объектов {id, symbol, name}
       cgIconsCache: iconsCache, // Кэш иконок в data для реактивности
       // Поиск монет
       cgSearchQuery: '',
@@ -157,13 +203,11 @@ window.cmpCoinGecko = {
       contextMenuX: 0,
       contextMenuY: 0,
       showContextMenu: false,
-      // Архив
-      selectedArchivedCoin: '', // Выбранная монета из архива для восстановления
-      showArchiveDropdown: false, // Показать/скрыть выпадающий список архива
+      // Избранное
+      selectedFavoriteCoin: '', // Выбранная монета из избранного для добавления в таблицу
+      showFavoritesDropdown: false, // Показать/скрыть выпадающий список избранного
       // Отмеченные чекбоксами монеты
       selectedCoinIds: selectedCoinIds, // Массив ID отмеченных монет (загружается из localStorage)
-      // Избранные монеты
-      favoriteCoinIds: JSON.parse(localStorage.getItem('cgFavoriteCoinIds') || '[]'), // Массив ID избранных монет (загружается из localStorage)
       // Выпадающее меню кнопки счетчика
       showCounterDropdown: false, // Показать/скрыть выпадающее меню счетчика
       // Сортировка колонки монет
@@ -960,7 +1004,7 @@ window.cmpCoinGecko = {
             if (!coinId) {
               // Тикер не найден
               if (attempts >= 5) {
-                // Достигли лимита попыток - отправляем в архив
+                // Достигли лимита попыток - добавляем в избранное как неудачный тикер
                 await this.archiveFailedTicker(ticker);
                 // Удаляем из счетчика попыток
                 delete this.tickerAttempts[ticker];
@@ -989,8 +1033,8 @@ window.cmpCoinGecko = {
               continue;
             }
             
-            // Синхронизация: удаляем из архива, если монета там есть
-            this.syncCoinWithArchive(coinId, 'add');
+            // Синхронизация: избранное не удаляется при добавлении в таблицу
+            this.syncCoinWithFavorites(coinId, 'add');
             
             // Добавляем монету в список выбранных
             this.cgSelectedCoins.push(coinId);
@@ -1016,7 +1060,7 @@ window.cmpCoinGecko = {
             // Проверяем количество попыток
             const attempts = this.tickerAttempts[ticker] || 0;
             if (attempts >= 5) {
-              // Достигли лимита попыток - отправляем в архив
+              // Достигли лимита попыток - добавляем в избранное как неудачный тикер
               await this.archiveFailedTicker(ticker);
               // Удаляем из счетчика попыток
               delete this.tickerAttempts[ticker];
@@ -1050,7 +1094,7 @@ window.cmpCoinGecko = {
       }
     },
     
-    // Архивирование неудачного тикера (после 5 попыток)
+    // Добавление неудачного тикера в избранное (после 5 попыток)
     async archiveFailedTicker(ticker) {
       try {
         // Пытаемся найти монету через поиск CoinGecko (даже если точного совпадения нет)
@@ -1058,20 +1102,20 @@ window.cmpCoinGecko = {
         const res = await fetch(url);
         
         if (!res.ok) {
-          // Обработка rate limiting (429) - пропускаем архивирование через API
+          // Обработка rate limiting (429) - пропускаем добавление в избранное через API
           if (res.status === 429) {
             this.increaseAdaptiveTimeout();
           }
-          // При любой ошибке API - все равно сохраняем в архив с тикером как ID
-          const archiveId = `failed-${ticker.toLowerCase()}`;
-          const existsInArchive = this.cgArchivedCoins.some(archived => archived.id === archiveId);
-          if (!existsInArchive) {
-            this.cgArchivedCoins.push({
-              id: archiveId,
+          // При любой ошибке API - все равно сохраняем в избранное с тикером как ID
+          const failedId = `failed-${ticker.toLowerCase()}`;
+          const existsInFavorites = this.cgFavoriteCoins.some(favorite => favorite.id === failedId);
+          if (!existsInFavorites) {
+            this.cgFavoriteCoins.push({
+              id: failedId,
               symbol: ticker.toUpperCase(),
               name: ticker
             });
-            localStorage.setItem('cgArchivedCoins', JSON.stringify(this.cgArchivedCoins));
+            localStorage.setItem('cgFavoriteCoins', JSON.stringify(this.cgFavoriteCoins));
           }
           return;
         }
@@ -1086,42 +1130,42 @@ window.cmpCoinGecko = {
           // Используем первый результат поиска (самый популярный)
           const coin = coins[0];
           
-          // Проверяем, нет ли уже этой монеты в архиве
-          const existsInArchive = this.cgArchivedCoins.some(archived => archived.id === coin.id);
-          if (!existsInArchive) {
+          // Проверяем, нет ли уже этой монеты в избранном
+          const existsInFavorites = this.cgFavoriteCoins.some(favorite => favorite.id === coin.id);
+          if (!existsInFavorites) {
             // Сохраняем объект с id, symbol (тикер) и name (полное название)
-            this.cgArchivedCoins.push({
+            this.cgFavoriteCoins.push({
               id: coin.id,
               symbol: (coin.symbol || ticker).toUpperCase(),
               name: coin.name || ticker
             });
-            localStorage.setItem('cgArchivedCoins', JSON.stringify(this.cgArchivedCoins));
+            localStorage.setItem('cgFavoriteCoins', JSON.stringify(this.cgFavoriteCoins));
           }
         } else {
-          // Если ничего не найдено - все равно сохраняем в архив с тикером как ID
-          const archiveId = `failed-${ticker.toLowerCase()}`;
-          const existsInArchive = this.cgArchivedCoins.some(archived => archived.id === archiveId);
-          if (!existsInArchive) {
-            this.cgArchivedCoins.push({
-              id: archiveId,
+          // Если ничего не найдено - все равно сохраняем в избранное с тикером как ID
+          const failedId = `failed-${ticker.toLowerCase()}`;
+          const existsInFavorites = this.cgFavoriteCoins.some(favorite => favorite.id === failedId);
+          if (!existsInFavorites) {
+            this.cgFavoriteCoins.push({
+              id: failedId,
               symbol: ticker.toUpperCase(),
               name: ticker
             });
-            localStorage.setItem('cgArchivedCoins', JSON.stringify(this.cgArchivedCoins));
+            localStorage.setItem('cgFavoriteCoins', JSON.stringify(this.cgFavoriteCoins));
           }
         }
       } catch (error) {
         console.error(`Error archiving failed ticker ${ticker}:`, error);
-        // Даже при ошибке пытаемся сохранить тикер в архив
-        const archiveId = `failed-${ticker.toLowerCase()}`;
-        const existsInArchive = this.cgArchivedCoins.some(archived => archived.id === archiveId);
-        if (!existsInArchive) {
-          this.cgArchivedCoins.push({
-            id: archiveId,
+        // Даже при ошибке пытаемся сохранить тикер в избранное
+        const failedId = `failed-${ticker.toLowerCase()}`;
+        const existsInFavorites = this.cgFavoriteCoins.some(favorite => favorite.id === failedId);
+          if (!existsInFavorites) {
+            this.cgFavoriteCoins.push({
+              id: failedId,
             symbol: ticker.toUpperCase(),
             name: ticker
           });
-          localStorage.setItem('cgArchivedCoins', JSON.stringify(this.cgArchivedCoins));
+          localStorage.setItem('cgFavoriteCoins', JSON.stringify(this.cgFavoriteCoins));
         }
       }
     },
@@ -1293,20 +1337,18 @@ window.cmpCoinGecko = {
       }
     },
     
-    // Синхронизация монеты между таблицей и архивом
-    // Приоритет: таблица (активное состояние) важнее архива
-    syncCoinWithArchive(coinId, action) {
+    // Синхронизация монеты между таблицей и избранным
+    // При добавлении в таблицу - НЕ удаляем из избранного (избранное - хранилище)
+    // При удалении из таблицы - удаляем из таблицы, но добавляем в избранное
+    syncCoinWithFavorites(coinId, action) {
       if (!coinId) return;
       
       if (action === 'add') {
-        // При добавлении в таблицу - удаляем из архива (если есть)
-        const archiveIndex = this.cgArchivedCoins.findIndex(archived => archived.id === coinId);
-        if (archiveIndex > -1) {
-          this.cgArchivedCoins.splice(archiveIndex, 1);
-          localStorage.setItem('cgArchivedCoins', JSON.stringify(this.cgArchivedCoins));
-        }
-      } else if (action === 'archive') {
-        // При архивировании - удаляем из таблицы (если есть)
+        // При добавлении в таблицу - НЕ удаляем из избранного
+        // Избранное теперь хранилище, монета может быть и в таблице, и в избранном одновременно
+        // Ничего не делаем
+      } else if (action === 'remove') {
+        // При удалении из таблицы - удаляем из таблицы
         const tableIndex = this.cgSelectedCoins.indexOf(coinId);
         if (tableIndex > -1) {
           this.cgSelectedCoins.splice(tableIndex, 1);
@@ -1318,18 +1360,11 @@ window.cmpCoinGecko = {
       }
     },
     
-    // Проверка и очистка дубликатов между таблицей и архивом при загрузке
-    syncAllCoinsWithArchive() {
-      // Удаляем из архива все монеты, которые присутствуют в таблице
-      const tableCoinIds = new Set(this.cgSelectedCoins);
-      const initialArchiveLength = this.cgArchivedCoins.length;
-      
-      this.cgArchivedCoins = this.cgArchivedCoins.filter(archived => !tableCoinIds.has(archived.id));
-      
-      // Если были удаления - сохраняем изменения
-      if (this.cgArchivedCoins.length < initialArchiveLength) {
-        localStorage.setItem('cgArchivedCoins', JSON.stringify(this.cgArchivedCoins));
-      }
+    // Проверка и очистка дубликатов между таблицей и избранным при загрузке
+    // НЕ удаляем из избранного монеты, которые есть в таблице (избранное - хранилище)
+    syncAllCoinsWithFavorites() {
+      // Избранное теперь хранилище - монета может быть и в таблице, и в избранном одновременно
+      // Ничего не делаем - оставляем как есть
     },
     
     // Увеличение таймаута при получении 429 ошибки (rate limiting)
@@ -1361,8 +1396,8 @@ window.cmpCoinGecko = {
     // Добавление монеты в список
     addCoin(coinId) {
       if (!this.cgSelectedCoins.includes(coinId)) {
-        // Синхронизация: удаляем из архива, если монета там есть
-        this.syncCoinWithArchive(coinId, 'add');
+        // Синхронизация: избранное не удаляется при добавлении в таблицу
+        this.syncCoinWithFavorites(coinId, 'add');
         
         this.cgSelectedCoins.push(coinId);
         localStorage.setItem('cgSelectedCoins', JSON.stringify(this.cgSelectedCoins));
@@ -1419,8 +1454,8 @@ window.cmpCoinGecko = {
           if (!this.cgSelectedCoins.includes(coin.id)) {
             this.cgSelectedCoins.push(coin.id);
             newCoinIds.push(coin.id);
-            // Синхронизация: удаляем из архива, если монета там есть
-            this.syncCoinWithArchive(coin.id, 'add');
+            // Синхронизация: избранное не удаляется при добавлении в таблицу
+            this.syncCoinWithFavorites(coin.id, 'add');
           }
         });
         
@@ -1477,8 +1512,8 @@ window.cmpCoinGecko = {
           if (!this.cgSelectedCoins.includes(coin.id)) {
             this.cgSelectedCoins.push(coin.id);
             newCoinIds.push(coin.id);
-            // Синхронизация: удаляем из архива, если монета там есть
-            this.syncCoinWithArchive(coin.id, 'add');
+            // Синхронизация: избранное не удаляется при добавлении в таблицу
+            this.syncCoinWithFavorites(coin.id, 'add');
           }
         });
         
@@ -1541,34 +1576,52 @@ window.cmpCoinGecko = {
       this.showContextMenu = true;
     },
     
-    // Проверка, является ли монета избранной
+    // Проверка, является ли монета избранной (проверяет cgFavoriteCoins)
     isFavorite(coinId) {
-      return this.favoriteCoinIds.includes(coinId);
+      if (!coinId) return false;
+      return this.cgFavoriteCoins.some(favorite => favorite.id === coinId);
     },
     
-    // Переключение избранного статуса монеты
+    // Переключение избранного статуса монеты (работает с cgFavoriteCoins)
     toggleFavorite(coinId) {
       if (!coinId) return;
       
-      const index = this.favoriteCoinIds.indexOf(coinId);
-      if (index > -1) {
+      // Находим монету в текущих данных для получения symbol и name
+      const coin = this.cgCoins.find(c => c.id === coinId);
+      
+      const favoriteIndex = this.cgFavoriteCoins.findIndex(favorite => favorite.id === coinId);
+      if (favoriteIndex > -1) {
         // Убираем из избранного
-        this.favoriteCoinIds.splice(index, 1);
+        this.cgFavoriteCoins.splice(favoriteIndex, 1);
       } else {
         // Добавляем в избранное
-        this.favoriteCoinIds.push(coinId);
+        if (coin) {
+          // Если монета есть в таблице - берем данные оттуда
+          this.cgFavoriteCoins.push({
+            id: coin.id,
+            symbol: (coin.symbol || '').toUpperCase(),
+            name: coin.name || coin.id
+          });
+        } else {
+          // Если монеты нет в таблице - создаем минимальный объект
+          this.cgFavoriteCoins.push({
+            id: coinId,
+            symbol: coinId.toUpperCase(),
+            name: coinId
+          });
+        }
       }
       
       // Сохраняем в localStorage
-      localStorage.setItem('cgFavoriteCoinIds', JSON.stringify(this.favoriteCoinIds));
+      localStorage.setItem('cgFavoriteCoins', JSON.stringify(this.cgFavoriteCoins));
       
       // Закрываем контекстное меню
       this.closeContextMenu();
     },
     
-    // Открытие/закрытие dropdown архива
-    toggleArchiveDropdown() {
-      this.showArchiveDropdown = !this.showArchiveDropdown;
+    // Открытие/закрытие dropdown избранного
+    toggleFavoritesDropdown() {
+      this.showFavoritesDropdown = !this.showFavoritesDropdown;
     },
     
     // Контекстное меню: закрытие
@@ -1577,9 +1630,9 @@ window.cmpCoinGecko = {
       this.contextMenuCoin = null;
     },
     
-    // Закрытие выпадающего списка архива
-    closeArchiveDropdown() {
-      this.showArchiveDropdown = false;
+    // Закрытие выпадающего списка избранного
+    closeFavoritesDropdown() {
+      this.showFavoritesDropdown = false;
     },
     
     // Закрытие выпадающего списка поиска
@@ -1600,7 +1653,7 @@ window.cmpCoinGecko = {
     // Обработчик глобального события закрытия всех выпадающих списков
     handleCloseAllDropdowns() {
       this.closeContextMenu();
-      this.closeArchiveDropdown();
+      this.closeFavoritesDropdown();
       this.closeSearchDropdown();
       this.closeCounterDropdown();
       this.closeCoinSortDropdown();
@@ -1766,28 +1819,28 @@ window.cmpCoinGecko = {
       this.closeCounterDropdown();
     },
     
-    // Архивировать отмеченные монеты
-    archiveSelectedCoins() {
+    // Удалить отмеченные монеты из таблицы и добавить в избранное
+    removeSelectedFromTable() {
       if (this.selectedCoinIds.length === 0) return;
       
       // Сохраняем копию списка
-      const coinsToArchive = [...this.selectedCoinIds];
+      const coinsToRemove = [...this.selectedCoinIds];
       
-      // Архивируем каждую отмеченную монету
-      coinsToArchive.forEach(coinId => {
+      // Удаляем каждую отмеченную монету из таблицы и добавляем в избранное
+      coinsToRemove.forEach(coinId => {
         // Находим монету в текущих данных ПЕРЕД синхронизацией (которая удалит её из cgCoins)
         const coin = this.cgCoins.find(c => c.id === coinId);
         
         // Синхронизация: удаляем из таблицы, если монета там есть
-        this.syncCoinWithArchive(coinId, 'archive');
+        this.syncCoinWithFavorites(coinId, 'remove');
         
-        // Добавляем в архив, если монета была найдена
+        // Добавляем в избранное, если монета была найдена
         if (coin) {
-          // Проверяем, нет ли уже этой монеты в архиве
-          const existsInArchive = this.cgArchivedCoins.some(archived => archived.id === coinId);
-          if (!existsInArchive) {
+          // Проверяем, нет ли уже этой монеты в избранном
+          const existsInFavorites = this.cgFavoriteCoins.some(favorite => favorite.id === coinId);
+          if (!existsInFavorites) {
             // Сохраняем объект с id, symbol (тикер) и name (полное название)
-            this.cgArchivedCoins.push({
+            this.cgFavoriteCoins.push({
               id: coin.id,
               symbol: (coin.symbol || '').toUpperCase(),
               name: coin.name || coin.id
@@ -1796,18 +1849,18 @@ window.cmpCoinGecko = {
         }
       });
       
-      // Сохраняем архив
-      localStorage.setItem('cgArchivedCoins', JSON.stringify(this.cgArchivedCoins));
+      // Сохраняем избранное
+      localStorage.setItem('cgFavoriteCoins', JSON.stringify(this.cgFavoriteCoins));
       
       // Удаляем монеты из списка выбранных для запроса (если еще не удалены синхронизацией)
-      coinsToArchive.forEach(coinId => {
+      coinsToRemove.forEach(coinId => {
         const index = this.cgSelectedCoins.indexOf(coinId);
         if (index > -1) {
           this.cgSelectedCoins.splice(index, 1);
         }
       });
       
-      // Сохраняем изменения (cgCoins уже обновлен в syncCoinWithArchive)
+      // Сохраняем изменения (cgCoins уже обновлен в syncCoinWithFavorites)
       localStorage.setItem('cgSelectedCoins', JSON.stringify(this.cgSelectedCoins));
       localStorage.setItem('cgCoins', JSON.stringify(this.cgCoins));
       
@@ -1840,28 +1893,28 @@ window.cmpCoinGecko = {
       this.closeContextMenu();
     },
     
-    // Архивирование монеты
-    archiveCoin() {
+    // Удаление монеты из таблицы и добавление в избранное
+    removeFromTable() {
       if (!this.contextMenuCoin) return;
       
       // Находим монету в текущих данных
       const coin = this.cgCoins.find(c => c.id === this.contextMenuCoin);
       if (!coin) return;
       
-      // Синхронизация: удаляем из таблицы и отображаемых данных, если монета там есть
-      this.syncCoinWithArchive(this.contextMenuCoin, 'archive');
+      // Синхронизация: удаляем из таблицы, если монета там есть
+      this.syncCoinWithFavorites(this.contextMenuCoin, 'remove');
       
-      // Проверяем, нет ли уже этой монеты в архиве
-      const existsInArchive = this.cgArchivedCoins.some(archived => archived.id === this.contextMenuCoin);
-      if (!existsInArchive) {
+      // Добавляем в избранное, если монеты там еще нет
+      const existsInFavorites = this.cgFavoriteCoins.some(favorite => favorite.id === this.contextMenuCoin);
+      if (!existsInFavorites) {
         // Сохраняем объект с id, symbol (тикер) и name (полное название)
         // В CoinGecko API: coin.symbol - это тикер, coin.name - это полное название
-        this.cgArchivedCoins.push({
+        this.cgFavoriteCoins.push({
           id: coin.id,
           symbol: (coin.symbol || '').toUpperCase(), // Тикер в верхнем регистре (BTC, ETH)
           name: coin.name || coin.id // Полное название монеты (Bitcoin, Ethereum)
         });
-        localStorage.setItem('cgArchivedCoins', JSON.stringify(this.cgArchivedCoins));
+        localStorage.setItem('cgFavoriteCoins', JSON.stringify(this.cgFavoriteCoins));
       }
       
       // Удаляем монету из выбранных чекбоксами, если она была отмечена
@@ -1875,57 +1928,61 @@ window.cmpCoinGecko = {
       this.closeContextMenu();
     },
     
-    // Восстановление монеты из архива (старый метод для совместимости)
-    restoreFromArchive() {
-      if (!this.selectedArchivedCoin) return;
-      this.restoreFromArchiveById(this.selectedArchivedCoin);
-      this.selectedArchivedCoin = '';
+    // Добавление монеты из избранного в таблицу (старый метод для совместимости)
+    addFavoriteToTable() {
+      if (!this.selectedFavoriteCoin) return;
+      this.addFavoriteToTableById(this.selectedFavoriteCoin);
+      this.selectedFavoriteCoin = '';
     },
     
-    // Восстановление монеты из архива по ID
-    async restoreFromArchiveById(coinId) {
+    // Добавление монеты из избранного в таблицу по ID
+    // Если монета уже в таблице - просто закрываем dropdown (отметка показывается в UI)
+    // Если монеты нет - добавляем её в таблицу
+    async addFavoriteToTableById(coinId) {
       if (!coinId) return;
       
-      // Находим монету в архиве, чтобы получить тикер для failed- монет
-      const archivedCoin = this.cgArchivedCoins.find(archived => archived.id === coinId);
-      if (!archivedCoin) return;
+      // Проверяем, есть ли монета уже в таблице
+      if (this.cgSelectedCoins.includes(coinId)) {
+        // Монета уже в таблице - просто закрываем dropdown
+        // Отметка уже показывается в выпадающем списке избранного
+        this.closeFavoritesDropdown();
+        return;
+      }
+      
+      // Находим монету в избранном, чтобы получить тикер для failed- монет
+      const favoriteCoin = this.cgFavoriteCoins.find(favorite => favorite.id === coinId);
+      if (!favoriteCoin) return;
       
       let realCoinId = coinId;
       
-      // Если это автоматически заархивированная монета (failed-{ticker})
+      // Если это автоматически добавленная монета с неудачным тикером (failed-{ticker})
       if (coinId && typeof coinId === 'string' && coinId.startsWith('failed-')) {
         // Извлекаем тикер из ID (убираем префикс "failed-")
-        const ticker = archivedCoin.symbol || coinId.replace('failed-', '').toUpperCase();
+        const ticker = favoriteCoin.symbol || coinId.replace('failed-', '').toUpperCase();
         
         // Пытаемся найти реальный CoinGecko ID по тикеру
         try {
           realCoinId = await this.getCoinIdBySymbol(ticker);
           
           if (!realCoinId) {
-            // Не удалось найти монету - возвращаем в архив
+            // Не удалось найти монету - возвращаем в избранное
             console.warn(`Failed to restore coin ${ticker}: not found on CoinGecko`);
-            // Монета уже в архиве, просто не удаляем её
+            // Монета уже в избранном, просто не удаляем её
             return;
           }
         } catch (error) {
           console.error(`Error finding coin ID for ticker ${ticker}:`, error);
-          // При ошибке - возвращаем в архив
+          // При ошибке - возвращаем в избранное
           return;
         }
       }
       
-      // Сохраняем монету обратно в архив на случай ошибки
-      const archivedCoinBackup = { ...archivedCoin };
+      // Сохраняем монету обратно в избранное на случай ошибки
+      const favoriteCoinBackup = { ...favoriteCoin };
       
-      // Синхронизация: удаляем из архива и добавляем в таблицу (используем realCoinId)
-      this.syncCoinWithArchive(realCoinId, 'add');
-      
-      // Удаляем из архива (ищем по id в объектах) - на случай если синхронизация не сработала
-      const archiveIndex = this.cgArchivedCoins.findIndex(archived => archived.id === coinId);
-      if (archiveIndex > -1) {
-        this.cgArchivedCoins.splice(archiveIndex, 1);
-        localStorage.setItem('cgArchivedCoins', JSON.stringify(this.cgArchivedCoins));
-      }
+      // Синхронизация: удаляем из избранного и добавляем в таблицу (используем realCoinId)
+      // НО: не удаляем из избранного, так как это хранилище избранного
+      // this.syncCoinWithFavorites(realCoinId, 'add'); // УБРАНО: избранное не удаляется при добавлении в таблицу
       
       // Добавляем в активный список (используем realCoinId)
       if (!this.cgSelectedCoins.includes(realCoinId)) {
@@ -1934,9 +1991,9 @@ window.cmpCoinGecko = {
       }
       
       // Закрываем dropdown
-      this.closeArchiveDropdown();
+      this.closeFavoritesDropdown();
       
-      // Пытаемся обновить данные - при ошибке возвращаем монету в архив
+      // Пытаемся обновить данные - при ошибке удаляем из таблицы (но оставляем в избранном)
       let restoreFailed = false;
       
       try {
@@ -1961,7 +2018,7 @@ window.cmpCoinGecko = {
         console.error(`Error fetching coin data for ${realCoinId}:`, error);
       }
       
-      // Если восстановление не удалось - возвращаем монету в архив
+      // Если добавление не удалось - удаляем из таблицы (но оставляем в избранном)
       if (restoreFailed) {
         // Удаляем из таблицы
         const tableIndex = this.cgSelectedCoins.indexOf(realCoinId);
@@ -1969,49 +2026,43 @@ window.cmpCoinGecko = {
           this.cgSelectedCoins.splice(tableIndex, 1);
           localStorage.setItem('cgSelectedCoins', JSON.stringify(this.cgSelectedCoins));
         }
-        
-        // Возвращаем в архив с оригинальным ID
-        const existsInArchive = this.cgArchivedCoins.some(archived => archived.id === archivedCoinBackup.id);
-        if (!existsInArchive) {
-          this.cgArchivedCoins.push(archivedCoinBackup);
-          localStorage.setItem('cgArchivedCoins', JSON.stringify(this.cgArchivedCoins));
-        }
+        // Монета остается в избранном (не возвращаем её туда, так как она там уже есть)
       }
     },
     
-    // Получение названия монеты из архива
-    getArchivedCoinName(archivedCoin) {
-      // archivedCoin может быть объектом {id, symbol, name} или строкой (старый формат)
-      if (typeof archivedCoin === 'object' && archivedCoin.name) {
-        return archivedCoin.name;
+    // Получение названия монеты из избранного
+    getFavoriteCoinName(favoriteCoin) {
+      // favoriteCoin может быть объектом {id, symbol, name} или строкой (старый формат)
+      if (typeof favoriteCoin === 'object' && favoriteCoin.name) {
+        return favoriteCoin.name;
       }
       // Fallback: ищем в текущих данных или возвращаем ID
-      const coin = this.cgCoins.find(c => c.id === (archivedCoin.id || archivedCoin));
-      return coin ? coin.name : (archivedCoin.id || archivedCoin);
+      const coin = this.cgCoins.find(c => c.id === (favoriteCoin.id || favoriteCoin));
+      return coin ? coin.name : (favoriteCoin.id || favoriteCoin);
     },
     
-    // Получение тикера монеты из архива
-    getArchivedCoinSymbol(archivedCoin) {
-      // archivedCoin может быть объектом {id, symbol, name} или строкой (старый формат)
-      if (typeof archivedCoin === 'object' && archivedCoin.symbol) {
-        return archivedCoin.symbol;
+    // Получение тикера монеты из избранного
+    getFavoriteCoinSymbol(favoriteCoin) {
+      // favoriteCoin может быть объектом {id, symbol, name} или строкой (старый формат)
+      if (typeof favoriteCoin === 'object' && favoriteCoin.symbol) {
+        return favoriteCoin.symbol;
       }
       // Fallback: ищем в текущих данных или возвращаем ID
-      const coin = this.cgCoins.find(c => c.id === (archivedCoin.id || archivedCoin));
-      return coin ? coin.symbol.toUpperCase() : (archivedCoin.id || archivedCoin).toUpperCase();
+      const coin = this.cgCoins.find(c => c.id === (favoriteCoin.id || favoriteCoin));
+      return coin ? coin.symbol.toUpperCase() : (favoriteCoin.id || favoriteCoin).toUpperCase();
     },
     
-    // Получение ID монеты из архива (для восстановления)
-    getArchivedCoinId(archivedCoin) {
-      // archivedCoin может быть объектом {id, symbol, name} или строкой (старый формат)
-      return typeof archivedCoin === 'object' ? archivedCoin.id : archivedCoin;
+    // Получение ID монеты из избранного
+    getFavoriteCoinId(favoriteCoin) {
+      // favoriteCoin может быть объектом {id, symbol, name} или строкой (старый формат)
+      return typeof favoriteCoin === 'object' ? favoriteCoin.id : favoriteCoin;
     },
     
-    // Получение иконки монеты из архива
-    getArchivedCoinIcon(archivedCoin) {
-      const coinId = typeof archivedCoin === 'object' ? archivedCoin.id : archivedCoin;
+    // Получение иконки монеты из избранного
+    getFavoriteCoinIcon(favoriteCoin) {
+      const coinId = typeof favoriteCoin === 'object' ? favoriteCoin.id : favoriteCoin;
       
-      // Если это автоматически заархивированная монета (неудачная попытка добавления)
+      // Если это автоматически добавленная монета с неудачным тикером (неудачная попытка добавления)
       // определяем по префиксу "failed-" в ID
       if (coinId && typeof coinId === 'string' && coinId.startsWith('failed-')) {
         return null; // Возвращаем null, чтобы показать иконку рефреша в шаблоне
@@ -2025,9 +2076,9 @@ window.cmpCoinGecko = {
       return this.cgIconsCache[coinId] || null;
     },
     
-    // Проверка, является ли монета из архива автоматически заархивированной (неудачной попыткой)
-    isFailedArchivedCoin(archivedCoin) {
-      const coinId = typeof archivedCoin === 'object' ? archivedCoin.id : archivedCoin;
+    // Проверка, является ли монета из избранного автоматически добавленной с неудачным тикером (неудачной попыткой)
+    isFailedFavoriteCoin(favoriteCoin) {
+      const coinId = typeof favoriteCoin === 'object' ? favoriteCoin.id : favoriteCoin;
       return coinId && typeof coinId === 'string' && coinId.startsWith('failed-');
     },
     
@@ -2209,8 +2260,8 @@ window.cmpCoinGecko = {
 
   mounted() {
     console.log('🔍 CoinGecko component mounted');
-    // Проверяем и очищаем дубликаты между таблицей и архивом при загрузке
-    this.syncAllCoinsWithArchive();
+    // Проверяем и очищаем дубликаты между таблицей и избранным при загрузке
+    this.syncAllCoinsWithFavorites();
     
     // Рассчитываем CPT для монет, загруженных из localStorage (если еще не рассчитан)
     // Источник: Этап 2 миграции математической модели

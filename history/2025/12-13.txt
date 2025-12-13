@@ -88,3 +88,42 @@
     - Итоговый цвет: `hsl(200deg 20% 50% / 5%)`
 - **Функциональность**: Тени выпадающих меню стали шире и ниже, рамка более легкая и менее заметная. Подсветка выбранных строк таблицы использует нейтральный серый с легким синеватым оттенком
 
+### Коммит: Refactor archive to favorites system with migration
+- **Что сделано**: Полностью переработан концепт архива монет в хранилище избранного с миграцией данных и переименованием всех упоминаний "архив" на "избранное"
+- **Как сделано**:
+  * **Объединение систем избранного и архива**:
+    - Объединены `favoriteCoinIds` и `cgArchivedCoins` в единую систему `cgFavoriteCoins` при загрузке данных
+    - Добавлена миграция localStorage: `cgArchivedCoins` → `cgFavoriteCoins` с сохранением обратной совместимости
+    - Удалена отдельная система `favoriteCoinIds` (миграция в `cgFavoriteCoins`)
+  * **Переименование переменных и методов**:
+    - `cgArchivedCoins` → `cgFavoriteCoins`, `archivedCoins` → `favoriteCoins`
+    - `showArchiveDropdown` → `showFavoritesDropdown`, `selectedArchivedCoin` → `selectedFavoriteCoin`
+    - `archiveCoin()` → `removeFromTable()`, `archiveSelectedCoins()` → `removeSelectedFromTable()`
+    - `restoreFromArchiveById()` → `addFavoriteToTableById()`, `restoreFromArchive()` → `addFavoriteToTable()`
+    - `syncCoinWithArchive()` → `syncCoinWithFavorites()`, `syncAllCoinsWithArchive()` → `syncAllCoinsWithFavorites()`
+    - `getArchivedCoin*()` → `getFavoriteCoin*()`, `isFailedArchivedCoin()` → `isFailedFavoriteCoin()`
+    - `toggleArchiveDropdown()` → `toggleFavoritesDropdown()`, `closeArchiveDropdown()` → `closeFavoritesDropdown()`
+  * **Обновление логики работы**:
+    - Избранное теперь хранилище, а не архив: монета может быть одновременно в таблице и в избранном
+    - `syncCoinWithFavorites()` не удаляет из избранного при добавлении в таблицу
+    - `addFavoriteToTableById()` проверяет наличие монеты в таблице: если есть - закрывает dropdown (отметка показывается), если нет - добавляет
+    - `removeFromTable()` и `removeSelectedFromTable()` удаляют из таблицы и добавляют в избранное
+  * **Обновление UI**:
+    - "Архив" переименован в "Избранное" в кнопке и выпадающем списке
+    - Иконка изменена с `fa-archive` на `fa-star`
+    - CSS классы: `.cg-archive-btn` → `.cg-favorites-btn`, `archive-dropdown` → `favorites-dropdown`
+    - События/эмиты: `archive-selected-coins` → `remove-selected-coins`, `restore-from-archive` → `add-favorite-to-table`
+    - ID элементов: `context-archive` → `context-remove-from-table`, `counter-archive` → `counter-remove-from-table`
+    - Тексты меню: "В архив" → "Убрать из таблицы", "Архивировать отмеченные" → "Убрать отмеченные из таблицы"
+    - В выпадающем списке избранного показываются отметки для монет, уже находящихся в таблице
+  * **Обновление документации**:
+    - Переписан раздел "Синхронизация данных между таблицей и архивом" в `architect.md` на "Хранилище избранного и работа с таблицей монет"
+    - Обновлены все упоминания архива на избранное в `ui/guide-ii.md` (переписаны целые абзацы)
+    - Обновлены комментарии в коде под новую концепцию
+    - Убраны все упоминания "архив" из кода, комментариев и документации (кроме истории и иконок для будущей функциональности)
+  * **Миграция данных**:
+    - При загрузке проверяются оба ключа: `cgArchivedCoins` (старый) и `cgFavoriteCoins` (новый)
+    - Если есть старый ключ, но нет нового - данные мигрируются в новый ключ
+    - Старый ключ `cgFavoriteCoinIds` также мигрируется в `cgFavoriteCoins` при первом запуске
+- **Функциональность**: Избранное теперь работает как хранилище: монеты могут быть одновременно в таблице и в избранном. При клике на пункт избранного монета добавляется в таблицу (если её нет) или показывается отметка (если уже есть). Удаление из таблицы добавляет монету в избранное. Все упоминания "архив" удалены из проекта для избежания путаницы с будущей функциональностью архива
+

@@ -57,7 +57,7 @@ const iconsMapping = {
     "archive": {
       "icon": "fas fa-archive",
       "title": "Архив",
-      "description": "Архивировать элемент или элементы"
+      "description": "Архивировать элемент или элементы (будущая функциональность)"
     },
     "save": {
       "icon": "fas fa-save",

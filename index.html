@@ -393,8 +393,8 @@
                     :pending-tickers="pendingTickers"
                     :cg-search-results="cgSearchResults"
                     :cg-selected-coins="cgSelectedCoins"
-                    :show-archive-dropdown="showArchiveDropdown"
-                    :cg-archived-coins="cgArchivedCoins"
+                    :show-favorites-dropdown="showFavoritesDropdown"
+                    :cg-favorite-coins="cgFavoriteCoins"
                     :cg-icons-cache="cgIconsCache"
                     :cg-last-updated="cgLastUpdated"
                     :cg-is-loading="cgIsLoading"
@@ -403,15 +403,15 @@
                     @select-all-coins="selectAllCoins"
                     @deselect-all-coins="deselectAllCoins"
                     @delete-selected-coins="deleteSelectedCoins"
-                    @archive-selected-coins="archiveSelectedCoins"
+                    @remove-selected-coins="removeSelectedFromTable"
                     @search-input="handleSearchInput"
                     @search-focus="handleSearchFocus"
                     @close-search-dropdown="closeSearchDropdown"
                     @stop-adding-tickers="stopAddingTickers"
                     @add-coin="handleAddCoin"
-                    @toggle-archive-dropdown="toggleArchiveDropdown"
-                    @close-archive-dropdown="closeArchiveDropdown"
-                    @restore-from-archive="restoreFromArchiveById"
+                    @toggle-favorites-dropdown="toggleFavoritesDropdown"
+                    @close-favorites-dropdown="closeFavoritesDropdown"
+                    @add-favorite-to-table="addFavoriteToTableById"
                     @fetch-coins="fetchCoinGecko"
                 ></header-coins>
                 <div class="card-body">
@@ -505,10 +505,11 @@
                     <div class="dropdown-divider"></div>
                     <menu-item
                         icon-category="actions"
+                        icon-category="actions"
                         icon-command="archive"
-                        item-id="context-archive"
-                        label="В архив"
-                        @click="() => archiveCoin()"
+                        item-id="context-remove-from-table"
+                        label="Убрать из таблицы"
+                        @click="() => removeFromTable()"
                     ></menu-item>
                     <menu-item
                         icon-category="actions"
@@ -597,11 +598,12 @@
                             ></menu-item>
                             <menu-item
                                 icon-category="actions"
+                                icon-category="actions"
                                 icon-command="archive"
-                                item-id="counter-archive"
+                                item-id="counter-remove-from-table"
                                 :disabled="selectedCoinsCount === 0"
-                                label="Архивировать отмеченные"
-                                @click="handleArchiveSelectedCoins"
+                                label="Убрать отмеченные из таблицы"
+                                @click="handleRemoveSelectedFromTable"
                             ></menu-item>
                         </dropdown-menu>
                     </div>
@@ -660,7 +662,7 @@
                             </div>
                             <div v-if="failedTickers.length > 0" class="small text-warning-dark">
                                 <i class="fas fa-exclamation-triangle me-1"></i>
-                                Неудачные тикеры будут отправлены в архив после 5 попыток
+                                Неудачные тикеры будут добавлены в избранное после 5 попыток
                             </div>
                         </div>
                         <!-- Выпадающий список результатов поиска -->
@@ -690,17 +692,17 @@
                     </div>
                     <div class="position-relative">
                         <button 
-                    class="btn btn-sm cg-archive-btn" 
+                    class="btn btn-sm cg-favorites-btn" 
                             type="button"
-                            :disabled="cgArchivedCoins.length === 0"
-                    @click.stop="handleToggleArchiveDropdown"
+                            :disabled="cgFavoriteCoins.length === 0"
+                    @click.stop="handleToggleFavoritesDropdown"
                         >
-                    <i class="fas fa-archive d-inline d-md-none"></i>
-                    <span class="d-none d-md-inline">Архив</span>
+                    <i class="fas fa-star d-inline d-md-none"></i>
+                    <span class="d-none d-md-inline">Избранное</span>
                         </button>
-                        <!-- Выпадающий список архива -->
+                        <!-- Выпадающий список избранного -->
                         <dropdown-menu
-                            :show="showArchiveDropdown && cgArchivedCoins.length > 0"
+                            :show="showFavoritesDropdown && cgFavoriteCoins.length > 0"
                             position="absolute"
                             placement="bottom-end"
                             offset-x="0"
@@ -709,20 +711,21 @@
                             :scrollable="true"
                             width="auto"
                             :min-width="'fit-content'"
-                            instance-id="archive-dropdown"
-                            trigger-selector=".cg-archive-btn"
-                            @close="$emit('close-archive-dropdown')"
+                            instance-id="favorites-dropdown"
+                            trigger-selector=".cg-favorites-btn"
+                            @close="$emit('close-favorites-dropdown')"
                         >
                             <menu-item
-                                v-for="archivedCoin in cgArchivedCoins" 
-                                :key="getArchivedCoinId(archivedCoin)"
-                                :icon-image="isFailedArchivedCoin(archivedCoin) ? null : getArchivedCoinIcon(archivedCoin)"
-                                :icon-state-map="isFailedArchivedCoin(archivedCoin) ? { 'failed': 'fas fa-sync-alt opacity-25' } : null"
-                                :icon-state="isFailedArchivedCoin(archivedCoin) ? 'failed' : null"
-                                :label="getArchivedCoinSymbol(archivedCoin)"
-                                :tooltip="getArchivedCoinName(archivedCoin)"
-                                :item-id="'archive-' + getArchivedCoinId(archivedCoin)"
-                                @click="handleRestoreFromArchive(getArchivedCoinId(archivedCoin))"
+                                v-for="favoriteCoin in cgFavoriteCoins" 
+                                :key="getFavoriteCoinId(favoriteCoin)"
+                                :icon-image="isFailedFavoriteCoin(favoriteCoin) ? null : getFavoriteCoinIcon(favoriteCoin)"
+                                :icon-state-map="isFailedFavoriteCoin(favoriteCoin) ? { 'failed': 'fas fa-sync-alt opacity-25' } : null"
+                                :icon-state="isFailedFavoriteCoin(favoriteCoin) ? 'failed' : null"
+                                :label="getFavoriteCoinSymbol(favoriteCoin)"
+                                :tooltip="getFavoriteCoinName(favoriteCoin)"
+                                :indicator="!isFailedFavoriteCoin(favoriteCoin) && cgSelectedCoins.includes(getFavoriteCoinId(favoriteCoin)) ? { type: 'status', value: 'selected' } : null"
+                                :item-id="'favorite-' + getFavoriteCoinId(favoriteCoin)"
+                                @click="handleAddFavoriteToTable(getFavoriteCoinId(favoriteCoin))"
                             ></menu-item>
                         </dropdown-menu>
                     </div>

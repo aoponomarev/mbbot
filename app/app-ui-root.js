@@ -48,7 +48,7 @@
       const clickableSelectors = [
       '.cg-coin-sort-dropdown', // Выпадающее меню сортировки монет
         '.cg-search-dropdown', // Выпадающий список результатов поиска
-        '.cg-archive-dropdown', // Выпадающий список архива
+        '.cg-favorites-dropdown', // Выпадающий список избранного
         '.cg-context-menu', // Контекстное меню монеты
         '.cg-counter-dropdown', // Выпадающее меню счетчика монет
         '.dropdown-menu', // Bootstrap dropdown меню (в хедере)

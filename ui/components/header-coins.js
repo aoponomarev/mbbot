@@ -50,12 +50,12 @@ window.cmpHeaderCoins = {
       type: Array,
       default: () => []
     },
-    // Архив
-    showArchiveDropdown: {
+    // Избранное
+    showFavoritesDropdown: {
       type: Boolean,
       default: false
     },
-    cgArchivedCoins: {
+    cgFavoriteCoins: {
       type: Array,
       default: () => []
     },
@@ -73,7 +73,7 @@ window.cmpHeaderCoins = {
       type: Array,
       default: () => []
     },
-    // Кэш иконок для получения иконок монет из архива
+    // Кэш иконок для получения иконок монет из избранного
     cgIconsCache: {
       type: Object,
       default: () => ({})
@@ -86,15 +86,15 @@ window.cmpHeaderCoins = {
     'select-all-coins',
     'deselect-all-coins',
     'delete-selected-coins',
-    'archive-selected-coins',
+    'remove-selected-coins',
     'search-input',
     'search-focus',
     'close-search-dropdown',
     'stop-adding-tickers',
     'add-coin',
-    'toggle-archive-dropdown',
-    'close-archive-dropdown',
-    'restore-from-archive',
+    'toggle-favorites-dropdown',
+    'close-favorites-dropdown',
+    'add-favorite-to-table',
     'fetch-coins'
   ],
   
@@ -117,30 +117,30 @@ window.cmpHeaderCoins = {
       return allTickers;
     },
     
-    // Получение ID монеты из архива
-    getArchivedCoinId(archivedCoin) {
-      return typeof archivedCoin === 'object' ? archivedCoin.id : archivedCoin;
+    // Получение ID монеты из избранного
+    getFavoriteCoinId(favoriteCoin) {
+      return typeof favoriteCoin === 'object' ? favoriteCoin.id : favoriteCoin;
     },
     
-    // Получение названия монеты из архива
-    getArchivedCoinName(archivedCoin) {
-      if (typeof archivedCoin === 'object' && archivedCoin.name) {
-        return archivedCoin.name;
+    // Получение названия монеты из избранного
+    getFavoriteCoinName(favoriteCoin) {
+      if (typeof favoriteCoin === 'object' && favoriteCoin.name) {
+        return favoriteCoin.name;
       }
-      return typeof archivedCoin === 'object' ? archivedCoin.id : archivedCoin;
+      return typeof favoriteCoin === 'object' ? favoriteCoin.id : favoriteCoin;
     },
     
-    // Получение тикера монеты из архива
-    getArchivedCoinSymbol(archivedCoin) {
-      if (typeof archivedCoin === 'object' && archivedCoin.symbol) {
-        return archivedCoin.symbol;
+    // Получение тикера монеты из избранного
+    getFavoriteCoinSymbol(favoriteCoin) {
+      if (typeof favoriteCoin === 'object' && favoriteCoin.symbol) {
+        return favoriteCoin.symbol;
       }
-      return typeof archivedCoin === 'object' ? archivedCoin.id : archivedCoin;
+      return typeof favoriteCoin === 'object' ? favoriteCoin.id : favoriteCoin;
     },
     
-    // Получение иконки монеты из архива
-    getArchivedCoinIcon(archivedCoin) {
-      const coinId = typeof archivedCoin === 'object' ? archivedCoin.id : archivedCoin;
+    // Получение иконки монеты из избранного
+    getFavoriteCoinIcon(favoriteCoin) {
+      const coinId = typeof favoriteCoin === 'object' ? favoriteCoin.id : favoriteCoin;
       if (coinId && typeof coinId === 'string' && coinId.startsWith('failed-')) {
         return null; // Не показываем иконку для неудачных попыток
       }
@@ -149,8 +149,8 @@ window.cmpHeaderCoins = {
     },
     
     // Проверка, является ли монета неудачной попыткой
-    isFailedArchivedCoin(archivedCoin) {
-      const coinId = typeof archivedCoin === 'object' ? archivedCoin.id : archivedCoin;
+    isFailedFavoriteCoin(favoriteCoin) {
+      const coinId = typeof favoriteCoin === 'object' ? favoriteCoin.id : favoriteCoin;
       return coinId && typeof coinId === 'string' && coinId.startsWith('failed-');
     },
     
@@ -187,8 +187,8 @@ window.cmpHeaderCoins = {
       this.$emit('delete-selected-coins');
     },
     
-    handleArchiveSelectedCoins() {
-      this.$emit('archive-selected-coins');
+    handleRemoveSelectedFromTable() {
+      this.$emit('remove-selected-coins');
     },
     
     handleSearchInput(event) {
@@ -207,12 +207,12 @@ window.cmpHeaderCoins = {
       this.$emit('add-coin', coinId);
     },
     
-    handleToggleArchiveDropdown() {
-      this.$emit('toggle-archive-dropdown');
+    handleToggleFavoritesDropdown() {
+      this.$emit('toggle-favorites-dropdown');
     },
     
-    handleRestoreFromArchive(coinId) {
-      this.$emit('restore-from-archive', coinId);
+    handleAddFavoriteToTable(coinId) {
+      this.$emit('add-favorite-to-table', coinId);
     },
     
     handleFetchCoins() {

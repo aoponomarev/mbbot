@@ -268,15 +268,15 @@ table td.col-hidden {
     }
 }
 
-/* Кнопка архива CoinGecko: фиксированная ширина для мобильных */
-.cg-archive-btn {
+/* Кнопка избранного CoinGecko: фиксированная ширина для мобильных */
+.cg-favorites-btn {
     min-width: 3em;
     width: 3em;
 }
 
-/* На десктопе: ширина по контенту для текста "Архив" */
+/* На десктопе: ширина по контенту для текста "Избранное" */
 @media (min-width: 768px) {
-    .cg-archive-btn {
+    .cg-favorites-btn {
         min-width: auto;
         width: auto;
     }
@@ -518,7 +518,7 @@ th.col-checkbox .form-check-input:focus {
 /* так как эти меню мигрированы на компонент dropdown-menu */
 
 /* Глобально для всех выпадающих меню внутри <main>: единый стиль с более контрастной рамкой и тенью */
-/* ПРИМЕЧАНИЕ: Стили для .cg-counter-dropdown, .cg-search-dropdown, .cg-archive-dropdown, .cg-context-menu */
+/* ПРИМЕЧАНИЕ: Стили для .cg-counter-dropdown, .cg-search-dropdown, .cg-favorites-dropdown, .cg-context-menu */
 /* удалены, так как эти меню мигрированы на компонент dropdown-menu */
 /* Остался только .cg-coin-sort-dropdown для меню сортировки в header-cell */
 main .cg-coin-sort-dropdown {
