@@ -3,5 +3,9 @@
     "key": "ctrl+shift+s",
     "command": "git.stageAll",
     "when": "scmProvider == git"
+  },
+  {
+    "key": "ctrl+shift+r",
+    "command": "workbench.action.reloadWindow"
   }
 ]

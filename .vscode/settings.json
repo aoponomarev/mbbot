@@ -20,6 +20,10 @@
   "editor.detectIndentation": false,
   "editor.formatOnSave": false,
   "editor.wordWrap": "off",
+  "editor.fontFamily": "'JetBrains Mono', 'Consolas', 'Courier New', monospace",
+  "editor.fontSize": 14,
+  "editor.fontLigatures": true,
+  "editor.fontStretch": "condensed",
   
   // Файлы
   "files.exclude": {
@@ -42,5 +46,15 @@
   // Открывать Markdown файлы в режиме preview
   "workbench.editorAssociations": {
     "*.md": "vscode.markdown.preview.editor"
+  },
+  
+  // Настройки для текстовых файлов
+  "[*.txt]": {
+    "editor.wordWrap": "on",
+    "editor.wordWrapColumn": 0
+  },
+  "[plaintext]": {
+    "editor.wordWrap": "on",
+    "editor.wordWrapColumn": 0
   }
 }
