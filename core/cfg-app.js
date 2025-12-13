@@ -13,5 +13,5 @@ window.appConfig = {
     { value: 'llama-3.1-sonar-small-128k-online', label: 'llama-3.1-sonar-small-128k-online' },
     { value: 'llama-3.1-sonar-large-128k-online', label: 'llama-3.1-sonar-large-128k-online' }
   ],
-  lastCommitMessage: 'Implement universal menu components (menu-item and dropdown-menu)'
+  lastCommitMessage: 'Add rule for commit hash requests in daily log'
 };
