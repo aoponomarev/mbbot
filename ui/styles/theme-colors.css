@@ -46,12 +46,20 @@
     --color-muted: hsl(var(--color-muted-h), var(--color-muted-s), var(--color-muted-l));
     --color-light-gray-l: 82%; /* Общий lightness для светло-серых элементов */
     
-    /* Оттенок для подсветки выбранных строк и фокуса пунктов меню (зеленовато-бирюзовый, ближе к зеленому) */
+    /* Оттенок для подсветки выбранных строк таблицы (нейтральный серый с легким синеватым оттенком) */
+    --color-selected-row-h: 200; /* Синий оттенок (200 градусов) */
+    --color-selected-row-s: 20%; /* Насыщенность 20% */
+    --color-selected-row-l: 50%; /* Яркость 50% */
+    --color-selected-row-alpha: 0.05; /* Альфа 5% */
+    /* Переменная для фона выбранных строк таблицы (hsl(200deg 20% 50% / 5%)) */
+    --color-selected-row-bg: hsla(var(--color-selected-row-h), var(--color-selected-row-s), var(--color-selected-row-l), var(--color-selected-row-alpha));
+    
+    /* Оттенок для фокуса пунктов меню (зеленовато-бирюзовый, ближе к зеленому) */
     --color-selected-h: 149; /* Зеленовато-бирюзовый оттенок */
     --color-selected-s: 100%; /* Максимальная насыщенность */
     --color-selected-l: 20%; /* Оптимальная яркость */
     --color-selected-alpha: 0.07; /* Низкая альфа для прозрачности */
-    /* Общая переменная для фона выбранных элементов и фокуса */
+    /* Общая переменная для фона фокуса пунктов меню */
     --color-focus-bg: hsla(var(--color-selected-h), var(--color-selected-s), var(--color-selected-l), var(--color-selected-alpha));
     
     /* Кастомные цвета для кнопок карточек (серые оттенки) */
@@ -179,12 +187,20 @@
     --color-muted-l: 50%; /* Средняя яркость для нейтрального цвета */
     --color-muted: hsl(var(--color-muted-h), var(--color-muted-s), var(--color-muted-l));
     
-    /* Оттенок для подсветки выбранных строк и фокуса пунктов меню (зеленовато-бирюзовый, ближе к зеленому) */
+    /* Оттенок для подсветки выбранных строк таблицы (нейтральный серый с легким синеватым оттенком) */
+    --color-selected-row-h: 200; /* Синий оттенок (200 градусов) */
+    --color-selected-row-s: 20%; /* Насыщенность 20% */
+    --color-selected-row-l: 50%; /* Яркость 50% */
+    --color-selected-row-alpha: 0.05; /* Альфа 5% */
+    /* Переменная для фона выбранных строк таблицы (hsl(200deg 20% 50% / 5%)) */
+    --color-selected-row-bg: hsla(var(--color-selected-row-h), var(--color-selected-row-s), var(--color-selected-row-l), var(--color-selected-row-alpha));
+    
+    /* Оттенок для фокуса пунктов меню (зеленовато-бирюзовый, ближе к зеленому) */
     --color-selected-h: 149; /* Зеленовато-бирюзовый оттенок */
     --color-selected-s: 100%; /* Максимальная насыщенность */
     --color-selected-l: 20%; /* Оптимальная яркость */
     --color-selected-alpha: 0.07; /* Низкая альфа для прозрачности */
-    /* Общая переменная для фона выбранных элементов и фокуса */
+    /* Общая переменная для фона фокуса пунктов меню */
     --color-focus-bg: hsla(var(--color-selected-h), var(--color-selected-s), var(--color-selected-l), var(--color-selected-alpha));
     
     /* Общий нейтральный серый для рамок, hover и disabled в темной теме (объединение дубликатов) */

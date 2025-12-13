@@ -6,11 +6,11 @@
 .dropdown-menu-container {
     background-color: var(--bs-body-bg);
     border: 1px solid var(--color-border);
-    /* Двойная тень: 1px для рамки + общая тень для слоя */
+    /* Двойная тень: 1px для рамки + общая тень для слоя (шире и ниже, но не гуще) */
     box-shadow: 
-        0 0 0 1px hsla(0, 0%, 0%, 0.1), /* 1px тень для рамки */
-        0 4px 8px -2px hsla(0, 0%, 0%, 0.15), 
-        0 2px 6px -1px hsla(0, 0%, 0%, 0.1); /* Общая тень для слоя */
+        0 0 0 1px hsla(0, 0%, 0%, 0.05), /* 1px тень для рамки (более легкая) */
+        0 12px 20px -4px hsla(0, 0%, 0%, 0.15), /* Еще ниже: увеличен offset-y */
+        0 6px 14px -2px hsla(0, 0%, 0%, 0.1); /* Общая тень для слоя (еще ниже) */
     overflow: hidden; /* Важно: скрывает перекрытие скруглений */
 }
 
@@ -93,18 +93,18 @@
     background-color: var(--color-dropdown-dark-bg);
     border: 1px solid var(--color-dropdown-dark-border);
     box-shadow: 
-        0 0 0 1px hsla(0, 0%, 0%, 0.3), /* 1px тень для рамки */
-        0 4px 6px -1px hsla(0, 0%, 0%, 0.3), 
-        0 2px 4px -1px hsla(0, 0%, 0%, 0.2); /* Общая тень для слоя */
+        0 0 0 1px hsla(0, 0%, 0%, 0.15), /* 1px тень для рамки (более легкая) */
+        0 12px 16px -2px hsla(0, 0%, 0%, 0.3), /* Еще ниже: увеличен offset-y */
+        0 6px 10px -2px hsla(0, 0%, 0%, 0.2); /* Общая тень для слоя (еще ниже) */
 }
 
 .dropdown-menu-container.theme-inverse[data-bs-theme="light"] {
     background-color: var(--color-dropdown-light-bg);
     border: 1px solid var(--color-dropdown-light-border);
     box-shadow: 
-        0 0 0 1px hsla(0, 0%, 0%, 0.1), /* 1px тень для рамки */
-        0 4px 6px -1px hsla(0, 0%, 0%, 0.1), 
-        0 2px 4px -1px hsla(0, 0%, 0%, 0.06); /* Общая тень для слоя */
+        0 0 0 1px hsla(0, 0%, 0%, 0.05), /* 1px тень для рамки (более легкая) */
+        0 12px 16px -2px hsla(0, 0%, 0%, 0.1), /* Еще ниже: увеличен offset-y */
+        0 6px 10px -2px hsla(0, 0%, 0%, 0.06); /* Общая тень для слоя (еще ниже) */
 }
 
 /* Стили для dropdown меню в хедере (инверсны включенной теме, идентичны для десктоп и мобильной версии) */

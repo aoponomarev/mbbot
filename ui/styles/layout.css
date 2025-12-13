@@ -555,11 +555,11 @@ main .cg-coin-sort-dropdown {
     background-color: transparent !important;
 }
 
-/* Подсветка выбранных строк таблицы с монетами - едва видимая прозрачная подсветка зеленовато-бирюзового цвета */
-/* Используем общую рутовую переменную для консистентности с фокусом пунктов меню */
+/* Подсветка выбранных строк таблицы с монетами - слабо-слабо прозрачная нейтрально-серовая подсветка */
+/* Используем нейтрально-серый цвет (HSL: 0, 0%, 50%) с очень низкой прозрачностью (alpha: 0.05) */
 .cg-coins-table tbody tr.coin-row-selected,
 .cg-coins-table tbody tr.coin-row-selected td {
-    background-color: var(--color-focus-bg) !important;
+    background-color: var(--color-selected-row-bg) !important;
 }
 
 /* Перекрываем все состояния (hover, nth-child) для выбранных строк */
@@ -569,7 +569,7 @@ main .cg-coin-sort-dropdown {
 .cg-coins-table tbody tr.coin-row-selected:nth-child(even) td,
 .cg-coins-table tbody tr.coin-row-selected:nth-child(odd),
 .cg-coins-table tbody tr.coin-row-selected:nth-child(odd) td {
-    background-color: var(--color-focus-bg) !important;
+    background-color: var(--color-selected-row-bg) !important;
 }
 
 /* Для темной темы: используем те же параметры для консистентности */
@@ -581,7 +581,7 @@ main .cg-coin-sort-dropdown {
 [data-bs-theme="dark"] .cg-coins-table tbody tr.coin-row-selected:nth-child(even) td,
 [data-bs-theme="dark"] .cg-coins-table tbody tr.coin-row-selected:nth-child(odd),
 [data-bs-theme="dark"] .cg-coins-table tbody tr.coin-row-selected:nth-child(odd) td {
-    background-color: var(--color-focus-bg) !important;
+    background-color: var(--color-selected-row-bg) !important;
 }
 
 /* Анимация перемещения строк таблицы при сортировке */
