@@ -85,6 +85,7 @@ window.cmpHeaderCoins = {
     'close-counter-dropdown',
     'select-all-coins',
     'deselect-all-coins',
+    'select-favorites',
     'delete-selected-coins',
     'remove-selected-coins',
     'search-input',
@@ -183,12 +184,12 @@ window.cmpHeaderCoins = {
       this.$emit('deselect-all-coins');
     },
     
-    handleDeleteSelectedCoins() {
-      this.$emit('delete-selected-coins');
+    handleSelectFavorites() {
+      this.$emit('select-favorites');
     },
     
-    handleRemoveSelectedFromTable() {
-      this.$emit('remove-selected-coins');
+    handleDeleteSelectedCoins() {
+      this.$emit('delete-selected-coins');
     },
     
     handleSearchInput(event) {

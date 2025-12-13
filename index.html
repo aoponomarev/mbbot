@@ -401,9 +401,9 @@
                     @toggle-counter-dropdown="toggleCounterDropdown"
                     @close-counter-dropdown="closeCounterDropdown"
                     @select-all-coins="selectAllCoins"
+                    @select-favorites="selectFavorites"
                     @deselect-all-coins="deselectAllCoins"
                     @delete-selected-coins="deleteSelectedCoins"
-                    @remove-selected-coins="removeSelectedFromTable"
                     @search-input="handleSearchInput"
                     @search-focus="handleSearchFocus"
                     @close-search-dropdown="closeSearchDropdown"
@@ -493,24 +493,12 @@
                         @click="openCoinOnBybit"
                     ></menu-item>
                     <menu-item
-                        :icon-state-map="{
-                            'favorite': 'fas fa-star text-warning',
-                            'not-favorite': 'fas fa-star opacity-25'
-                        }"
-                        :icon-state="isFavorite(contextMenuCoin) ? 'favorite' : 'not-favorite'"
-                        :label="isFavorite(contextMenuCoin) ? 'Убрать из избранного' : 'В избранное'"
+                        icon-category="actions"
+                        :icon-command="isFavorite(contextMenuCoin) ? 'remove-from-favorites' : 'add-to-favorites'"
                         item-id="context-favorite"
                         @click="() => toggleFavorite(contextMenuCoin)"
                     ></menu-item>
                     <div class="dropdown-divider"></div>
-                    <menu-item
-                        icon-category="actions"
-                        icon-category="actions"
-                        icon-command="archive"
-                        item-id="context-remove-from-table"
-                        label="Убрать из таблицы"
-                        @click="() => removeFromTable()"
-                    ></menu-item>
                     <menu-item
                         icon-category="actions"
                         icon-command="delete"
@@ -582,6 +570,12 @@
                             ></menu-item>
                             <menu-item
                                 icon-category="actions"
+                                icon-command="favorite"
+                                item-id="counter-favorite"
+                                @click="handleSelectFavorites"
+                            ></menu-item>
+                            <menu-item
+                                icon-category="actions"
                                 icon-command="deselect-all"
                                 item-id="counter-deselect-all"
                                 :disabled="selectedCoinsCount === 0"
@@ -595,15 +589,6 @@
                                 :disabled="selectedCoinsCount === 0"
                                 label="Удалить отмеченные"
                                 @click="handleDeleteSelectedCoins"
-                            ></menu-item>
-                            <menu-item
-                                icon-category="actions"
-                                icon-category="actions"
-                                icon-command="archive"
-                                item-id="counter-remove-from-table"
-                                :disabled="selectedCoinsCount === 0"
-                                label="Убрать отмеченные из таблицы"
-                                @click="handleRemoveSelectedFromTable"
                             ></menu-item>
                         </dropdown-menu>
                     </div>
@@ -895,6 +880,7 @@
                     :key="item.id"
                     :label="item.label"
                     :active="isMenuItemActive(item)"
+                    :tooltip="item.id === 'favorite' || item.id === 'selected' || item.id === 'market_cap' || item.id === 'total_volume' || item.id === 'alphabet' ? '' : undefined"
                     @click="handleMenuItemClick(item.id)"
                 ></menu-item>
             </dropdown-menu>

@@ -146,9 +146,11 @@ window.cmpMenuItem = {
       return this.label || this.indicatorLabel || this.iconTitle || '';
     },
     
-    // Tooltip - приоритет: tooltip > indicatorTitle > iconTitle > displayLabel
+    // Tooltip - приоритет: tooltip > indicatorTitle > iconDescription > iconTitle > displayLabel
+    // Если tooltip === '', возвращаем null (убираем tooltip)
     displayTooltip() {
-      return this.tooltip || this.indicatorTitle || this.iconTitle || this.displayLabel;
+      if (this.tooltip === '') return null;
+      return this.tooltip || this.indicatorTitle || this.iconDescription || this.iconTitle || this.displayLabel;
     },
     
     // Эффективная иконка слева - приоритет: iconImage > iconStateMap (динамическая) > iconClass (из iconsHelper)
@@ -199,46 +201,12 @@ window.cmpMenuItem = {
       try {
         // Загружаем основную иконку (слева) через iconsHelper, если указан iconCommand
         if (this.iconCommand) {
-          let iconClass = '';
-          let title = '';
-          let description = '';
-          
-          switch (this.iconCategory) {
-            case 'actions':
-              iconClass = window.iconsHelper.getActionIcon(this.iconCommand);
-              title = window.iconsHelper.getIconTitle('actions', this.iconCommand);
-              description = window.iconsHelper.getIconDescription('actions', this.iconCommand);
-              break;
-            case 'navigation':
-              iconClass = window.iconsHelper.getNavigationIcon(this.iconCommand);
-              title = window.iconsHelper.getIconTitle('navigation', this.iconCommand);
-              description = window.iconsHelper.getIconDescription('navigation', this.iconCommand);
-              break;
-            case 'status':
-              iconClass = window.iconsHelper.getStatusIcon(this.iconCommand);
-              title = window.iconsHelper.getIconTitle('status', this.iconCommand);
-              description = window.iconsHelper.getIconDescription('status', this.iconCommand);
-              break;
-            case 'metrics':
-              iconClass = window.iconsHelper.getMetricIcon(this.iconCommand);
-              title = window.iconsHelper.getIconTitle('metrics', this.iconCommand);
-              description = window.iconsHelper.getIconDescription('metrics', this.iconCommand);
-              break;
-            case 'frameworks':
-              iconClass = window.iconsHelper.getFrameworkIcon(this.iconCommand);
-              title = window.iconsHelper.getIconTitle('frameworks', this.iconCommand);
-              description = window.iconsHelper.getIconDescription('frameworks', this.iconCommand);
-              break;
-            case 'other':
-              iconClass = window.iconsHelper.getOtherIcon(this.iconCommand);
-              title = window.iconsHelper.getIconTitle('other', this.iconCommand);
-              description = window.iconsHelper.getIconDescription('other', this.iconCommand);
-              break;
-          }
+          const iconClass = window.iconsHelper.getIconForCommand(this.iconCategory, this.iconCommand);
+          const commandData = window.iconsHelper.getCommandData(this.iconCommand);
           
           this.iconClass = iconClass || '';
-          this.iconTitle = title || '';
-          this.iconDescription = description || '';
+          this.iconTitle = commandData?.title || '';
+          this.iconDescription = commandData?.description || '';
         }
         
         // Загружаем данные indicator через iconsHelper

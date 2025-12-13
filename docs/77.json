@@ -4,6 +4,7 @@
   "regularSettings": {
     "cgLastUpdated": "2025-12-13T10:46:21.286Z",
     "cgSortOrder": "desc",
+    "cgCoinSortType": "selected",
     "theme": "light",
     "cgCoins": [
       {
@@ -3988,6 +3989,33 @@
       "cardano",
       "monero",
       "chiliz"
+    ],
+    "cgFavoriteCoins": [
+      {
+        "id": "monero",
+        "symbol": "XMR",
+        "name": "Monero"
+      },
+      {
+        "id": "tron",
+        "symbol": "TRX",
+        "name": "TRON"
+      },
+      {
+        "id": "bitcoin",
+        "symbol": "BTC",
+        "name": "Bitcoin"
+      },
+      {
+        "id": "ripple",
+        "symbol": "XRP",
+        "name": "XRP"
+      },
+      {
+        "id": "virtual-protocol",
+        "symbol": "VIRTUAL",
+        "name": "Virtuals Protocol"
+      }
     ],
     "cgArchivedCoins": [
       {

@@ -253,13 +253,22 @@ Bootstrap 5 определяет следующие z-index переменные
 - **Централизованное управление цветами**: Цвета иконок фреймворков и статусов определяются через CSS переменные, что упрощает настройку и поддержку.
 
 **Структура системы:**
-- **JSON файл соответствий** (`ui/config/icons-mapping.json`): Содержит соответствия иконок и команд, разделенные по категориям:
-  - `actions`: Действия (refresh, theme, settings, export, import, select-all, deselect-all, delete, archive, save, eye, eye-slash, stop)
-  - `navigation`: Навигация (sort, sort-up, sort-down)
-  - `status`: Статусы (warning, error, success, check, spinner)
-  - `metrics`: Метрики (bitcoin, fgi, vix, oi, fr, lsr)
-  - `frameworks`: Фреймворки (vuejs, bootstrap)
-  - `other`: Другие элементы (robot, database, hamburger)
+- **JSON файл соответствий** (`ui/config/icons-mapping.json`): Содержит две схемы соответствий:
+  - **Новая схема `icons` (одна иконка → много команд)**: Позволяет одной иконке соответствовать нескольким командам. Например, иконка `fas fa-star` может использоваться для команд `favorite`, `add-to-favorites`, `remove-from-favorites`. Структура:
+    ```json
+    "icons": {
+      "fas fa-star": {
+        "commands": {
+          "favorite": { "category": "actions", "title": "Избранное", ... },
+          "add-to-favorites": { "category": "actions", "title": "В избранное", ... },
+          "remove-from-favorites": { "category": "actions", "title": "Убрать из избранного", ... }
+        },
+        "defaultCommand": "favorite",
+        "baseIcon": "fas fa-star"
+      }
+    }
+    ```
+  - **Индикаторы**: Индикаторы (статусы и навигационные указатели) также хранятся в схеме `icons` как команды с `category: "indicators"`. Примеры: `selected`, `disabled`, `loading`, `warning`, `error`, `favorite`, `not-favorite`, `submenu`, `external`, `modal`
 - **CSS файл стилей** (`ui/styles/icons.css`): Определяет CSS переменные для цветов иконок:
   - `--icon-vuejs-color`: Цвет иконки Vue.js (hsl(152, 48%, 53%))
   - `--icon-bootstrap-color`: Цвет иконки Bootstrap (hsl(264, 45%, 47%))
@@ -270,22 +279,35 @@ Bootstrap 5 определяет следующие z-index переменные
   - `--icon-action-hover-color`: Цвет иконок действий при hover (зарутован от `--bs-primary`)
   - `--icon-action-disabled-color`: Цвет иконок действий в disabled состоянии (зарутован от `--bs-secondary`)
 - **Утилита** (`ui/utils/icons-helper.js`): Предоставляет функции для получения иконок:
-  - `getActionIcon(action)`: Получить иконку для действия
-  - `getNavigationIcon(navigation)`: Получить иконку для навигации (sort, sort-up, sort-down)
-  - `getStatusIcon(status)`: Получить иконку для статуса
-  - `getMetricIcon(metric)`: Получить иконку для метрики
-  - `getFrameworkIcon(framework)`: Получить иконку для фреймворка
-  - `getOtherIcon(other)`: Получить иконку для другого элемента
-  - `getThemeIcon(theme)`: Получить иконку темы в зависимости от текущей темы
-  - `getIconTitle(category, name)`: Получить title (подсказку) для иконки
-  - `getIconDescription(category, name)`: Получить описание для иконки
-  - `getFrameworkColor(framework)`: Получить цвет для иконки фреймворка
+  - **Основные функции схемы "одна иконка → много команд"**:
+    - `getIconCommands(iconClass)`: Получить все команды для иконки
+    - `getIconByCommand(command)`: Получить базовую иконку для команды
+    - `getCommandData(command)`: Получить данные команды (category, title, description)
+    - `getIconForCommand(category, command)`: Получить иконку для команды
+  - **Функции для категорий** (используют `getIconForCommand` внутри):
+    - `getActionIcon(action)`: Получить иконку для действия
+    - `getNavigationIcon(navigation)`: Получить иконку для навигации
+    - `getStatusIcon(status)`: Получить иконку для статуса
+    - `getMetricIcon(metric)`: Получить иконку для метрики
+    - `getFrameworkIcon(framework)`: Получить иконку для фреймворка
+    - `getOtherIcon(other)`: Получить иконку для другого элемента
+    - `getThemeIcon(theme)`: Получить иконку темы в зависимости от текущей темы
+    - `getIconTitle(category, name)`: Получить title (подсказку) для иконки
+    - `getIconDescription(category, name)`: Получить описание для иконки
+    - `getFrameworkColor(framework)`: Получить цвет для иконки фреймворка
+  - **Функции для индикаторов**:
+    - `getIndicatorIcon(type, value)`: Получить иконку для indicator
+    - `getIndicatorLabel(type, value)`: Получить label для indicator
+    - `getIndicatorTitle(type, value)`: Получить title для indicator
+    - `getIndicatorDescription(type, value)`: Получить description для indicator
 
 **Правила использования:**
-- Все соответствия иконок и команд должны быть описаны в `ui/config/icons-mapping.json`.
-- Стили иконок должны использовать CSS переменные из `ui/styles/icons.css`, избегать хардкодных цветов в CSS правилах и inline стилях.
-- При добавлении новой иконки - добавить соответствие в JSON файл и при необходимости CSS переменную.
-- Цвета иконок должны быть зарутованы от Bootstrap переменных для автоматической адаптации к темам.
+- **Единая схема "одна иконка → много команд"**: Все иконки и команды хранятся в схеме `icons`. Даже если у иконки только одна команда, она все равно должна быть в этой схеме для единообразия.
+- **Все соответствия иконок и команд должны быть описаны в `ui/config/icons-mapping.json`**: При добавлении новой иконки добавить в секцию `icons` с соответствующими командами.
+- **Индикаторы хранятся как команды с `category: "indicators"`**: Индикаторы (статусы и навигационные указатели) хранятся в той же схеме `icons`, но имеют `category: "indicators"` и дополнительные поля `type` и `value`.
+- **Стили иконок должны использовать CSS переменные из `ui/styles/icons.css`**: Избегать хардкодных цветов в CSS правилах и inline стилях.
+- **Цвета иконок должны быть зарутованы от Bootstrap переменных**: Для автоматической адаптации к темам.
+- **Компонент `menu-item` использует схему `icons`**: При указании `icon-command` компонент ищет команду в схеме `icons`.
 
 **Связь с Bootstrap:**
 CSS переменные иконок используют Bootstrap переменные как основу:
@@ -759,7 +781,7 @@ if (settings.secureData.apiKeyPerplexity) {
 
 **Назначение**: Избранное - это хранилище избранных монет (любого избранного, но пока только монеты). Монета может одновременно присутствовать в таблице и в избранном. Избранное не удаляется при добавлении монеты в таблицу.
 
-**Реализация**: `ui/api/coingecko.js` - методы `syncCoinWithFavorites()`, `syncAllCoinsWithFavorites()`, `addFavoriteToTableById()`, `removeFromTable()`, `removeSelectedFromTable()`
+**Реализация**: `ui/api/coingecko.js` - методы `syncCoinWithFavorites()`, `syncAllCoinsWithFavorites()`, `addFavoriteToTableById()`
 
 **Принципы работы**:
 
@@ -775,8 +797,6 @@ if (settings.secureData.apiKeyPerplexity) {
 
 4. **Методы работы с избранным**:
    - `addFavoriteToTableById(coinId)` - добавление монеты из избранного в таблицу. Если монета уже в таблице - просто закрывает dropdown (отметка показывается в UI)
-   - `removeFromTable()` - удаление монеты из таблицы и добавление в избранное (через контекстное меню)
-   - `removeSelectedFromTable()` - массовое удаление отмеченных монет из таблицы и добавление в избранное
    - `toggleFavorite(coinId)` - переключение статуса избранного (добавление/удаление из избранного)
    - `isFavorite(coinId)` - проверка, является ли монета избранной
 
