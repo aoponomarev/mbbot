@@ -159,7 +159,7 @@
    ========================= */
 
 /* ГЛОБАЛЬНОЕ ПРАВИЛО: Все элементы меню (menu-item) не имеют паддингов у ссылки */
-/* Все отступы назначаются спанам внутри (menu-item-icon, menu-item-label) */
+/* Все отступы назначаются спанам внутри (.menu-item-main, .menu-item-indicator) */
 /* Используется высокая специфичность селектора для переопределения Bootstrap без !important */
 a.menu-item.list-group-item.list-group-item-action,
 .menu-item.list-group-item.list-group-item-action {
@@ -167,9 +167,19 @@ a.menu-item.list-group-item.list-group-item-action,
     font-weight: normal; /* Дефолтный вес шрифта, переопределяет Bootstrap */
     min-height: 3rem; /* Минимальная высота пункта меню */
     display: flex; /* Flex-контейнер для выравнивания элементов в одну строку */
-    align-items: center; /* Вертикальное выравнивание всех элементов по центру */
+    align-items: stretch; /* Растягиваем дочерние элементы для корректной работы tooltips */
+    gap: 0; /* Без зазора между элементами */
     /* Прозрачный фон для просвечивания divider */
     background-color: transparent;
+}
+
+/* Основная часть (иконка + текст) - получает все паддинги для корректной работы tooltip */
+.menu-item-main {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 0; /* Для корректного обрезания текста */
+    padding: 1rem; /* py-1rem px-1rem - полные паддинги Bootstrap list-group-item */
 }
 
 /* Восстанавливаем подсветку при наведении (более прозрачная) */
@@ -184,10 +194,10 @@ a.menu-item.list-group-item.list-group-item-action:hover,
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 4em; /* Фиксированная ширина 4em */
+    width: 2em; /* Фиксированная ширина 2em */
     flex-shrink: 0;
-    padding: 1rem 0; /* py-1rem - только вертикальные паддинги, горизонтальные 0 */
-    margin-right: -2rem; /* Отрицательный правый маргин для уменьшения зазора с текстом */
+    padding: 0; /* Паддинги перенесены на .menu-item-main */
+    /* margin-right: -2rem; */
 }
 
 /* Изображения в иконках меню */
@@ -202,10 +212,24 @@ a.menu-item.list-group-item.list-group-item-action:hover,
     color: var(--bs-body-color);
 }
 
-/* Контейнер пункта меню */
+/* Иконки недоступных пунктов меню */
+.menu-item.disabled .menu-item-icon,
+a.menu-item.list-group-item.list-group-item-action.disabled .menu-item-icon,
+.menu-item.list-group-item.list-group-item-action.disabled .menu-item-icon {
+    opacity: 0.5;
+}
+
+.menu-item.disabled .menu-item-icon i,
+.menu-item.disabled .menu-item-icon img,
+a.menu-item.list-group-item.list-group-item-action.disabled .menu-item-icon i,
+a.menu-item.list-group-item.list-group-item-action.disabled .menu-item-icon img {
+    opacity: 0.5;
+}
+
+/* Контейнер пункта меню - теперь без паддингов, так как они перенесены на .menu-item-main */
 .menu-item-label {
     flex-grow: 1;
-    padding: 1rem; /* py-1rem px-1rem - вертикальные и горизонтальные паддинги в rem */
+    padding: 0; /* Паддинги перенесены на .menu-item-main */
     font-weight: normal; /* Дефолтный вес шрифта, переопределяет Bootstrap */
     line-height: 1rem;
 }
@@ -241,12 +265,9 @@ a.menu-item.list-group-item.list-group-item-action:hover,
     white-space: nowrap; /* Запрет переноса строки */
 }
 
-/* Если иконки нет (label первый элемент), паддинги переносятся на label */
-.menu-item > .menu-item-label:first-child {
-    padding: 1rem; /* py-1rem px-1rem - полные паддинги, если нет иконки */
-}
+/* Если иконки нет, паддинги уже на .menu-item-main, поэтому это правило не нужно */
 
-/* Отметка/указатель */
+/* Отметка/указатель - получает вертикальные паддинги и правый для корректной работы tooltip */
 .menu-item-indicator {
     margin-left: auto;
     display: inline-flex;
@@ -254,9 +275,13 @@ a.menu-item.list-group-item.list-group-item-action:hover,
     justify-content: center;
     width: 3em; /* Фиксированная ширина 3em */
     flex-shrink: 0;
-    padding: 1rem 0; /* py-1rem - только вертикальные паддинги, горизонтальные 0 */
+    padding-top: 1rem; /* Вертикальные паддинги как у основной части */
+    padding-bottom: 1rem;
+    padding-left: 0;
+    padding-right: 1rem; /* Правый паддинг для корректной зоны tooltip */
     opacity: 0.7;
 }
+
 
 /* Статусы */
 .indicator-status {

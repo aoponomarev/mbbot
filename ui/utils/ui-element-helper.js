@@ -1,42 +1,40 @@
-// Утилита для работы с иконками на основе централизованного JSON файла
+// Утилита для работы с UI элементами (иконки, кнопки, меню) на основе централизованного JSON файла
 // Соответствия иконок и команд встроены прямо в код для избежания CORS проблем при работе с file:// протоколом
 
-// Встроенное содержимое icons-mapping.json
+// Встроенное содержимое ui-element-mapping.json
 // Структура: icons (одна иконка → много команд)
-const iconsMapping = {
+const uiElementMapping = {
   "icons": {
     "fas fa-star": {
       "commands": {
         "favorite": {
           "category": "actions",
-          "title": "Избранное",
-          "description": "Выбрать избранное"
+          "label": "Избранное",
+          "tooltip": "Выбрать избранное"
         },
         "add-to-favorites": {
           "category": "actions",
-          "title": "В избранное",
-          "description": "Добавить в избранное"
+          "label": "В избранное",
+          "tooltip": "Добавить в избранное"
         },
         "remove-from-favorites": {
           "category": "actions",
-          "title": "Убрать из избранного",
-          "description": "Убрать из избранного"
+          "label": "Убрать из избранного",
+          "tooltip": "Убрать из избранного"
         },
         "favorite-status": {
           "category": "indicators",
           "type": "status",
           "value": "favorite",
           "label": "В избранном",
-          "title": "В избранном",
-          "description": "Элемент находится в избранном. Нажмите, чтобы убрать из избранного"
+          "tooltip": "Элемент находится в избранном. Нажмите, чтобы убрать из избранного"
         },
         "not-favorite-status": {
           "category": "indicators",
           "type": "status",
           "value": "not-favorite",
           "label": "Не в избранном",
-          "title": "Не в избранном",
-          "description": "Элемент не в избранном. Нажмите, чтобы добавить в избранное"
+          "tooltip": "Элемент не в избранном. Нажмите, чтобы добавить в избранное"
         }
       },
       "defaultCommand": "favorite",
@@ -46,16 +44,15 @@ const iconsMapping = {
       "commands": {
         "check": {
           "category": "status",
-          "title": "Отмечено",
-          "description": "Иконка отметки"
+          "label": "Отмечено",
+          "tooltip": "Иконка отметки"
         },
         "selected": {
           "category": "indicators",
           "type": "status",
           "value": "selected",
           "label": "Выбрано",
-          "title": "Элемент выбран",
-          "description": "Элемент находится в выбранном состоянии"
+          "tooltip": "Элемент находится в выбранном состоянии"
         }
       },
       "defaultCommand": "check",
@@ -65,16 +62,15 @@ const iconsMapping = {
       "commands": {
         "open-external": {
           "category": "actions",
-          "title": "Открыть",
-          "description": "Открыть на внешнем ресурсе (Bybit)"
+          "label": "Открыть",
+          "tooltip": "Открыть на внешнем ресурсе (Bybit)"
         },
         "external": {
           "category": "indicators",
           "type": "navigation",
           "value": "external",
           "label": "Внешняя ссылка",
-          "title": "Открыть во внешнем ресурсе",
-          "description": "Нажмите, чтобы открыть на внешнем сайте"
+          "tooltip": "Нажмите, чтобы открыть на внешнем сайте"
         }
       },
       "defaultCommand": "open-external",
@@ -84,8 +80,8 @@ const iconsMapping = {
       "commands": {
         "refresh": {
           "category": "actions",
-          "title": "Обновить",
-          "description": "Обновление данных или страницы"
+          "label": "Обновить",
+          "tooltip": "Обновление данных или страницы"
         }
       },
       "defaultCommand": "refresh",
@@ -95,8 +91,8 @@ const iconsMapping = {
       "commands": {
         "theme-light": {
           "category": "actions",
-          "title": "Переключить на темную тему",
-          "description": "Переключить тему на темную"
+          "label": "Переключить на темную тему",
+          "tooltip": "Переключить тему на темную"
         }
       },
       "defaultCommand": "theme-light",
@@ -106,8 +102,8 @@ const iconsMapping = {
       "commands": {
         "theme-dark": {
           "category": "actions",
-          "title": "Переключить на светлую тему",
-          "description": "Переключить тему на светлую"
+          "label": "Переключить на светлую тему",
+          "tooltip": "Переключить тему на светлую"
         }
       },
       "defaultCommand": "theme-dark",
@@ -117,8 +113,8 @@ const iconsMapping = {
       "commands": {
         "settings": {
           "category": "actions",
-          "title": "Настройки",
-          "description": "Открыть настройки проекта"
+          "label": "Настройки",
+          "tooltip": "Открыть настройки проекта"
         }
       },
       "defaultCommand": "settings",
@@ -128,8 +124,8 @@ const iconsMapping = {
       "commands": {
         "export": {
           "category": "actions",
-          "title": "Экспорт",
-          "description": "Экспорт настроек в JSON"
+          "label": "Экспорт",
+          "tooltip": "Экспорт настроек в JSON"
         }
       },
       "defaultCommand": "export",
@@ -139,8 +135,8 @@ const iconsMapping = {
       "commands": {
         "import": {
           "category": "actions",
-          "title": "Импорт",
-          "description": "Импорт настроек из JSON"
+          "label": "Импорт",
+          "tooltip": "Импорт настроек из JSON"
         }
       },
       "defaultCommand": "import",
@@ -150,8 +146,8 @@ const iconsMapping = {
       "commands": {
         "select-all": {
           "category": "actions",
-          "title": "Выбрать все",
-          "description": "Выбрать все элементы"
+          "label": "Выбрать все",
+          "tooltip": "Выбрать все элементы"
         }
       },
       "defaultCommand": "select-all",
@@ -161,8 +157,8 @@ const iconsMapping = {
       "commands": {
         "deselect-all": {
           "category": "actions",
-          "title": "Отменить все",
-          "description": "Отменить выбор всех элементов"
+          "label": "Отменить все",
+          "tooltip": "Отменить выбор всех элементов"
         }
       },
       "defaultCommand": "deselect-all",
@@ -172,8 +168,8 @@ const iconsMapping = {
       "commands": {
         "delete": {
           "category": "actions",
-          "title": "Удалить",
-          "description": "Удалить элемент или элементы"
+          "label": "Удалить",
+          "tooltip": "Удалить элемент или элементы"
         }
       },
       "defaultCommand": "delete",
@@ -183,8 +179,8 @@ const iconsMapping = {
       "commands": {
         "archive": {
           "category": "actions",
-          "title": "Архив",
-          "description": "Архивировать элемент или элементы (будущая функциональность)"
+          "label": "Архив",
+          "tooltip": "Архивировать элемент или элементы (будущая функциональность)"
         }
       },
       "defaultCommand": "archive",
@@ -194,8 +190,8 @@ const iconsMapping = {
       "commands": {
         "save": {
           "category": "actions",
-          "title": "Сохранить",
-          "description": "Сохранить изменения"
+          "label": "Сохранить",
+          "tooltip": "Сохранить изменения"
         }
       },
       "defaultCommand": "save",
@@ -205,8 +201,8 @@ const iconsMapping = {
       "commands": {
         "eye": {
           "category": "actions",
-          "title": "Показать",
-          "description": "Показать скрытое содержимое"
+          "label": "Показать",
+          "tooltip": "Показать скрытое содержимое"
         }
       },
       "defaultCommand": "eye",
@@ -216,8 +212,8 @@ const iconsMapping = {
       "commands": {
         "eye-slash": {
           "category": "actions",
-          "title": "Скрыть",
-          "description": "Скрыть содержимое"
+          "label": "Скрыть",
+          "tooltip": "Скрыть содержимое"
         }
       },
       "defaultCommand": "eye-slash",
@@ -227,8 +223,8 @@ const iconsMapping = {
       "commands": {
         "stop": {
           "category": "actions",
-          "title": "Остановить",
-          "description": "Остановить выполнение операции"
+          "label": "Остановить",
+          "tooltip": "Остановить выполнение операции"
         }
       },
       "defaultCommand": "stop",
@@ -238,8 +234,8 @@ const iconsMapping = {
       "commands": {
         "sort": {
           "category": "navigation",
-          "title": "Сортировка",
-          "description": "Нейтральная иконка сортировки"
+          "label": "Сортировка",
+          "tooltip": "Нейтральная иконка сортировки"
         }
       },
       "defaultCommand": "sort",
@@ -249,8 +245,8 @@ const iconsMapping = {
       "commands": {
         "sort-up": {
           "category": "navigation",
-          "title": "Сортировка по возрастанию",
-          "description": "Сортировка по возрастанию"
+          "label": "Сортировка по возрастанию",
+          "tooltip": "Сортировка по возрастанию"
         }
       },
       "defaultCommand": "sort-up",
@@ -260,8 +256,8 @@ const iconsMapping = {
       "commands": {
         "sort-down": {
           "category": "navigation",
-          "title": "Сортировка по убыванию",
-          "description": "Сортировка по убыванию"
+          "label": "Сортировка по убыванию",
+          "tooltip": "Сортировка по убыванию"
         }
       },
       "defaultCommand": "sort-down",
@@ -271,16 +267,15 @@ const iconsMapping = {
       "commands": {
         "warning": {
           "category": "status",
-          "title": "Предупреждение",
-          "description": "Иконка предупреждения"
+          "label": "Предупреждение",
+          "tooltip": "Иконка предупреждения"
         },
         "warning-indicator": {
           "category": "indicators",
           "type": "status",
           "value": "warning",
           "label": "Предупреждение",
-          "title": "Предупреждение",
-          "description": "Требуется внимание"
+          "tooltip": "Требуется внимание"
         }
       },
       "defaultCommand": "warning",
@@ -290,16 +285,15 @@ const iconsMapping = {
       "commands": {
         "error": {
           "category": "status",
-          "title": "Ошибка",
-          "description": "Иконка ошибки"
+          "label": "Ошибка",
+          "tooltip": "Иконка ошибки"
         },
         "error-indicator": {
           "category": "indicators",
           "type": "status",
           "value": "error",
           "label": "Ошибка",
-          "title": "Ошибка",
-          "description": "Произошла ошибка"
+          "tooltip": "Произошла ошибка"
         }
       },
       "defaultCommand": "error",
@@ -309,8 +303,8 @@ const iconsMapping = {
       "commands": {
         "success": {
           "category": "status",
-          "title": "Успех",
-          "description": "Иконка успешного выполнения"
+          "label": "Успех",
+          "tooltip": "Иконка успешного выполнения"
         }
       },
       "defaultCommand": "success",
@@ -320,16 +314,15 @@ const iconsMapping = {
       "commands": {
         "spinner": {
           "category": "status",
-          "title": "Загрузка",
-          "description": "Иконка загрузки с анимацией"
+          "label": "Загрузка",
+          "tooltip": "Иконка загрузки с анимацией"
         },
         "loading-indicator": {
           "category": "indicators",
           "type": "status",
           "value": "loading",
           "label": "Загрузка",
-          "title": "Идет загрузка",
-          "description": "Выполняется операция загрузки данных"
+          "tooltip": "Выполняется операция загрузки данных"
         }
       },
       "defaultCommand": "spinner",
@@ -342,8 +335,7 @@ const iconsMapping = {
           "type": "status",
           "value": "disabled",
           "label": "Отключено",
-          "title": "Элемент отключен",
-          "description": "Элемент недоступен для взаимодействия"
+          "tooltip": "Элемент недоступен для взаимодействия"
         }
       },
       "defaultCommand": "disabled-indicator",
@@ -356,8 +348,7 @@ const iconsMapping = {
           "type": "navigation",
           "value": "submenu",
           "label": "Подменю",
-          "title": "Вложенное меню",
-          "description": "Нажмите, чтобы открыть вложенное меню"
+          "tooltip": "Нажмите, чтобы открыть вложенное меню"
         }
       },
       "defaultCommand": "submenu",
@@ -370,8 +361,7 @@ const iconsMapping = {
           "type": "navigation",
           "value": "modal",
           "label": "Модальное окно",
-          "title": "Открыть в модальном окне",
-          "description": "Нажмите, чтобы открыть модальное окно"
+          "tooltip": "Нажмите, чтобы открыть модальное окно"
         }
       },
       "defaultCommand": "modal",
@@ -381,8 +371,8 @@ const iconsMapping = {
       "commands": {
         "bitcoin": {
           "category": "metrics",
-          "title": "Bitcoin Dominance",
-          "description": "Иконка доминирования Bitcoin"
+          "label": "Bitcoin Dominance",
+          "tooltip": "Иконка доминирования Bitcoin"
         }
       },
       "defaultCommand": "bitcoin",
@@ -392,8 +382,8 @@ const iconsMapping = {
       "commands": {
         "fgi": {
           "category": "metrics",
-          "title": "Fear & Greed Index",
-          "description": "Иконка индекса страха и жадности"
+          "label": "Fear & Greed Index",
+          "tooltip": "Иконка индекса страха и жадности"
         }
       },
       "defaultCommand": "fgi",
@@ -403,8 +393,8 @@ const iconsMapping = {
       "commands": {
         "vix": {
           "category": "metrics",
-          "title": "VIX",
-          "description": "Иконка индекса волатильности"
+          "label": "VIX",
+          "tooltip": "Иконка индекса волатильности"
         }
       },
       "defaultCommand": "vix",
@@ -414,8 +404,8 @@ const iconsMapping = {
       "commands": {
         "oi": {
           "category": "metrics",
-          "title": "Open Interest",
-          "description": "Иконка открытого интереса"
+          "label": "Open Interest",
+          "tooltip": "Иконка открытого интереса"
         }
       },
       "defaultCommand": "oi",
@@ -425,8 +415,8 @@ const iconsMapping = {
       "commands": {
         "fr": {
           "category": "metrics",
-          "title": "Funding Rate",
-          "description": "Иконка ставки финансирования"
+          "label": "Funding Rate",
+          "tooltip": "Иконка ставки финансирования"
         }
       },
       "defaultCommand": "fr",
@@ -436,8 +426,8 @@ const iconsMapping = {
       "commands": {
         "lsr": {
           "category": "metrics",
-          "title": "Long/Short Ratio",
-          "description": "Иконка соотношения лонгов и шортов"
+          "label": "Long/Short Ratio",
+          "tooltip": "Иконка соотношения лонгов и шортов"
         }
       },
       "defaultCommand": "lsr",
@@ -447,8 +437,8 @@ const iconsMapping = {
       "commands": {
         "vuejs": {
           "category": "frameworks",
-          "title": "Vue.js",
-          "description": "Иконка фреймворка Vue.js",
+          "label": "Vue.js",
+          "tooltip": "Иконка фреймворка Vue.js",
           "color": "hsl(152, 48%, 53%)"
         }
       },
@@ -459,8 +449,8 @@ const iconsMapping = {
       "commands": {
         "bootstrap": {
           "category": "frameworks",
-          "title": "Bootstrap",
-          "description": "Иконка фреймворка Bootstrap",
+          "label": "Bootstrap",
+          "tooltip": "Иконка фреймворка Bootstrap",
           "color": "hsl(264, 45%, 47%)"
         }
       },
@@ -471,8 +461,8 @@ const iconsMapping = {
       "commands": {
         "robot": {
           "category": "other",
-          "title": "AI",
-          "description": "Иконка искусственного интеллекта"
+          "label": "AI",
+          "tooltip": "Иконка искусственного интеллекта"
         }
       },
       "defaultCommand": "robot",
@@ -482,8 +472,8 @@ const iconsMapping = {
       "commands": {
         "database": {
           "category": "other",
-          "title": "База данных",
-          "description": "Иконка управления данными"
+          "label": "База данных",
+          "tooltip": "Иконка управления данными"
         }
       },
       "defaultCommand": "database",
@@ -493,8 +483,8 @@ const iconsMapping = {
       "commands": {
         "hamburger": {
           "category": "other",
-          "title": "Меню",
-          "description": "Иконка гамбургер-меню"
+          "label": "Меню",
+          "tooltip": "Иконка гамбургер-меню"
         }
       },
       "defaultCommand": "hamburger",
@@ -504,11 +494,11 @@ const iconsMapping = {
 };
 
 /**
- * Загружает соответствия иконок (синхронно, так как данные встроены)
- * @returns {Object} Объект с соответствиями иконок
+ * Загружает соответствия UI элементов (синхронно, так как данные встроены)
+ * @returns {Object} Объект с соответствиями иконок и команд
  */
-function loadIconsMapping() {
-  return iconsMapping;
+function loadUIElementMapping() {
+  return uiElementMapping;
 }
 
 /**
@@ -517,7 +507,7 @@ function loadIconsMapping() {
  * @returns {Object} Объект с командами для иконки или null
  */
 function getIconCommands(iconClass) {
-  const mapping = loadIconsMapping();
+  const mapping = loadUIElementMapping();
   return mapping.icons?.[iconClass]?.commands || null;
 }
 
@@ -527,7 +517,7 @@ function getIconCommands(iconClass) {
  * @returns {string} CSS класс базовой иконки или пустая строка
  */
 function getIconByCommand(command) {
-  const mapping = loadIconsMapping();
+  const mapping = loadUIElementMapping();
   if (!mapping.icons) return '';
   
   // Ищем команду во всех иконках
@@ -542,10 +532,10 @@ function getIconByCommand(command) {
 /**
  * Получает данные команды
  * @param {string} command - Название команды
- * @returns {Object} Данные команды (category, title, description) или null
+ * @returns {Object} Данные команды (category, label, tooltip) или null
  */
 function getCommandData(command) {
-  const mapping = loadIconsMapping();
+  const mapping = loadUIElementMapping();
   if (!mapping.icons) return null;
   
   // Ищем команду во всех иконках
@@ -635,25 +625,25 @@ function getThemeIcon(theme) {
 }
 
 /**
- * Получает title (подсказку) для иконки
+ * Получает label (текст для UI) для команды
  * @param {string} category - Категория ('actions', 'navigation', 'status', 'metrics', 'frameworks', 'other')
- * @param {string} name - Название иконки
- * @returns {string} Title для иконки
+ * @param {string} command - Название команды
+ * @returns {string} Label для команды
  */
-function getIconTitle(category, name) {
-  const commandData = getCommandData(name);
-  return commandData?.title || '';
+function getIconLabel(category, command) {
+  const commandData = getCommandData(command);
+  return commandData?.label || '';
 }
 
 /**
- * Получает описание для иконки
+ * Получает tooltip (подсказку) для команды
  * @param {string} category - Категория ('actions', 'navigation', 'status', 'metrics', 'frameworks', 'other')
- * @param {string} name - Название иконки
- * @returns {string} Описание иконки
+ * @param {string} command - Название команды
+ * @returns {string} Tooltip для команды
  */
-function getIconDescription(category, name) {
-  const commandData = getCommandData(name);
-  return commandData?.description || '';
+function getIconTooltip(category, command) {
+  const commandData = getCommandData(command);
+  return commandData?.tooltip || '';
 }
 
 /**
@@ -673,7 +663,7 @@ function getFrameworkColor(framework) {
  * @returns {Object} Данные команды-индикатора или null
  */
 function findIndicatorCommand(type, value) {
-  const mapping = loadIconsMapping();
+  const mapping = loadUIElementMapping();
   if (!mapping.icons) return null;
   
   // Ищем команду-индикатор во всех иконках
@@ -702,7 +692,7 @@ function getIndicatorIcon(type, value) {
   if (!indicatorData) return '';
   
   // Ищем иконку, которая содержит эту команду-индикатор
-  const mapping = loadIconsMapping();
+  const mapping = loadUIElementMapping();
   if (!mapping.icons) return '';
   
   for (const [iconClass, iconData] of Object.entries(mapping.icons)) {
@@ -729,31 +719,20 @@ function getIndicatorLabel(type, value) {
 }
 
 /**
- * Получает title (подсказку) для indicator
+ * Получает tooltip (подсказку) для indicator
  * @param {string} type - Тип indicator ('status' или 'navigation')
  * @param {string} value - Значение indicator
- * @returns {string} Title для indicator
+ * @returns {string} Tooltip для indicator
  */
-function getIndicatorTitle(type, value) {
+function getIndicatorTooltip(type, value) {
   const indicatorData = findIndicatorCommand(type, value);
-  return indicatorData?.title || '';
-}
-
-/**
- * Получает description для indicator
- * @param {string} type - Тип indicator ('status' или 'navigation')
- * @param {string} value - Значение indicator
- * @returns {string} Description для indicator
- */
-function getIndicatorDescription(type, value) {
-  const indicatorData = findIndicatorCommand(type, value);
-  return indicatorData?.description || '';
+  return indicatorData?.tooltip || '';
 }
 
 // Экспорт функций для использования в компонентах
 if (typeof window !== 'undefined') {
-  window.iconsHelper = {
-    loadIconsMapping,
+  window.uiElementHelper = {
+    loadUIElementMapping,
     getActionIcon,
     getNavigationIcon,
     getStatusIcon,
@@ -761,13 +740,12 @@ if (typeof window !== 'undefined') {
     getFrameworkIcon,
     getOtherIcon,
     getThemeIcon,
-    getIconTitle,
-    getIconDescription,
+    getIconLabel,
+    getIconTooltip,
     getFrameworkColor,
     getIndicatorIcon,
     getIndicatorLabel,
-    getIndicatorTitle,
-    getIndicatorDescription,
+    getIndicatorTooltip,
     // Функции для схемы "одна иконка → много команд"
     getIconCommands,
     getIconByCommand,
@@ -775,3 +753,4 @@ if (typeof window !== 'undefined') {
     getIconForCommand
   };
 }
+

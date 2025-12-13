@@ -99,6 +99,16 @@ window.cmpHeaderCoins = {
     'fetch-coins'
   ],
   
+  computed: {
+    // Динамический текст для кнопки обновления во время загрузки
+    updateButtonLoadingText() {
+      if (this.cgIsLoading && this.totalCoinsCount > 0) {
+        return this.totalCoinsCount.toString();
+      }
+      return null;
+    }
+  },
+  
   methods: {
     // Получение количества оставшихся тикеров
     getRemainingTickersCount() {

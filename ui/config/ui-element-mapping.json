@@ -4,34 +4,32 @@
       "commands": {
         "favorite": {
           "category": "actions",
-          "title": "Избранное",
-          "description": "Выбрать избранное"
+          "label": "Избранное",
+          "tooltip": "Выбрать избранное"
         },
         "add-to-favorites": {
           "category": "actions",
-          "title": "В избранное",
-          "description": "Добавить в избранное"
+          "label": "В избранное",
+          "tooltip": "Добавить в избранное"
         },
         "remove-from-favorites": {
           "category": "actions",
-          "title": "Убрать из избранного",
-          "description": "Убрать из избранного"
+          "label": "Убрать из избранного",
+          "tooltip": "Убрать из избранного"
         },
         "favorite-status": {
           "category": "indicators",
           "type": "status",
           "value": "favorite",
           "label": "В избранном",
-          "title": "В избранном",
-          "description": "Элемент находится в избранном. Нажмите, чтобы убрать из избранного"
+          "tooltip": "Элемент находится в избранном. Нажмите, чтобы убрать из избранного"
         },
         "not-favorite-status": {
           "category": "indicators",
           "type": "status",
           "value": "not-favorite",
           "label": "Не в избранном",
-          "title": "Не в избранном",
-          "description": "Элемент не в избранном. Нажмите, чтобы добавить в избранное"
+          "tooltip": "Элемент не в избранном. Нажмите, чтобы добавить в избранное"
         }
       },
       "defaultCommand": "favorite",
@@ -41,16 +39,15 @@
       "commands": {
         "check": {
           "category": "status",
-          "title": "Отмечено",
-          "description": "Иконка отметки"
+          "label": "Отмечено",
+          "tooltip": "Иконка отметки"
         },
         "selected": {
           "category": "indicators",
           "type": "status",
           "value": "selected",
           "label": "Выбрано",
-          "title": "Элемент выбран",
-          "description": "Элемент находится в выбранном состоянии"
+          "tooltip": "Элемент находится в выбранном состоянии"
         }
       },
       "defaultCommand": "check",
@@ -60,16 +57,15 @@
       "commands": {
         "open-external": {
           "category": "actions",
-          "title": "Открыть",
-          "description": "Открыть на внешнем ресурсе (Bybit)"
+          "label": "Открыть",
+          "tooltip": "Открыть на внешнем ресурсе (Bybit)"
         },
         "external": {
           "category": "indicators",
           "type": "navigation",
           "value": "external",
           "label": "Внешняя ссылка",
-          "title": "Открыть во внешнем ресурсе",
-          "description": "Нажмите, чтобы открыть на внешнем сайте"
+          "tooltip": "Нажмите, чтобы открыть на внешнем сайте"
         }
       },
       "defaultCommand": "open-external",
@@ -79,8 +75,8 @@
       "commands": {
         "refresh": {
           "category": "actions",
-          "title": "Обновить",
-          "description": "Обновление данных или страницы"
+          "label": "Обновить",
+          "tooltip": "Обновление данных или страницы"
         }
       },
       "defaultCommand": "refresh",
@@ -90,8 +86,8 @@
       "commands": {
         "theme-light": {
           "category": "actions",
-          "title": "Переключить на темную тему",
-          "description": "Переключить тему на темную"
+          "label": "Переключить на темную тему",
+          "tooltip": "Переключить тему на темную"
         }
       },
       "defaultCommand": "theme-light",
@@ -101,8 +97,8 @@
       "commands": {
         "theme-dark": {
           "category": "actions",
-          "title": "Переключить на светлую тему",
-          "description": "Переключить тему на светлую"
+          "label": "Переключить на светлую тему",
+          "tooltip": "Переключить тему на светлую"
         }
       },
       "defaultCommand": "theme-dark",
@@ -112,8 +108,8 @@
       "commands": {
         "settings": {
           "category": "actions",
-          "title": "Настройки",
-          "description": "Открыть настройки проекта"
+          "label": "Настройки",
+          "tooltip": "Открыть настройки проекта"
         }
       },
       "defaultCommand": "settings",
@@ -123,8 +119,8 @@
       "commands": {
         "export": {
           "category": "actions",
-          "title": "Экспорт",
-          "description": "Экспорт настроек в JSON"
+          "label": "Экспорт",
+          "tooltip": "Экспорт настроек в JSON"
         }
       },
       "defaultCommand": "export",
@@ -134,8 +130,8 @@
       "commands": {
         "import": {
           "category": "actions",
-          "title": "Импорт",
-          "description": "Импорт настроек из JSON"
+          "label": "Импорт",
+          "tooltip": "Импорт настроек из JSON"
         }
       },
       "defaultCommand": "import",
@@ -145,8 +141,8 @@
       "commands": {
         "select-all": {
           "category": "actions",
-          "title": "Выбрать все",
-          "description": "Выбрать все элементы"
+          "label": "Выбрать все",
+          "tooltip": "Выбрать все элементы"
         }
       },
       "defaultCommand": "select-all",
@@ -156,8 +152,8 @@
       "commands": {
         "deselect-all": {
           "category": "actions",
-          "title": "Отменить все",
-          "description": "Отменить выбор всех элементов"
+          "label": "Отменить все",
+          "tooltip": "Отменить выбор всех элементов"
         }
       },
       "defaultCommand": "deselect-all",
@@ -167,8 +163,8 @@
       "commands": {
         "delete": {
           "category": "actions",
-          "title": "Удалить",
-          "description": "Удалить элемент или элементы"
+          "label": "Удалить",
+          "tooltip": "Удалить элемент или элементы"
         }
       },
       "defaultCommand": "delete",
@@ -178,8 +174,8 @@
       "commands": {
         "archive": {
           "category": "actions",
-          "title": "Архив",
-          "description": "Архивировать элемент или элементы (будущая функциональность)"
+          "label": "Архив",
+          "tooltip": "Архивировать элемент или элементы (будущая функциональность)"
         }
       },
       "defaultCommand": "archive",
@@ -189,8 +185,8 @@
       "commands": {
         "save": {
           "category": "actions",
-          "title": "Сохранить",
-          "description": "Сохранить изменения"
+          "label": "Сохранить",
+          "tooltip": "Сохранить изменения"
         }
       },
       "defaultCommand": "save",
@@ -200,8 +196,8 @@
       "commands": {
         "eye": {
           "category": "actions",
-          "title": "Показать",
-          "description": "Показать скрытое содержимое"
+          "label": "Показать",
+          "tooltip": "Показать скрытое содержимое"
         }
       },
       "defaultCommand": "eye",
@@ -211,8 +207,8 @@
       "commands": {
         "eye-slash": {
           "category": "actions",
-          "title": "Скрыть",
-          "description": "Скрыть содержимое"
+          "label": "Скрыть",
+          "tooltip": "Скрыть содержимое"
         }
       },
       "defaultCommand": "eye-slash",
@@ -222,8 +218,8 @@
       "commands": {
         "stop": {
           "category": "actions",
-          "title": "Остановить",
-          "description": "Остановить выполнение операции"
+          "label": "Остановить",
+          "tooltip": "Остановить выполнение операции"
         }
       },
       "defaultCommand": "stop",
@@ -233,8 +229,8 @@
       "commands": {
         "sort": {
           "category": "navigation",
-          "title": "Сортировка",
-          "description": "Нейтральная иконка сортировки"
+          "label": "Сортировка",
+          "tooltip": "Нейтральная иконка сортировки"
         }
       },
       "defaultCommand": "sort",
@@ -244,8 +240,8 @@
       "commands": {
         "sort-up": {
           "category": "navigation",
-          "title": "Сортировка по возрастанию",
-          "description": "Сортировка по возрастанию"
+          "label": "Сортировка по возрастанию",
+          "tooltip": "Сортировка по возрастанию"
         }
       },
       "defaultCommand": "sort-up",
@@ -255,8 +251,8 @@
       "commands": {
         "sort-down": {
           "category": "navigation",
-          "title": "Сортировка по убыванию",
-          "description": "Сортировка по убыванию"
+          "label": "Сортировка по убыванию",
+          "tooltip": "Сортировка по убыванию"
         }
       },
       "defaultCommand": "sort-down",
@@ -266,16 +262,15 @@
       "commands": {
         "warning": {
           "category": "status",
-          "title": "Предупреждение",
-          "description": "Иконка предупреждения"
+          "label": "Предупреждение",
+          "tooltip": "Иконка предупреждения"
         },
         "warning-indicator": {
           "category": "indicators",
           "type": "status",
           "value": "warning",
           "label": "Предупреждение",
-          "title": "Предупреждение",
-          "description": "Требуется внимание"
+          "tooltip": "Требуется внимание"
         }
       },
       "defaultCommand": "warning",
@@ -285,16 +280,15 @@
       "commands": {
         "error": {
           "category": "status",
-          "title": "Ошибка",
-          "description": "Иконка ошибки"
+          "label": "Ошибка",
+          "tooltip": "Иконка ошибки"
         },
         "error-indicator": {
           "category": "indicators",
           "type": "status",
           "value": "error",
           "label": "Ошибка",
-          "title": "Ошибка",
-          "description": "Произошла ошибка"
+          "tooltip": "Произошла ошибка"
         }
       },
       "defaultCommand": "error",
@@ -304,8 +298,8 @@
       "commands": {
         "success": {
           "category": "status",
-          "title": "Успех",
-          "description": "Иконка успешного выполнения"
+          "label": "Успех",
+          "tooltip": "Иконка успешного выполнения"
         }
       },
       "defaultCommand": "success",
@@ -315,16 +309,15 @@
       "commands": {
         "spinner": {
           "category": "status",
-          "title": "Загрузка",
-          "description": "Иконка загрузки с анимацией"
+          "label": "Загрузка",
+          "tooltip": "Иконка загрузки с анимацией"
         },
         "loading-indicator": {
           "category": "indicators",
           "type": "status",
           "value": "loading",
           "label": "Загрузка",
-          "title": "Идет загрузка",
-          "description": "Выполняется операция загрузки данных"
+          "tooltip": "Выполняется операция загрузки данных"
         }
       },
       "defaultCommand": "spinner",
@@ -337,8 +330,7 @@
           "type": "status",
           "value": "disabled",
           "label": "Отключено",
-          "title": "Элемент отключен",
-          "description": "Элемент недоступен для взаимодействия"
+          "tooltip": "Элемент недоступен для взаимодействия"
         }
       },
       "defaultCommand": "disabled-indicator",
@@ -351,8 +343,7 @@
           "type": "navigation",
           "value": "submenu",
           "label": "Подменю",
-          "title": "Вложенное меню",
-          "description": "Нажмите, чтобы открыть вложенное меню"
+          "tooltip": "Нажмите, чтобы открыть вложенное меню"
         }
       },
       "defaultCommand": "submenu",
@@ -365,8 +356,7 @@
           "type": "navigation",
           "value": "modal",
           "label": "Модальное окно",
-          "title": "Открыть в модальном окне",
-          "description": "Нажмите, чтобы открыть модальное окно"
+          "tooltip": "Нажмите, чтобы открыть модальное окно"
         }
       },
       "defaultCommand": "modal",
@@ -376,8 +366,8 @@
       "commands": {
         "bitcoin": {
           "category": "metrics",
-          "title": "Bitcoin Dominance",
-          "description": "Иконка доминирования Bitcoin"
+          "label": "Bitcoin Dominance",
+          "tooltip": "Иконка доминирования Bitcoin"
         }
       },
       "defaultCommand": "bitcoin",
@@ -387,8 +377,8 @@
       "commands": {
         "fgi": {
           "category": "metrics",
-          "title": "Fear & Greed Index",
-          "description": "Иконка индекса страха и жадности"
+          "label": "Fear & Greed Index",
+          "tooltip": "Иконка индекса страха и жадности"
         }
       },
       "defaultCommand": "fgi",
@@ -398,8 +388,8 @@
       "commands": {
         "vix": {
           "category": "metrics",
-          "title": "VIX",
-          "description": "Иконка индекса волатильности"
+          "label": "VIX",
+          "tooltip": "Иконка индекса волатильности"
         }
       },
       "defaultCommand": "vix",
@@ -409,8 +399,8 @@
       "commands": {
         "oi": {
           "category": "metrics",
-          "title": "Open Interest",
-          "description": "Иконка открытого интереса"
+          "label": "Open Interest",
+          "tooltip": "Иконка открытого интереса"
         }
       },
       "defaultCommand": "oi",
@@ -420,8 +410,8 @@
       "commands": {
         "fr": {
           "category": "metrics",
-          "title": "Funding Rate",
-          "description": "Иконка ставки финансирования"
+          "label": "Funding Rate",
+          "tooltip": "Иконка ставки финансирования"
         }
       },
       "defaultCommand": "fr",
@@ -431,8 +421,8 @@
       "commands": {
         "lsr": {
           "category": "metrics",
-          "title": "Long/Short Ratio",
-          "description": "Иконка соотношения лонгов и шортов"
+          "label": "Long/Short Ratio",
+          "tooltip": "Иконка соотношения лонгов и шортов"
         }
       },
       "defaultCommand": "lsr",
@@ -442,8 +432,8 @@
       "commands": {
         "vuejs": {
           "category": "frameworks",
-          "title": "Vue.js",
-          "description": "Иконка фреймворка Vue.js",
+          "label": "Vue.js",
+          "tooltip": "Иконка фреймворка Vue.js",
           "color": "hsl(152, 48%, 53%)"
         }
       },
@@ -454,8 +444,8 @@
       "commands": {
         "bootstrap": {
           "category": "frameworks",
-          "title": "Bootstrap",
-          "description": "Иконка фреймворка Bootstrap",
+          "label": "Bootstrap",
+          "tooltip": "Иконка фреймворка Bootstrap",
           "color": "hsl(264, 45%, 47%)"
         }
       },
@@ -466,8 +456,8 @@
       "commands": {
         "robot": {
           "category": "other",
-          "title": "AI",
-          "description": "Иконка искусственного интеллекта"
+          "label": "AI",
+          "tooltip": "Иконка искусственного интеллекта"
         }
       },
       "defaultCommand": "robot",
@@ -477,8 +467,8 @@
       "commands": {
         "database": {
           "category": "other",
-          "title": "База данных",
-          "description": "Иконка управления данными"
+          "label": "База данных",
+          "tooltip": "Иконка управления данными"
         }
       },
       "defaultCommand": "database",
@@ -488,8 +478,8 @@
       "commands": {
         "hamburger": {
           "category": "other",
-          "title": "Меню",
-          "description": "Иконка гамбургер-меню"
+          "label": "Меню",
+          "tooltip": "Иконка гамбургер-меню"
         }
       },
       "defaultCommand": "hamburger",
@@ -497,3 +487,4 @@
     }
   }
 }
+

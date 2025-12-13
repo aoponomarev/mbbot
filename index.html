@@ -26,6 +26,7 @@
     <link rel="stylesheet" href="ui/styles/header.css">
     <link rel="stylesheet" href="ui/styles/footer.css">
     <link rel="stylesheet" href="ui/styles/dropdown.css">
+    <link rel="stylesheet" href="ui/styles/button.css">
     <link rel="stylesheet" href="ui/styles/splash.css">
 </head>
 <body class="min-vh-100">
@@ -69,7 +70,7 @@
     <!-- Глобальные утилиты -->
     <script src="ui/utils/table-sort-mixin.js"></script>
     <script src="ui/utils/pluralize.js"></script>
-    <script src="ui/utils/icons-helper.js"></script>
+    <script src="ui/utils/ui-element-helper.js"></script>
     <script src="ui/utils/hash-generator.js"></script>
 
     <!-- X-Template для компонента сплэш-экрана (должен быть ДО загрузки Vue и компонентов) -->
@@ -676,15 +677,17 @@
                         </dropdown-menu>
                     </div>
                     <div class="position-relative">
-                        <button 
-                    class="btn btn-sm cg-favorites-btn" 
-                            type="button"
+                        <cmp-button
+                            icon-category="actions"
+                            icon-command="favorite"
+                            label="Избранное"
+                            size="sm"
+                            variant="secondary"
                             :disabled="cgFavoriteCoins.length === 0"
-                    @click.stop="handleToggleFavoritesDropdown"
-                        >
-                    <i class="fas fa-star d-inline d-md-none"></i>
-                    <span class="d-none d-md-inline">Избранное</span>
-                        </button>
+                            button-id="cg-favorites-btn"
+                            custom-class="cg-favorites-btn"
+                            @click.stop="handleToggleFavoritesDropdown"
+                        ></cmp-button>
                         <!-- Выпадающий список избранного -->
                         <dropdown-menu
                             :show="showFavoritesDropdown && cgFavoriteCoins.length > 0"
@@ -718,13 +721,19 @@
                         <div>{{ formatLastUpdatedDate(cgLastUpdated) }}</div>
                         <div>{{ formatLastUpdatedTime(cgLastUpdated) }}</div>
                     </small>
-            <button class="btn btn-sm cg-update-btn" @click="handleFetchCoins" :disabled="cgIsLoading">
-                <span v-if="cgIsLoading" class="spinner-border spinner-border-sm" role="status"></span>
-                <template v-else>
-                    <i class="fas fa-sync-alt d-inline d-md-none"></i>
-                    <span class="d-none d-md-inline">Обновить</span>
-                </template>
-                    </button>
+            <cmp-button
+                icon-category="actions"
+                icon-command="refresh"
+                label="Обновить"
+                size="sm"
+                variant="secondary"
+                :disabled="cgIsLoading"
+                :loading="cgIsLoading"
+                :loading-text="updateButtonLoadingText"
+                button-id="cg-update-btn"
+                custom-class="cg-update-btn"
+                @click="handleFetchCoins"
+            ></cmp-button>
         </div>
     </script>
 
@@ -927,28 +936,81 @@
     </script>
 
     <!-- X-Template для компонента пункта меню (должен быть ДО загрузки Vue и компонентов) -->
+    <script type="text/x-template" id="button-template">
+        <button
+            :type="type"
+            :class="buttonClasses"
+            :disabled="disabled"
+            @click="handleClick"
+        >
+            <!-- Основная часть (иконка + текст) с tooltip -->
+            <span 
+                class="button-main"
+                :class="{'button-icon-only': isIconOnly}"
+                :title="mainTooltip"
+            >
+                <!-- Спиннер загрузки (показывается только если нет loadingText) -->
+                <span v-if="loading && !loadingText" class="spinner-border spinner-border-sm" role="status"></span>
+                
+                <!-- Динамический текст загрузки (показывается вместо спиннера) -->
+                <span v-if="loading && loadingText" class="button-label">{{ loadingText }}</span>
+                
+                <!-- Иконка (скрывается при loading) -->
+                <span v-if="!loading && (effectiveIconClass || hasIconImage)" class="button-icon">
+                    <i v-if="effectiveIconClass" :class="effectiveIconClass"></i>
+                    <img v-if="hasIconImage" :src="iconImage" :alt="displayLabel" width="16" height="16">
+                </span>
+                
+                <!-- Текст (всегда рендерится, но скрывается визуально при loading для сохранения высоты, если нет loadingText) -->
+                <span 
+                    v-if="displayLabel && !(loading && loadingText)" 
+                    class="button-label"
+                    :style="{ visibility: (loading && !loadingText) ? 'hidden' : 'visible' }"
+                >{{ displayLabel }}</span>
+            </span>
+            
+            <!-- Индикатор с отдельным tooltip -->
+            <span 
+                v-if="indicator"
+                class="button-indicator"
+                :title="indicatorTooltipText"
+            >
+                <i v-if="effectiveIndicatorIcon" :class="effectiveIndicatorIcon"></i>
+            </span>
+        </button>
+    </script>
+
     <script type="text/x-template" id="menu-item-template">
         <a 
             :href="href || '#'"
             :class="itemClasses"
-            :title="displayTooltip"
             :aria-disabled="disabled"
             @click.prevent="handleClick"
         >
-            <!-- Иконка -->
-            <span v-if="effectiveIconClass || hasIconImage" class="menu-item-icon">
-                <i v-if="effectiveIconClass" :class="effectiveIconClass"></i>
-                <img v-if="hasIconImage" :src="iconImage" :alt="displayLabel" width="20" height="20">
+            <!-- Основная часть (иконка + текст) с tooltip -->
+            <span 
+                class="menu-item-main"
+                :title="mainTooltip"
+            >
+                <!-- Иконка -->
+                <span v-if="effectiveIconClass || hasIconImage" class="menu-item-icon">
+                    <i v-if="effectiveIconClass" :class="effectiveIconClass"></i>
+                    <img v-if="hasIconImage" :src="iconImage" :alt="displayLabel" width="20" height="20">
+                </span>
+                
+                <!-- Текст -->
+                <span class="menu-item-label">
+                    <div v-if="displayLabel">{{ displayLabel }}</div>
+                    <small v-if="subtitle" class="menu-item-subtitle">{{ subtitle }}</small>
+                </span>
             </span>
             
-            <!-- Текст команды -->
-            <span class="menu-item-label">
-                <div v-if="displayLabel">{{ displayLabel }}</div>
-                <small v-if="subtitle" class="menu-item-subtitle">{{ subtitle }}</small>
-            </span>
-            
-            <!-- Отметка/указатель -->
-            <span v-if="indicator" :class="indicatorClasses">
+            <!-- Индикатор с отдельным tooltip -->
+            <span 
+                v-if="indicator"
+                :class="indicatorClasses"
+                :title="indicatorTooltipText"
+            >
                 <i v-if="effectiveIndicatorIcon" :class="effectiveIndicatorIcon"></i>
             </span>
         </a>
@@ -1187,6 +1249,7 @@
     <script src="./ui/components/cell-row-select.js"></script>
     <script src="./ui/components/cell-coin.js"></script>
     <script src="./ui/components/table-data.js"></script>
+    <script src="./ui/components/button.js"></script>
     <script src="./ui/components/menu-item.js"></script>
     <script src="./ui/components/dropdown-menu.js"></script>
     <script src="./ui/utils/column-visibility-mixin.js"></script>

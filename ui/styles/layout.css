@@ -282,6 +282,45 @@ table td.col-hidden {
     }
 }
 
+/* Скрытие элементов кнопки избранного для адаптивности */
+/* На мобильных: скрываем текст, показываем только иконку */
+.cg-favorites-btn .button-label {
+    display: none;
+}
+
+@media (min-width: 768px) {
+    /* На десктопе: скрываем иконку, показываем только текст */
+    .cg-favorites-btn .button-icon {
+        display: none;
+    }
+    
+    .cg-favorites-btn .button-label {
+        display: inline;
+    }
+}
+
+/* Скрытие элементов кнопки обновления для адаптивности */
+/* На мобильных: скрываем текст, показываем только иконку */
+.cg-update-btn .button-label {
+    display: none;
+}
+
+@media (min-width: 768px) {
+    /* На десктопе: скрываем иконку, показываем только текст */
+    .cg-update-btn .button-icon {
+        display: none;
+    }
+    
+    .cg-update-btn .button-label {
+        display: inline;
+    }
+}
+
+/* Убираем правый паддинг для кнопки обновления */
+.cg-update-btn .button-main {
+    padding-right: 0;
+}
+
 /* Выделение числа отмеченных монет более контрастным цветом */
 .cg-counter-selected {
     /* Используем дефолтный цвет текста Bootstrap, который адаптируется под тему (light/dark) */

@@ -267,6 +267,18 @@
     console.warn('window.cmpTableData not found');
   }
 
+  // Регистрация компонента кнопки
+  if (window.cmpButton) {
+    try {
+      app.component('cmp-button', window.cmpButton);
+      console.log('Button component registered');
+    } catch (error) {
+      console.error('Ошибка при регистрации компонента кнопки:', error);
+    }
+  } else {
+    console.warn('window.cmpButton not found');
+  }
+
   // Регистрация компонента пункта меню
   if (window.cmpMenuItem) {
     try {
