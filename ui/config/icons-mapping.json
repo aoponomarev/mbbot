@@ -182,6 +182,72 @@
       "title": "Меню",
       "description": "Иконка гамбургер-меню"
     }
+  },
+  "indicators": {
+    "status": {
+      "selected": {
+        "icon": "fas fa-check",
+        "label": "Выбрано",
+        "title": "Элемент выбран",
+        "description": "Элемент находится в выбранном состоянии"
+      },
+      "disabled": {
+        "icon": "fas fa-ban",
+        "label": "Отключено",
+        "title": "Элемент отключен",
+        "description": "Элемент недоступен для взаимодействия"
+      },
+      "loading": {
+        "icon": "fas fa-spinner fa-spin",
+        "label": "Загрузка",
+        "title": "Идет загрузка",
+        "description": "Выполняется операция загрузки данных"
+      },
+      "warning": {
+        "icon": "fas fa-exclamation-triangle",
+        "label": "Предупреждение",
+        "title": "Предупреждение",
+        "description": "Требуется внимание"
+      },
+      "error": {
+        "icon": "fas fa-exclamation-circle",
+        "label": "Ошибка",
+        "title": "Ошибка",
+        "description": "Произошла ошибка"
+      },
+      "favorite": {
+        "icon": "fas fa-star text-warning",
+        "label": "В избранном",
+        "title": "В избранном",
+        "description": "Элемент находится в избранном. Нажмите, чтобы убрать из избранного"
+      },
+      "not-favorite": {
+        "icon": "fas fa-star text-muted",
+        "label": "Не в избранном",
+        "title": "Не в избранном",
+        "description": "Элемент не в избранном. Нажмите, чтобы добавить в избранное"
+      }
+    },
+    "navigation": {
+      "submenu": {
+        "icon": "fas fa-chevron-right",
+        "label": "Подменю",
+        "title": "Вложенное меню",
+        "description": "Нажмите, чтобы открыть вложенное меню"
+      },
+      "external": {
+        "icon": "fas fa-external-link-alt",
+        "label": "Внешняя ссылка",
+        "title": "Открыть во внешнем ресурсе",
+        "description": "Нажмите, чтобы открыть на внешнем сайте"
+      },
+      "modal": {
+        "icon": "fas fa-window-maximize",
+        "label": "Модальное окно",
+        "title": "Открыть в модальном окне",
+        "description": "Нажмите, чтобы открыть модальное окно"
+      }
+    }
   }
 }
 

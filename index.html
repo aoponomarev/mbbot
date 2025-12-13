@@ -200,32 +200,35 @@
                         </div>
 
                         <!-- Dropdown вкладок отображения: мобильная версия -->
-                        <div class="dropdown d-block d-md-none">
+                        <div class="d-block d-md-none position-relative">
                             <button 
                                 class="btn btn-sm dropdown-toggle header-select header-select-tab app-header-dropdown-btn"
                                 type="button"
-                                :id="tabDropdownId"
-                                data-bs-toggle="dropdown"
-                                aria-expanded="false"
+                                @click.stop="showTabDropdown = !showTabDropdown"
                             >
                                 {{ selectedTabLabel }}
                             </button>
-                            <ul 
-                                class="dropdown-menu app-header-dropdown-menu"
-                                :aria-labelledby="tabDropdownId"
-                                :data-bs-theme="inverseTheme"
+                            <dropdown-menu
+                                :show="showTabDropdown"
+                                position="absolute"
+                                placement="bottom-start"
+                                offset-x="0"
+                                offset-y="4px"
+                                theme="inverse"
+                                :border-radius="'default'"
+                                instance-id="header-tab-dropdown"
+                                trigger-selector=".header-select-tab"
+                                @close="showTabDropdown = false"
                             >
-                                <li v-for="tab in displayTabs" :key="tab.id">
-                                    <a 
-                                        class="dropdown-item app-header-dropdown-item"
-                                        href="#"
-                                        :class="{ 'active': activeTab === tab.id }"
-                                        @click.prevent="switchTab(tab.id)"
-                                    >
-                                        {{ tab.label }}
-                                    </a>
-                                </li>
-                            </ul>
+                                <menu-item
+                                    v-for="tab in displayTabs"
+                                    :key="tab.id"
+                                    :label="tab.label"
+                                    :item-id="'tab-' + tab.id"
+                                    :indicator="activeTab === tab.id ? { type: 'status', value: 'selected' } : null"
+                                    @click="switchTab(tab.id)"
+                                ></menu-item>
+                            </dropdown-menu>
                         </div>
 
                         <!-- Вкладки отображения: десктопная версия (Bootstrap радиокнопки) -->
@@ -396,15 +399,18 @@
                     :cg-last-updated="cgLastUpdated"
                     :cg-is-loading="cgIsLoading"
                     @toggle-counter-dropdown="toggleCounterDropdown"
+                    @close-counter-dropdown="closeCounterDropdown"
                     @select-all-coins="selectAllCoins"
                     @deselect-all-coins="deselectAllCoins"
                     @delete-selected-coins="deleteSelectedCoins"
                     @archive-selected-coins="archiveSelectedCoins"
                     @search-input="handleSearchInput"
                     @search-focus="handleSearchFocus"
+                    @close-search-dropdown="closeSearchDropdown"
                     @stop-adding-tickers="stopAddingTickers"
                     @add-coin="handleAddCoin"
                     @toggle-archive-dropdown="toggleArchiveDropdown"
+                    @close-archive-dropdown="closeArchiveDropdown"
                     @restore-from-archive="restoreFromArchiveById"
                     @fetch-coins="fetchCoinGecko"
                 ></header-coins>
@@ -470,35 +476,48 @@
                 </div>
                 
                 <!-- Контекстное меню для операций с монетой -->
-                <div 
-                    v-if="showContextMenu" 
-                    class="position-fixed bg-body border rounded shadow-sm cg-context-menu avto-6zjS7D"
-                    :style="{left: contextMenuX + 'px', top: contextMenuY + 'px', zIndex: 2000}"
-                    @click.stop
+                <dropdown-menu
+                    :show="showContextMenu"
+                    position="fixed"
+                    :fixed-x="contextMenuX"
+                    :fixed-y="contextMenuY"
+                    :z-index="2000"
+                    instance-id="context-menu"
+                    @close="showContextMenu = false"
                 >
-                    <div class="list-group list-group-flush">
-                        <button class="list-group-item list-group-item-action py-1 px-3 border-0" @click="openCoinOnBybit()">
-                            <i class="fas fa-external-link-alt me-2"></i>Открыть
-                        </button>
-                        <button 
-                            class="list-group-item list-group-item-action py-1 px-3 border-0" 
-                            @click="toggleFavorite(contextMenuCoin)"
-                        >
-                            <i 
-                                class="fas me-2"
-                                :class="isFavorite(contextMenuCoin) ? 'fa-star text-warning' : 'fa-star text-muted'"
-                            ></i>
-                            {{ isFavorite(contextMenuCoin) ? 'Убрать из избранного' : 'В избранное' }}
-                        </button>
-                        <div class="dropdown-divider my-0"></div>
-                        <button class="list-group-item list-group-item-action py-1 px-3 border-0" @click="archiveCoin()">
-                            <i class="fas fa-archive me-2"></i>В архив
-                        </button>
-                        <button class="list-group-item list-group-item-action py-1 px-3 border-0" @click="removeCoin(contextMenuCoin)">
-                            <i class="fas fa-trash me-2"></i>Удалить
-                        </button>
-                    </div>
-                </div>
+                    <menu-item
+                        icon-category="actions"
+                        icon-command="open-external"
+                        item-id="context-open-bybit"
+                        label="Открыть"
+                        @click="openCoinOnBybit"
+                    ></menu-item>
+                    <menu-item
+                        :icon-state-map="{
+                            'favorite': 'fas fa-star text-warning',
+                            'not-favorite': 'fas fa-star opacity-25'
+                        }"
+                        :icon-state="isFavorite(contextMenuCoin) ? 'favorite' : 'not-favorite'"
+                        :label="isFavorite(contextMenuCoin) ? 'Убрать из избранного' : 'В избранное'"
+                        item-id="context-favorite"
+                        @click="() => toggleFavorite(contextMenuCoin)"
+                    ></menu-item>
+                    <div class="dropdown-divider my-0"></div>
+                    <menu-item
+                        icon-category="actions"
+                        icon-command="archive"
+                        item-id="context-archive"
+                        label="В архив"
+                        @click="() => archiveCoin()"
+                    ></menu-item>
+                    <menu-item
+                        icon-category="actions"
+                        icon-command="delete"
+                        item-id="context-delete"
+                        label="Удалить"
+                        @click="() => removeCoin(contextMenuCoin)"
+                    ></menu-item>
+                </dropdown-menu>
             </div>
         </div>
     </script>
@@ -543,44 +562,48 @@
                     <span>{{ selectedCoinsCount > 0 ? selectedCoinsCount : totalCoinsCount }}</span>
                         </button>
                         <!-- Выпадающее меню счетчика -->
-                        <div 
-                            v-if="showCounterDropdown" 
-                    class="position-absolute bg-body border rounded shadow-sm cg-counter-dropdown avto-2CCdUy" 
-                    style="top: 100%; margin-top: 4px; min-width: 200px;"
-                            @click.stop
+                        <dropdown-menu
+                            :show="showCounterDropdown"
+                            position="absolute"
+                            placement="bottom-start"
+                            offset-y="4px"
+                            :min-width="'200px'"
+                            instance-id="counter-dropdown"
+                            trigger-selector=".cg-coins-counter"
+                            @close="$emit('close-counter-dropdown')"
                         >
-                            <div class="list-group list-group-flush">
-                                <button 
-                                    class="list-group-item list-group-item-action py-2 px-3 border-0" 
-                            @click="handleSelectAllCoins"
-                                    :disabled="selectedCoinsCount === totalCoinsCount && totalCoinsCount > 0"
-                                >
-                                    <i class="fas fa-check-square me-2"></i>Выбрать все
-                                </button>
-                                <button 
-                                    class="list-group-item list-group-item-action py-2 px-3 border-0" 
-                            @click="handleDeselectAllCoins"
-                                    :disabled="selectedCoinsCount === 0"
-                                >
-                                    <i class="fas fa-square me-2"></i>Отменить все
-                                </button>
-                                <div class="dropdown-divider my-0"></div>
-                                <button 
-                                    class="list-group-item list-group-item-action py-2 px-3 border-0" 
-                            @click="handleDeleteSelectedCoins"
-                                    :disabled="selectedCoinsCount === 0"
-                                >
-                                    <i class="fas fa-trash me-2"></i>Удалить отмеченные
-                                </button>
-                                <button 
-                                    class="list-group-item list-group-item-action py-2 px-3 border-0" 
-                            @click="handleArchiveSelectedCoins"
-                                    :disabled="selectedCoinsCount === 0"
-                                >
-                                    <i class="fas fa-archive me-2"></i>Архивировать отмеченные
-                                </button>
-                            </div>
-                        </div>
+                            <menu-item
+                                icon-category="actions"
+                                icon-command="select-all"
+                                item-id="counter-select-all"
+                                :disabled="selectedCoinsCount === totalCoinsCount && totalCoinsCount > 0"
+                                @click="handleSelectAllCoins"
+                            ></menu-item>
+                            <menu-item
+                                icon-category="actions"
+                                icon-command="deselect-all"
+                                item-id="counter-deselect-all"
+                                :disabled="selectedCoinsCount === 0"
+                                @click="handleDeselectAllCoins"
+                            ></menu-item>
+                            <div class="dropdown-divider my-0"></div>
+                            <menu-item
+                                icon-category="actions"
+                                icon-command="delete"
+                                item-id="counter-delete"
+                                :disabled="selectedCoinsCount === 0"
+                                label="Удалить отмеченные"
+                                @click="handleDeleteSelectedCoins"
+                            ></menu-item>
+                            <menu-item
+                                icon-category="actions"
+                                icon-command="archive"
+                                item-id="counter-archive"
+                                :disabled="selectedCoinsCount === 0"
+                                label="Архивировать отмеченные"
+                                @click="handleArchiveSelectedCoins"
+                            ></menu-item>
+                        </dropdown-menu>
                     </div>
                     <div class="flex-grow-1 position-relative">
                         <input
@@ -641,29 +664,29 @@
                             </div>
                         </div>
                         <!-- Выпадающий список результатов поиска -->
-                <div v-if="cgSearchResults.length > 0 && !isAddingTickers" class="position-absolute w-100 bg-body border rounded shadow-sm cg-search-dropdown avto-H8nL3qT" style="max-height: 300px; overflow-y: auto; top: 100%; margin-top: 4px;">
-                            <div 
+                        <dropdown-menu
+                            :show="cgSearchResults.length > 0 && !isAddingTickers"
+                            position="absolute"
+                            placement="bottom-start"
+                            offset-y="4px"
+                            width="100%"
+                            :max-height="'300px'"
+                            :scrollable="true"
+                            instance-id="search-dropdown"
+                            @close="$emit('close-search-dropdown')"
+                        >
+                            <menu-item
                                 v-for="result in cgSearchResults" 
                                 :key="result.id"
-                                class="p-2 border-bottom cg-search-item"
-                        @click="handleAddCoin(result.id)"
-                        :class="{'cg-search-item-selected': !result.type && cgSelectedCoins.includes(result.id)}"
-                            >
-                                <div class="d-flex align-items-center gap-2">
-                                    <img v-if="result.thumb" :src="result.thumb" :alt="result.symbol" width="20" height="20">
-                                    <div class="flex-grow-1">
-                                <div v-if="result.type" class="fw-semibold small">{{ result.name }}</div>
-                                <template v-else>
-                                        <div class="fw-semibold small text-uppercase">{{ result.symbol }}</div>
-                                        <small class="text-muted">{{ result.name }}</small>
-                                </template>
-                                    </div>
-                            <small v-if="!result.type && cgSelectedCoins.includes(result.id)">
-                                        <i class="fas fa-check"></i>
-                                    </small>
-                                </div>
-                            </div>
-                        </div>
+                                :icon-image="result.thumb"
+                                :label="result.type ? result.name : result.symbol.toUpperCase()"
+                                :subtitle="result.type ? null : result.name"
+                                :indicator="!result.type && cgSelectedCoins.includes(result.id) ? { type: 'status', value: 'selected' } : null"
+                                :item-id="'search-' + result.id"
+                                :tooltip="result.name"
+                                @click="handleAddCoin(result.id)"
+                            ></menu-item>
+                        </dropdown-menu>
                     </div>
                     <div class="position-relative">
                         <button 
@@ -676,30 +699,32 @@
                     <span class="d-none d-md-inline">Архив</span>
                         </button>
                         <!-- Выпадающий список архива -->
-                        <div 
-                            v-if="showArchiveDropdown && cgArchivedCoins.length > 0" 
-                            class="position-absolute bg-body border rounded shadow-sm cg-archive-dropdown avto-P4rM7wX" 
-                    style="max-height: 300px; overflow-y: auto; top: 100%; margin-top: 4px; width: auto; min-width: fit-content; right: 0;"
-                            @click.stop
+                        <dropdown-menu
+                            :show="showArchiveDropdown && cgArchivedCoins.length > 0"
+                            position="absolute"
+                            placement="bottom-end"
+                            offset-x="0"
+                            offset-y="4px"
+                            :max-height="'300px'"
+                            :scrollable="true"
+                            width="auto"
+                            :min-width="'fit-content'"
+                            instance-id="archive-dropdown"
+                            trigger-selector=".cg-archive-btn"
+                            @close="$emit('close-archive-dropdown')"
                         >
-                            <div 
+                            <menu-item
                                 v-for="archivedCoin in cgArchivedCoins" 
                                 :key="getArchivedCoinId(archivedCoin)"
-                                class="p-2 border-bottom cg-search-item"
-                                :title="getArchivedCoinName(archivedCoin)"
-                        @click="handleRestoreFromArchive(getArchivedCoinId(archivedCoin))"
-                            >
-                                <div class="d-flex align-items-center gap-2">
-                                    <!-- Иконка рефреша для автоматически заархивированных монет (неудачные попытки) -->
-                                    <i v-if="isFailedArchivedCoin(archivedCoin)" class="fas fa-sync-alt text-muted" style="width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 14px;"></i>
-                                    <!-- Обычная иконка монеты для вручную заархивированных -->
-                                    <img v-else-if="getArchivedCoinIcon(archivedCoin)" :src="getArchivedCoinIcon(archivedCoin)" :alt="getArchivedCoinId(archivedCoin)" width="20" height="20">
-                                    <div class="flex-grow-1">
-                                        <div class="fw-semibold small text-uppercase">{{ getArchivedCoinSymbol(archivedCoin) }}</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                                :icon-image="isFailedArchivedCoin(archivedCoin) ? null : getArchivedCoinIcon(archivedCoin)"
+                                :icon-state-map="isFailedArchivedCoin(archivedCoin) ? { 'failed': 'fas fa-sync-alt opacity-25' } : null"
+                                :icon-state="isFailedArchivedCoin(archivedCoin) ? 'failed' : null"
+                                :label="getArchivedCoinSymbol(archivedCoin)"
+                                :tooltip="getArchivedCoinName(archivedCoin)"
+                                :item-id="'archive-' + getArchivedCoinId(archivedCoin)"
+                                @click="handleRestoreFromArchive(getArchivedCoinId(archivedCoin))"
+                            ></menu-item>
+                        </dropdown-menu>
                     </div>
             <small class="text-muted d-none d-md-block" v-if="cgLastUpdated" style="line-height: 1.2;">
                         <div>{{ formatLastUpdatedDate(cgLastUpdated) }}</div>
@@ -849,24 +874,27 @@
             ></i>
             
             <!-- Выпадающее меню -->
-            <div 
-                v-if="menuItems.length > 0 && showDropdown" 
-                class="position-absolute bg-body border rounded shadow-sm" 
-                :style="dropdownStyle"
-                @click.stop
+            <dropdown-menu
+                :show="menuItems.length > 0 && showDropdown"
+                position="absolute"
+                :placement="dropdownPosition === 'left' ? 'bottom-start' : 'bottom-end'"
+                offset-x="0"
+                offset-y="4px"
+                :min-width="dropdownMinWidth"
+                :theme="'default'"
+                :border-radius="'small'"
+                :instance-id="'header-cell-' + (sortField || label)"
+                :trigger-selector="'.' + instanceHash"
+                @close="$emit('menu-toggle', false)"
             >
-                <div class="list-group list-group-flush">
-                    <button 
-                        v-for="item in menuItems" 
-                        :key="item.id"
-                        class="list-group-item list-group-item-action py-2 px-3 border-0" 
-                        @click="handleMenuItemClick(item.id)"
-                        :class="{'active': isMenuItemActive(item)}"
-                    >
-                        {{ item.label }}
-                    </button>
-                </div>
-            </div>
+                <menu-item 
+                    v-for="item in menuItems" 
+                    :key="item.id"
+                    :label="item.label"
+                    :active="isMenuItemActive(item)"
+                    @click="handleMenuItemClick(item.id)"
+                ></menu-item>
+            </dropdown-menu>
         </div>
     </script>
 
@@ -882,6 +910,59 @@
                 @click.stop
             >
         </div>
+    </script>
+
+    <!-- X-Template для компонента выпадающего меню (должен быть ДО загрузки Vue и компонентов) -->
+    <script type="text/x-template" id="dropdown-menu-template">
+        <div 
+            v-if="show"
+            :class="containerClasses"
+            :style="positionStyles"
+            :data-bs-theme="themeAttribute"
+            :aria-labelledby="dropdownId"
+            @click.stop
+        >
+            <div class="list-group list-group-flush">
+                <!-- Слот для кастомного содержимого -->
+                <slot>
+                    <!-- Если передан массив items, рендерим menu-item для каждого -->
+                    <menu-item
+                        v-for="(item, index) in items"
+                        :key="item.id || index"
+                        v-bind="item"
+                        @click="handleItemClick(item, $event)"
+                    ></menu-item>
+                </slot>
+            </div>
+        </div>
+    </script>
+
+    <!-- X-Template для компонента пункта меню (должен быть ДО загрузки Vue и компонентов) -->
+    <script type="text/x-template" id="menu-item-template">
+        <a 
+            :href="href || '#'"
+            :class="itemClasses"
+            :title="displayTooltip"
+            :aria-disabled="disabled"
+            @click.prevent="handleClick"
+        >
+            <!-- Иконка -->
+            <span v-if="effectiveIconClass || hasIconImage" class="menu-item-icon">
+                <i v-if="effectiveIconClass" :class="effectiveIconClass"></i>
+                <img v-if="hasIconImage" :src="iconImage" :alt="displayLabel" width="20" height="20">
+            </span>
+            
+            <!-- Текст команды -->
+            <span class="menu-item-label">
+                <div v-if="displayLabel">{{ displayLabel }}</div>
+                <small v-if="subtitle" class="menu-item-subtitle">{{ subtitle }}</small>
+            </span>
+            
+            <!-- Отметка/указатель -->
+            <span v-if="indicator" :class="indicatorClasses">
+                <i v-if="effectiveIndicatorIcon" :class="effectiveIndicatorIcon"></i>
+            </span>
+        </a>
     </script>
 
     <!-- X-Template для компонента ячейки выбора строки (должен быть ДО загрузки Vue и компонентов) -->
@@ -1117,6 +1198,8 @@
     <script src="./ui/components/cell-row-select.js"></script>
     <script src="./ui/components/cell-coin.js"></script>
     <script src="./ui/components/table-data.js"></script>
+    <script src="./ui/components/menu-item.js"></script>
+    <script src="./ui/components/dropdown-menu.js"></script>
     <script src="./ui/utils/column-visibility-mixin.js"></script>
     <script src="./ui/api/coingecko.js"></script>
     <script src="./app/app-ui-root.js"></script>

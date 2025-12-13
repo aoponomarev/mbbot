@@ -500,71 +500,13 @@ table td.col-hidden {
 }
 
 /* Исправление бага: подсветка для всех элементов в выпадающем списке счетчика монет */
-.cg-counter-dropdown .list-group-item-action {
-    /* Базовый стиль для всех элементов */
-    color: var(--bs-body-color);
-}
-
-.cg-counter-dropdown .list-group-item-action:hover {
-    /* Подсветка при наведении для всех элементов (включая disabled) */
-    background-color: var(--bs-secondary-bg) !important;
-    color: var(--bs-body-color) !important;
-}
-
-.cg-counter-dropdown .list-group-item-action:focus {
-    /* Подсветка при фокусе */
-    background-color: var(--bs-secondary-bg) !important;
-    color: var(--bs-body-color) !important;
-}
-
-.cg-counter-dropdown .list-group-item-action:active {
-    /* Подсветка при активном состоянии */
-    background-color: var(--bs-tertiary-bg) !important;
-    color: var(--bs-body-color) !important;
-}
-
-.cg-counter-dropdown .list-group-item-action:disabled {
-    /* Для disabled элементов также показываем hover, но с более слабым эффектом */
-    opacity: 0.65;
-}
-
-.cg-counter-dropdown .list-group-item-action:disabled:hover {
-    /* Подсветка для disabled элементов в выпадающем списке счетчика */
-    background-color: var(--bs-secondary-bg) !important;
-    opacity: 0.65;
-    color: var(--bs-secondary-color) !important;
-}
-
-.cg-counter-dropdown .list-group-item-action i {
-    /* Иконки наследуют цвет текста */
-    color: inherit;
-}
-
-/* Контекстное меню монет: также одинаковый цвет текста */
-.cg-context-menu .list-group-item-action {
-    color: var(--bs-body-color);
-}
-
-.cg-context-menu .list-group-item-action:hover:not(:disabled),
-.cg-context-menu .list-group-item-action:focus:not(:disabled) {
-    background-color: var(--bs-secondary-bg);
-    color: var(--bs-body-color);
-}
-
-.cg-context-menu .list-group-item-action:active:not(:disabled) {
-    background-color: var(--bs-tertiary-bg);
-    color: var(--bs-body-color);
-}
-
-.cg-context-menu .list-group-item-action i {
-    color: inherit;
-}
+/* ПРИМЕЧАНИЕ: Стили для .cg-counter-dropdown и .cg-context-menu удалены, */
+/* так как эти меню мигрированы на компонент dropdown-menu */
 
 /* Глобально для всех выпадающих меню внутри <main>: единый стиль с более контрастной рамкой и тенью */
-main .cg-counter-dropdown,
-main .cg-search-dropdown,
-main .cg-archive-dropdown,
-main .cg-context-menu,
+/* ПРИМЕЧАНИЕ: Стили для .cg-counter-dropdown, .cg-search-dropdown, .cg-archive-dropdown, .cg-context-menu */
+/* удалены, так как эти меню мигрированы на компонент dropdown-menu */
+/* Остался только .cg-coin-sort-dropdown для меню сортировки в header-cell */
 main .cg-coin-sort-dropdown {
     /* Z-index для dropdown меню (совпадает с Bootstrap) */
     z-index: var(--z-index-dropdown);
@@ -576,10 +518,6 @@ main .cg-coin-sort-dropdown {
     box-shadow: 0 4px 8px -2px hsla(0, 0%, 0%, 0.15), 0 2px 6px -1px hsla(0, 0%, 0%, 0.1) !important;
 }
 
-[data-bs-theme="dark"] main .cg-counter-dropdown,
-[data-bs-theme="dark"] main .cg-search-dropdown,
-[data-bs-theme="dark"] main .cg-archive-dropdown,
-[data-bs-theme="dark"] main .cg-context-menu,
 [data-bs-theme="dark"] main .cg-coin-sort-dropdown {
     /* Более контрастная рамка для темной темы */
     border-color: var(--color-dropdown-border-dark) !important;
@@ -604,11 +542,10 @@ main .cg-coin-sort-dropdown {
 }
 
 /* Подсветка выбранных строк таблицы с монетами - едва видимая прозрачная подсветка зеленовато-бирюзового цвета */
-/* Используем чистый цвет с максимальной насыщенностью, оптимальной яркостью и низкой альфа */
+/* Используем общую рутовую переменную для консистентности с фокусом пунктов меню */
 .cg-coins-table tbody tr.coin-row-selected,
 .cg-coins-table tbody tr.coin-row-selected td {
-    /* Зеленовато-бирюзовый цвет: hue из переменной (170), максимальная насыщенность (100%), оптимальная яркость (40%), низкая альфа (0.05) */
-    background-color: hsla(var(--color-selected-h), 100%, 40%, 0.05) !important;
+    background-color: var(--color-focus-bg) !important;
 }
 
 /* Перекрываем все состояния (hover, nth-child) для выбранных строк */
@@ -618,7 +555,7 @@ main .cg-coin-sort-dropdown {
 .cg-coins-table tbody tr.coin-row-selected:nth-child(even) td,
 .cg-coins-table tbody tr.coin-row-selected:nth-child(odd),
 .cg-coins-table tbody tr.coin-row-selected:nth-child(odd) td {
-    background-color: hsla(var(--color-selected-h), 100%, 40%, 0.05) !important;
+    background-color: var(--color-focus-bg) !important;
 }
 
 /* Для темной темы: используем те же параметры для консистентности */
@@ -630,8 +567,7 @@ main .cg-coin-sort-dropdown {
 [data-bs-theme="dark"] .cg-coins-table tbody tr.coin-row-selected:nth-child(even) td,
 [data-bs-theme="dark"] .cg-coins-table tbody tr.coin-row-selected:nth-child(odd),
 [data-bs-theme="dark"] .cg-coins-table tbody tr.coin-row-selected:nth-child(odd) td {
-    /* Для темной темы: те же параметры для консистентности */
-    background-color: hsla(var(--color-selected-h), 100%, 40%, 0.05) !important;
+    background-color: var(--color-focus-bg) !important;
 }
 
 /* Анимация перемещения строк таблицы при сортировке */

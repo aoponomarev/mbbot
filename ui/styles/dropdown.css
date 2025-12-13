@@ -1,3 +1,79 @@
+/* =========================
+   КОМПОНЕНТ ВЫПАДАЮЩЕГО МЕНЮ (dropdown-menu)
+   ========================= */
+
+/* Базовые стили контейнера выпадающего меню */
+.dropdown-menu-container {
+    background-color: var(--bs-body-bg);
+    border: 1px solid var(--color-border);
+    /* Двойная тень: 1px для рамки + общая тень для слоя */
+    box-shadow: 
+        0 0 0 1px hsla(0, 0%, 0%, 0.1), /* 1px тень для рамки */
+        0 4px 8px -2px hsla(0, 0%, 0%, 0.15), 
+        0 2px 6px -1px hsla(0, 0%, 0%, 0.1); /* Общая тень для слоя */
+    overflow: hidden; /* Важно: скрывает перекрытие скруглений */
+}
+
+/* Скругления 4px (стандарт для всех меню) */
+.dropdown-menu-container.border-radius-small {
+    border-radius: 4px;
+}
+
+/* Bootstrap дефолтные скругления (для хедера) */
+.dropdown-menu-container.border-radius-default {
+    border-radius: var(--bs-border-radius);
+}
+
+/* Пункты меню внутри - убираем скругления у первого и последнего */
+.dropdown-menu-container .menu-item:first-child {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.dropdown-menu-container .menu-item:last-child {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+/* Подсветка пунктов не должна перекрывать скругления */
+.dropdown-menu-container .menu-item:hover {
+    /* Фон подсветки не должен выходить за границы скруглений */
+    position: relative;
+    z-index: 1;
+}
+
+/* Стиль фокуса пунктов меню - такой же как у выбранных строк таблицы */
+.dropdown-menu-container .menu-item:focus,
+.menu-item.list-group-item.list-group-item-action:focus {
+    /* Убираем стандартную черную рамку Bootstrap */
+    outline: none !important;
+    box-shadow: none !important;
+    /* Используем общую рутовую переменную для фона фокуса */
+    background-color: var(--color-focus-bg) !important;
+    /* Фон подсветки не должен выходить за границы скруглений */
+    position: relative;
+    z-index: 1;
+}
+
+/* Инверсная тема для хедера */
+.dropdown-menu-container.theme-inverse[data-bs-theme="dark"] {
+    background-color: var(--color-dropdown-dark-bg);
+    border: 1px solid var(--color-dropdown-dark-border);
+    box-shadow: 
+        0 0 0 1px hsla(0, 0%, 0%, 0.3), /* 1px тень для рамки */
+        0 4px 6px -1px hsla(0, 0%, 0%, 0.3), 
+        0 2px 4px -1px hsla(0, 0%, 0%, 0.2); /* Общая тень для слоя */
+}
+
+.dropdown-menu-container.theme-inverse[data-bs-theme="light"] {
+    background-color: var(--color-dropdown-light-bg);
+    border: 1px solid var(--color-dropdown-light-border);
+    box-shadow: 
+        0 0 0 1px hsla(0, 0%, 0%, 0.1), /* 1px тень для рамки */
+        0 4px 6px -1px hsla(0, 0%, 0%, 0.1), 
+        0 2px 4px -1px hsla(0, 0%, 0%, 0.06); /* Общая тень для слоя */
+}
+
 /* Стили для dropdown меню в хедере (инверсны включенной теме, идентичны для десктоп и мобильной версии) */
 
 /* Стилизация селектов и dropdown кнопок */
@@ -43,5 +119,142 @@
 .app-header-dropdown-menu[data-bs-theme="light"] .dropdown-item.active {
     background-color: var(--color-dropdown-light-overlay);
     color: var(--color-dropdown-light-text);
+}
+
+/* =========================
+   СТИЛИ ДЛЯ КОМПОНЕНТА ПУНКТА МЕНЮ (menu-item)
+   ========================= */
+
+/* ГЛОБАЛЬНОЕ ПРАВИЛО: Все элементы меню (menu-item) не имеют паддингов у ссылки */
+/* Все отступы назначаются спанам внутри (menu-item-icon, menu-item-label) */
+/* Используется высокая специфичность селектора для переопределения Bootstrap без !important */
+a.menu-item.list-group-item.list-group-item-action,
+.menu-item.list-group-item.list-group-item-action {
+    padding: 0;
+    font-weight: normal; /* Дефолтный вес шрифта, переопределяет Bootstrap */
+    min-height: 3rem; /* Минимальная высота пункта меню */
+    display: flex; /* Flex-контейнер для выравнивания элементов в одну строку */
+    align-items: center; /* Вертикальное выравнивание всех элементов по центру */
+}
+
+/* Контейнер иконки - фиксированная ширина для выравнивания текста */
+.menu-item-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 4em; /* Фиксированная ширина 4em */
+    flex-shrink: 0;
+    padding: 1rem 0; /* py-1rem - только вертикальные паддинги, горизонтальные 0 */
+    margin-right: -2rem; /* Отрицательный правый маргин для уменьшения зазора с текстом */
+}
+
+/* Изображения в иконках меню */
+.menu-item-icon img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}
+
+/* Для невыбранных состояний команд (opacity-25) используем обычный цвет текста */
+.menu-item-icon i.opacity-25 {
+    color: var(--bs-body-color);
+}
+
+/* Контейнер пункта меню */
+.menu-item-label {
+    flex-grow: 1;
+    padding: 1rem; /* py-1rem px-1rem - вертикальные и горизонтальные паддинги в rem */
+    font-weight: normal; /* Дефолтный вес шрифта, переопределяет Bootstrap */
+    line-height: 1rem;
+}
+
+/* Подзаголовок пункта меню (вторая строка) */
+.menu-item-subtitle {
+    display: block;
+    color: var(--bs-secondary-color);
+    font-size: 0.875rem; /* small */
+    margin-top: 0.25rem;
+    line-height: 1rem;
+}
+
+/* Стили для меню поиска */
+.cg-search-dropdown .menu-item-label {
+    font-weight: 600; /* Тикеры болдом */
+}
+
+.cg-search-dropdown .menu-item-label > div {
+    display: inline; /* Тикер в одну строку с subtitle */
+    font-weight: 600; /* Тикер болдом */
+}
+
+.cg-search-dropdown .menu-item-subtitle {
+    display: inline; /* Subtitle в одну строку с тикером */
+    margin-left: 0.5rem; /* Отступ между тикером и subtitle */
+    margin-top: 0; /* Убираем отступ сверху */
+}
+
+.cg-search-dropdown .menu-item-label {
+    overflow: hidden; /* Обрезка при нехватке места */
+    text-overflow: ellipsis; /* Многоточие в конце */
+    white-space: nowrap; /* Запрет переноса строки */
+}
+
+/* Если иконки нет (label первый элемент), паддинги переносятся на label */
+.menu-item > .menu-item-label:first-child {
+    padding: 1rem; /* py-1rem px-1rem - полные паддинги, если нет иконки */
+}
+
+/* Отметка/указатель */
+.menu-item-indicator {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3em; /* Фиксированная ширина 3em */
+    flex-shrink: 0;
+    padding: 1rem 0; /* py-1rem - только вертикальные паддинги, горизонтальные 0 */
+    opacity: 0.7;
+}
+
+/* Статусы */
+.indicator-status {
+    /* Базовые стили для статусов */
+}
+
+.indicator-selected {
+    color: var(--color-success);
+}
+
+.indicator-disabled {
+    color: var(--bs-secondary-color);
+}
+
+.indicator-loading {
+    color: var(--bs-primary);
+}
+
+.indicator-warning {
+    color: var(--color-warning);
+}
+
+.indicator-error {
+    color: var(--color-danger);
+}
+
+/* Переходы */
+.indicator-navigation {
+    color: var(--bs-secondary-color);
+}
+
+.indicator-submenu {
+    /* Стрелка вправо для вложенного меню */
+}
+
+.indicator-external {
+    /* Иконка внешней ссылки */
+}
+
+.indicator-modal {
+    /* Иконка модального окна */
 }
 

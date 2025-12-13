@@ -82,15 +82,18 @@ window.cmpHeaderCoins = {
   
   emits: [
     'toggle-counter-dropdown',
+    'close-counter-dropdown',
     'select-all-coins',
     'deselect-all-coins',
     'delete-selected-coins',
     'archive-selected-coins',
     'search-input',
     'search-focus',
+    'close-search-dropdown',
     'stop-adding-tickers',
     'add-coin',
     'toggle-archive-dropdown',
+    'close-archive-dropdown',
     'restore-from-archive',
     'fetch-coins'
   ],

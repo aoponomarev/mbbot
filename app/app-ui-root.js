@@ -267,6 +267,30 @@
     console.warn('window.cmpTableData not found');
   }
 
+  // Регистрация компонента пункта меню
+  if (window.cmpMenuItem) {
+    try {
+      app.component('menu-item', window.cmpMenuItem);
+      console.log('Menu item component registered');
+    } catch (error) {
+      console.error('Ошибка при регистрации компонента пункта меню:', error);
+    }
+  } else {
+    console.warn('window.cmpMenuItem not found');
+  }
+
+  // Регистрация компонента выпадающего меню
+  if (window.cmpDropdownMenu) {
+    try {
+      app.component('dropdown-menu', window.cmpDropdownMenu);
+      console.log('Dropdown Menu component registered');
+    } catch (error) {
+      console.error('Ошибка при регистрации компонента выпадающего меню:', error);
+    }
+  } else {
+    console.warn('window.cmpDropdownMenu not found');
+  }
+
   // Сохраняем ссылку на приложение в window для доступа из компонентов
   window.app = app;
 
