@@ -55,6 +55,39 @@
     z-index: 1;
 }
 
+/* Активное состояние пункта меню имеет приоритет над фокусом и ховером */
+.dropdown-menu-container .menu-item.active,
+.dropdown-menu-container .menu-item.active:hover,
+.dropdown-menu-container .menu-item.active:focus {
+    /* Яркий синий фон для активного пункта меню (стандартный Bootstrap blue) */
+    background-color: hsl(210, 100%, 50%) !important;
+    color: var(--bs-white) !important;
+}
+
+/* Убираем все границы между пунктами меню внутри выпадающего меню */
+.dropdown-menu-container .menu-item {
+    border: none !important;
+    border-top: none !important;
+    border-bottom: none !important;
+    /* Отрицательный гэп между пунктами меню */
+    margin-bottom: -0.5rem;
+}
+
+/* Последний пункт меню не должен иметь отрицательный margin */
+.dropdown-menu-container .menu-item:last-child {
+    margin-bottom: 0;
+}
+
+/* Divider между пунктами меню - тонкие светлые линии */
+.dropdown-menu-container .dropdown-divider {
+    padding-top: 1rem;
+    margin: 0.5rem 1rem calc(-1rem - 1px) 1rem; /* top right bottom left - увеличен отрицательный bottom на 1px для скрытия линии */
+    border-top: 1px solid var(--bs-border-color);
+    opacity: 0.7; /* Более яркая линия */
+    position: relative;
+    z-index: 0; /* Divider под пунктами меню для просвечивания */
+}
+
 /* Инверсная тема для хедера */
 .dropdown-menu-container.theme-inverse[data-bs-theme="dark"] {
     background-color: var(--color-dropdown-dark-bg);
@@ -135,6 +168,15 @@ a.menu-item.list-group-item.list-group-item-action,
     min-height: 3rem; /* Минимальная высота пункта меню */
     display: flex; /* Flex-контейнер для выравнивания элементов в одну строку */
     align-items: center; /* Вертикальное выравнивание всех элементов по центру */
+    /* Прозрачный фон для просвечивания divider */
+    background-color: transparent;
+}
+
+/* Восстанавливаем подсветку при наведении (более прозрачная) */
+.dropdown-menu-container .menu-item:hover,
+a.menu-item.list-group-item.list-group-item-action:hover,
+.menu-item.list-group-item.list-group-item-action:hover {
+    background-color: var(--color-focus-bg); /* Используем полупрозрачный цвет фокуса для более светлой подсветки */
 }
 
 /* Контейнер иконки - фиксированная ширина для выравнивания текста */

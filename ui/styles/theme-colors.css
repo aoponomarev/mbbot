@@ -47,10 +47,10 @@
     --color-light-gray-l: 82%; /* Общий lightness для светло-серых элементов */
     
     /* Оттенок для подсветки выбранных строк и фокуса пунктов меню (зеленовато-бирюзовый, ближе к зеленому) */
-    --color-selected-h: 170; /* Зеленовато-бирюзовый оттенок, еще ближе к зеленому */
+    --color-selected-h: 149; /* Зеленовато-бирюзовый оттенок */
     --color-selected-s: 100%; /* Максимальная насыщенность */
-    --color-selected-l: 40%; /* Оптимальная яркость */
-    --color-selected-alpha: 0.05; /* Низкая альфа для прозрачности */
+    --color-selected-l: 20%; /* Оптимальная яркость */
+    --color-selected-alpha: 0.07; /* Низкая альфа для прозрачности */
     /* Общая переменная для фона выбранных элементов и фокуса */
     --color-focus-bg: hsla(var(--color-selected-h), var(--color-selected-s), var(--color-selected-l), var(--color-selected-alpha));
     
@@ -180,10 +180,10 @@
     --color-muted: hsl(var(--color-muted-h), var(--color-muted-s), var(--color-muted-l));
     
     /* Оттенок для подсветки выбранных строк и фокуса пунктов меню (зеленовато-бирюзовый, ближе к зеленому) */
-    --color-selected-h: 170; /* Зеленовато-бирюзовый оттенок, еще ближе к зеленому */
+    --color-selected-h: 149; /* Зеленовато-бирюзовый оттенок */
     --color-selected-s: 100%; /* Максимальная насыщенность */
-    --color-selected-l: 40%; /* Оптимальная яркость */
-    --color-selected-alpha: 0.05; /* Низкая альфа для прозрачности */
+    --color-selected-l: 20%; /* Оптимальная яркость */
+    --color-selected-alpha: 0.07; /* Низкая альфа для прозрачности */
     /* Общая переменная для фона выбранных элементов и фокуса */
     --color-focus-bg: hsla(var(--color-selected-h), var(--color-selected-s), var(--color-selected-l), var(--color-selected-alpha));
     

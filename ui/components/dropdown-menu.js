@@ -327,7 +327,7 @@ window.cmpDropdownMenu = {
       }
     },
     
-    // Автофокус при открытии
+    // Автофокус при открытии (с последующим снятием фокуса для избежания визуального выделения)
     autoFocusFirst() {
       if (this.autoFocus && this.show) {
         this.$nextTick(() => {
@@ -335,6 +335,11 @@ window.cmpDropdownMenu = {
           if (items.length > 0) {
             items[0].focus();
             this.focusedIndex = 0;
+            // Убираем фокус сразу после установки, чтобы избежать визуального выделения первого пункта
+            // focusedIndex сохраняется для клавиатурной навигации
+            setTimeout(() => {
+              items[0].blur();
+            }, 0);
           }
         });
       }
