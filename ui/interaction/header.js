@@ -4,6 +4,17 @@
 window.cmpHeader = {
   template: '#header-template',
 
+  props: {
+    // Горизонт прогноза (передается из корневого компонента)
+    horizonDays: {
+      type: Number,
+      default: 2,
+      validator: (value) => value >= 1 && value <= 90
+    }
+  },
+
+  emits: ['update:horizonDays'],
+
   data() {
     return {
       // Выбранная математическая модель
@@ -36,6 +47,17 @@ window.cmpHeader = {
   },
 
   methods: {
+    // Обработка изменения горизонта прогноза
+    handleHorizonChange(newValue) {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/e7733f3e-f060-46bf-8fe8-79b2bd25ac6d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'header.js:51',message:'handleHorizonChange called',data:{newValue,currentHorizonDays:this.horizonDays},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
+      this.$emit('update:horizonDays', newValue);
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/e7733f3e-f060-46bf-8fe8-79b2bd25ac6d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'header.js:54',message:'handleHorizonChange emitted',data:{newValue},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
+    },
+    
     // Переключение вкладки отображения
     switchTab(tabId) {
       const root = this.$root || window.appRoot;

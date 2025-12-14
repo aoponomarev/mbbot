@@ -13,6 +13,13 @@ window.cmpChat = function () {
           return;
         }
 
+        // Проверяем доступность API утилиты
+        if (!window.perplexityAPI || !window.perplexityAPI.sendPerplexityRequest) {
+          console.error('perplexityAPI module not loaded');
+          this.error = 'Модуль Perplexity API не загружен';
+          return;
+        }
+
         const question = this.currentQuestion.trim();
         this.currentQuestion = '';
         this.error = null;
@@ -21,38 +28,19 @@ window.cmpChat = function () {
         this.messages.push({ role: 'user', content: question });
 
         try {
-          const response = await fetch('https://api.perplexity.ai/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${this.perplexityApiKey}`,
-              'Content-Type': 'application/json',
-              'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-              model: this.perplexityModel,
-              messages: this.messages.map(msg => ({
-                role: msg.role,
-                content: msg.content
-              }))
-            })
-          });
+          // Используем утилиту из core/api/perplexity.js
+          const answer = await window.perplexityAPI.sendPerplexityRequest(
+            this.perplexityApiKey,
+            this.perplexityModel,
+            this.messages,
+            null // timeoutManager опционален, пока не используется
+          );
 
-          if (!response.ok) {
-            const errorData = await response.json().catch(() => ({ error: { message: 'Неизвестная ошибка' } }));
-            throw new Error(errorData.error?.message || `HTTP ${response.status}: ${response.statusText}`);
-          }
-
-          const data = await response.json();
-
-          if (data.choices && data.choices.length > 0) {
-            const answer = data.choices[0].message.content;
-            this.messages.push({ role: 'assistant', content: answer });
-          } else {
-            throw new Error('Пустой ответ от API');
-          }
+          this.messages.push({ role: 'assistant', content: answer });
         } catch (error) {
           console.error('Ошибка при запросе к Perplexity:', error);
           this.error = error.message || 'Произошла ошибка при запросе к Perplexity AI';
+          // Удаляем последнее сообщение пользователя при ошибке
           if (this.messages.length > 0 && this.messages[this.messages.length - 1].role === 'user') {
             this.messages.pop();
           }

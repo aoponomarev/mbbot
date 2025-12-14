@@ -1,5 +1,7 @@
 # Дневной лог разработки - 2025-12-11
 
+> **⚠️ КРИТИЧЕСКИ ВАЖНО**: В этом логе упоминается файл `ui/api/coingecko.js`, который был переименован в `ui/api/coins-manager.js` (коммит от 14.12.2025). При чтении этого лога учитывайте, что все упоминания `ui/api/coingecko.js` относятся к текущему файлу `ui/api/coins-manager.js`.
+
 ## UI (оформление)
 
 ### Коммит: ddb24d2 - "Add centralized icon system as architectural principle"

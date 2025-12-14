@@ -142,6 +142,12 @@ window.cmpCellNum = {
       type: String,
       default: null
     },
+    // Кастомный tooltip (title атрибут)
+    // Если передан, используется вместо автоматического tooltip
+    customTooltip: {
+      type: String,
+      default: null
+    },
     // Включить автоматическую цветизацию на основе знака значения
     // При включении все дочерние <span> элементы получат цвет в зависимости от знака:
     // - positive: --color-success
@@ -229,6 +235,11 @@ window.cmpCellNum = {
     
     // Текст для всплывающей подсказки (tooltip)
     tooltipText() {
+      // Если передан кастомный tooltip - используем его
+      if (this.customTooltip) {
+        return this.customTooltip;
+      }
+      
       // Если значение округлилось до 0, но изначально не было 0, показываем точное значение
       if (!this.isEmpty && !this.isInfinite) {
         const rounded = this.roundedValue;

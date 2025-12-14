@@ -1,5 +1,7 @@
 # Дневной лог разработки - 2025-12-10
 
+> **⚠️ КРИТИЧЕСКИ ВАЖНО**: В этом логе упоминается файл `ui/api/coingecko.js`, который был переименован в `ui/api/coins-manager.js` (коммит от 14.12.2025). При чтении этого лога учитывайте, что все упоминания `ui/api/coingecko.js` относятся к текущему файлу `ui/api/coins-manager.js`.
+
 ## UI (оформление)
 
 ### Коммит: a602a3e - "Update documentation: add caching system and archive structure"

@@ -180,9 +180,9 @@ window.cmpTableData = {
     },
     
     // Получить props форматирования для колонки
-    getFormatProps(column) {
+    getFormatProps(column, item) {
       if (this.getColumnFormatProps) {
-        return this.getColumnFormatProps(column);
+        return this.getColumnFormatProps(column, item);
       }
       // Fallback: извлекаем из format
       if (column.format) {

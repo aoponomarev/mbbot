@@ -24,18 +24,23 @@
     // window.cmpPerplexitySettings больше не используется как часть - теперь это отдельный компонент
     // window.cmpChat удален - чат с Perplexity AI убран из интерфейса
     window.cmpImportExport && window.cmpImportExport()
-    // window.cmpCoinGecko больше не используется как часть - теперь это отдельный компонент
+    // window.cmpCoinsManager больше не используется как часть - теперь это отдельный компонент
   ].filter(Boolean);
 
   // Загружаем сохраненную активную вкладку из localStorage
   const savedActiveTab = localStorage.getItem('activeTab');
   const initialActiveTab = savedActiveTab || 'percent';
 
+  // Загружаем сохраненный горизонт прогноза из localStorage
+  const savedHorizonDays = parseInt(localStorage.getItem('horizonDays')) || 2;
+  const initialHorizonDays = (savedHorizonDays >= 1 && savedHorizonDays <= 90) ? savedHorizonDays : 2;
+
   const baseData = {
     vueVersion: '3.5.25',
     lastCommitMessage: (cfg.lastCommitMessage || '').trim(),
     showSettings: false, // Показывать ли настройки (по умолчанию false - показываем CoinGecko)
-    activeTab: initialActiveTab // Активная вкладка отображения (загружается из localStorage)
+    activeTab: initialActiveTab, // Активная вкладка отображения (загружается из localStorage)
+    horizonDays: initialHorizonDays // Горизонт прогноза в днях (загружается из localStorage)
   };
   const data = Object.assign(baseData, ...parts.map(p => p.data || {}));
   const methods = Object.assign({
@@ -77,6 +82,18 @@
     // Сохраняем активную вкладку в localStorage при изменении
     activeTab(newTab) {
       localStorage.setItem('activeTab', newTab);
+    },
+    // Сохраняем горизонт прогноза в localStorage при изменении
+    horizonDays(newValue, oldValue) {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/e7733f3e-f060-46bf-8fe8-79b2bd25ac6d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:87',message:'root watch horizonDays',data:{newValue,oldValue},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
+      if (newValue !== oldValue && newValue >= 1 && newValue <= 90) {
+        localStorage.setItem('horizonDays', newValue.toString());
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/e7733f3e-f060-46bf-8fe8-79b2bd25ac6d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:91',message:'root saved horizonDays to localStorage',data:{newValue},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+        // #endregion
+      }
     }
   }, ...parts.map(p => p.watch || {}));
   const mountedFns = parts.map(p => p.mounted).filter(Boolean);
@@ -159,16 +176,16 @@
     console.warn('window.cmpSettings not found');
   }
 
-  // Регистрация компонента виджета CoinGecko
-  if (window.cmpCoinGecko) {
+  // Регистрация компонента менеджера монет
+  if (window.cmpCoinsManager) {
     try {
-      app.component('app-coingecko', window.cmpCoinGecko);
-      console.log('CoinGecko component registered');
+      app.component('app-coins-manager', window.cmpCoinsManager);
+      console.log('Coins Manager component registered');
     } catch (error) {
-      console.error('Ошибка при регистрации компонента CoinGecko:', error);
+      console.error('Ошибка при регистрации компонента Coins Manager:', error);
     }
   } else {
-    console.warn('window.cmpCoinGecko not found');
+    console.warn('window.cmpCoinsManager not found');
   }
 
   // Регистрация компонента хедера индикатора монет
@@ -301,6 +318,18 @@
     }
   } else {
     console.warn('window.cmpDropdownMenu not found');
+  }
+
+  // Регистрация компонента поля ввода горизонта прогноза
+  if (window.cmpHorizonInput) {
+    try {
+      app.component('horizon-input', window.cmpHorizonInput);
+      console.log('Horizon input component registered');
+    } catch (error) {
+      console.error('Ошибка при регистрации компонента поля ввода горизонта прогноза:', error);
+    }
+  } else {
+    console.warn('window.cmpHorizonInput not found');
   }
 
   // Сохраняем ссылку на приложение в window для доступа из компонентов

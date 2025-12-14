@@ -35,7 +35,7 @@
         <splash-screen :last-commit-message="lastCommitMessage" :perplexity-model="perplexityModel"></splash-screen>
 
         <!-- Компонент хэдера -->
-        <app-header></app-header>
+        <app-header :horizon-days="horizonDays" @update:horizon-days="horizonDays = $event"></app-header>
 
         <!-- Компонент футера -->
         <app-footer></app-footer>
@@ -59,7 +59,10 @@
                 <app-settings v-if="showSettings"></app-settings>
 
                 <!-- Компонент виджета CoinGecko (показывается на вкладках "%" и "Компл. дельты") -->
-                <app-coingecko v-if="!showSettings && (activeTab === 'percent' || activeTab === 'complex-deltas')"></app-coingecko>
+                <app-coins-manager 
+                    v-if="!showSettings && (activeTab === 'percent' || activeTab === 'complex-deltas')"
+                    :horizon-days="horizonDays"
+                ></app-coins-manager>
             </main>
         </div>
     </div>
@@ -72,6 +75,11 @@
     <script src="ui/utils/pluralize.js"></script>
     <script src="ui/utils/ui-element-helper.js"></script>
     <script src="ui/utils/hash-generator.js"></script>
+    <script src="ui/utils/coins-cd-helpers.js"></script>
+    <script src="ui/utils/coins-favorites-helpers.js"></script>
+    
+    <!-- Конфигурация -->
+    <script src="ui/config/table-columns-config.js"></script>
 
     <!-- X-Template для компонента сплэш-экрана (должен быть ДО загрузки Vue и компонентов) -->
     <script type="text/x-template" id="splash-template">
@@ -154,7 +162,15 @@
                     </div>
 
                     <!-- Секция 2: Математическая модель и вкладки отображения (широкая секция) -->
-                    <div class="flex-grow-1 d-flex align-items-center justify-content-center">
+                    <div class="flex-grow-1 d-flex align-items-center justify-content-center gap-2">
+                        <!-- Поле ввода горизонта прогноза -->
+                        <horizon-input
+                            :model-value="horizonDays"
+                            size="sm"
+                            :show-label="true"
+                            @update:model-value="handleHorizonChange"
+                        ></horizon-input>
+                        
                         <!-- Селект математической модели: десктопная версия -->
                         <select 
                             v-model="selectedModel"
@@ -378,7 +394,7 @@
     </script>
 
     <!-- X-Template для компонента виджета CoinGecko (должен быть ДО загрузки Vue и компонентов) -->
-    <script type="text/x-template" id="coingecko-template">
+    <script type="text/x-template" id="coins-manager-template">
         <div class="col-12 mb-4">
             <div class="card avto-B7fN2kT for-coinsindicator">
                 <header-coins
@@ -515,6 +531,27 @@
     </script>
 
     <!-- X-Template для компонента хедера индикатора монет (должен быть ДО загрузки Vue и компонентов) -->
+    <!-- X-Template для компонента поля ввода горизонта прогноза (должен быть ДО загрузки Vue и компонентов) -->
+    <script type="text/x-template" id="horizon-input-template">
+        <div class="d-flex align-items-center gap-1" :class="customClass">
+            <label v-if="showLabel" class="mb-0 small text-muted" for="horizon-input">
+                ГП:
+            </label>
+            <input
+                id="horizon-input"
+                type="number"
+                min="1"
+                max="90"
+                :value="internalValue"
+                @input="handleInput"
+                @blur="handleBlur"
+                :class="['form-control', sizeClass]"
+                style="width: 60px;"
+                title="Горизонт прогноза в днях (1-90)"
+            >
+        </div>
+    </script>
+
     <script type="text/x-template" id="header-coins-template">
                 <div class="card-header d-flex align-items-center gap-2">
             <!-- Кнопка счетчика монет с выпадающим меню -->
@@ -1236,7 +1273,7 @@
                                     <cell-num 
                                         :value="getValue(item, column)"
                                         :cell-id="`${item.id}-${column.id}`"
-                                        v-bind="getFormatProps(column)"
+                                        v-bind="getFormatProps(column, item)"
                                     ></cell-num>
                                 </div>
                             </template>
@@ -1264,12 +1301,18 @@
     <!-- Математическая модель "median" - Этап 2: CPT (Coin Potential) -->
     <script src="mm/median/metrics/cpt.js"></script>
     
+    <!-- Математическая модель "median" - Этап 3: CD (Cumulative Delta) -->
+    <script src="mm/median/metrics/cd.js"></script>
+    
     <!-- Компоненты и приложение (обычные скрипты, совместимо с file://) -->
     <script src="./core/security/u-sec-obfuscate.js"></script>
     <script src="./core/cfg-app.js"></script>
     <script src="./ui/interaction/theme.js"></script>
     <script src="./ui/interaction/splash.js"></script>
+    <!-- API утилиты (независимые модули) -->
+    <script src="./core/api/coingecko.js"></script>
     <script src="./core/api/market-metrics.js"></script>
+    <script src="./core/api/perplexity.js"></script>
     <script src="./ui/interaction/header.js"></script>
     <script src="./ui/interaction/footer.js"></script>
     <script src="./ui/api/perplexity.js"></script>
@@ -1284,9 +1327,10 @@
     <script src="./ui/components/table-data.js"></script>
     <script src="./ui/components/button.js"></script>
     <script src="./ui/components/menu-item.js"></script>
+    <script src="./ui/components/horizon-input.js"></script>
     <script src="./ui/components/dropdown-menu.js"></script>
     <script src="./ui/utils/column-visibility-mixin.js"></script>
-    <script src="./ui/api/coingecko.js"></script>
+    <script src="./ui/api/coins-manager.js"></script>
     <script src="./app/app-ui-root.js"></script>
 </body>
 </html>

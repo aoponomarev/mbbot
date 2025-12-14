@@ -28,12 +28,13 @@
 - **core/cfg-app.js** — конфиг приложения (defaults, модели).
 - **core/security/u-sec-obfuscate.js** — утилиты обфускации для безопасного хранения PIN и API-ключей.
 - **core/api/market-metrics.js** — утилита для получения метрик рынка (FGI, VIX, BTC Dominance, Open Interest, Funding Rate, Long/Short Ratio). Независимый модуль, экспортирует функции через `window.marketMetrics`.
+- **core/api/perplexity.js** — утилита для отправки запросов к Perplexity Chat Completions API. Независимый модуль, экспортирует функции через `window.perplexityAPI`.
 - **ui/api/import-export.js** — экспорт/импорт настроек.
 - **ui/api/perplexity.js** (или **ui/api/settings.js**) — компонент общих настроек проекта (включая Perplexity AI).
-- **ui/api/coingecko.js** — компонент виджета CoinGecko с поиском монет, избранным (хранилище избранного), сортировкой таблиц, кэшированием иконок, добавлением топ N монет по капитализации и объему.
+- **ui/api/coins-manager.js** — компонент менеджера монет с поиском монет, избранным (хранилище избранного), сортировкой таблиц, кэшированием иконок, добавлением топ N монет по капитализации и объему. Использует утилиты из `core/api/coingecko.js` для работы с CoinGecko API.
 - **ui/interaction/splash.js** — сплэш-экран с защитой PIN-кодом и настройкой API-ключа.
 - **ui/interaction/theme.js** — применение темы.
-- **ui/interaction/chat.js** — чат Perplexity.
+- **ui/interaction/chat.js** — чат Perplexity. Использует утилиты из `core/api/perplexity.js` для работы с Perplexity API.
 - **ui/interaction/header.js** — компонент хедера с гамбургер-меню, селектом математической модели, вкладками отображения и кнопками управления.
 - **ui/interaction/footer.js** — компонент футера с индексами рынка и версиями фреймворков.
 - **ui/styles/header.css** — стили компонента хедера.
@@ -98,6 +99,25 @@ Fetch (ui/api) → Validate/Normalize (schemas) → Compute (calculator/indices)
 - **Кодировка файлов**: UTF-8
 - **Окончания строк**: CRLF (Windows), но Git настроен на автоматическое преобразование
 - **HTML**: Минимальная валидная HTML5 разметка, язык по умолчанию `ru`, кодировка UTF-8, viewport meta для адаптивности
+- **⚠️ Разделение ответственности между `core/api/` и `ui/api/`**: Критически важное архитектурное правило для обеспечения правильной организации кода:
+  - **`core/api/`** — утилиты для работы с внешними API (не Vue компоненты):
+    - Независимые модули, не зависят от Vue
+    - Экспортируют чистые функции через `window.*API` (например: `window.coinGeckoAPI`, `window.perplexityAPI`, `window.marketMetrics`)
+    - Содержат только логику запросов к API, обработку ошибок, трансформацию данных
+    - Не содержат UI логики, реактивности Vue, шаблонов, состояний компонентов
+    - Могут использоваться в любом контексте (Vue компоненты, обычные скрипты, тесты)
+    - Примеры: `core/api/coingecko.js`, `core/api/perplexity.js`, `core/api/market-metrics.js`
+  - **`ui/api/`** — Vue компоненты для работы с внешними API:
+    - Vue компоненты с `template`, `data`, `methods`, `computed`, `watch`
+    - Управляют UI состоянием (loading, error, данные для отображения)
+    - Используют утилиты из `core/api/` для выполнения запросов к API
+    - Содержат логику взаимодействия с пользователем, формы, отображение данных
+    - Примеры: `ui/api/coins-manager.js` (использует `core/api/coingecko.js`), `ui/api/perplexity.js` (компонент настроек)
+  - **Правило контроля для ИИ-агента**: При создании нового функционала для работы с внешним API:
+    1. Если нужна только функция запроса к API → создавать в `core/api/`
+    2. Если нужен UI компонент с формами, состоянием, реактивностью → создавать в `ui/api/` или `ui/interaction/`
+    3. Vue компонент должен использовать утилиту из `core/api/`, а не делать запросы напрямую через `fetch`
+    4. Если в Vue компоненте есть прямая логика `fetch` к API → вынести её в утилиту в `core/api/`
 - **⚠️ Архитектурные системы UI/UX**: Проект использует несколько архитектурных систем для обеспечения консистентности и централизованного управления UI элементами:
   - **Цветовая модель HSL/HSLA**: Все цвета определяются через HSL/HSLA переменные в `ui/styles/theme-colors.css`. Подробнее см. раздел "Цветовая модель HSL/HSLA" в `ui/guide-ii.md`.
   - **Система z-index слоев**: Все значения `z-index` определяются через CSS переменные в `ui/styles/z-index.css` и связаны с Bootstrap z-index переменными. Подробнее см. раздел "Система z-index слоев" в `ui/guide-ii.md`.
@@ -483,7 +503,7 @@ if (settings.secureData.apiKeyPerplexity) {
 **Назначение**: Оптимизация работы с внешними API через кэширование данных с временными ограничениями.
 
 **Реализация**:
-- **Иконки монет**: `ui/api/coingecko.js` - метод `cacheCoinsIcons()`
+- **Иконки монет**: `ui/api/coins-manager.js` - метод `cacheCoinsIcons()`
 - **Метрики рынка**: `ui/interaction/footer.js` - метод `fetchMarketIndices()`
 
 **Принципы работы**:
@@ -515,7 +535,7 @@ if (settings.secureData.apiKeyPerplexity) {
 
 **Назначение**: Автоматическая адаптация задержек между запросами к внешним API для предотвращения блокировки из-за rate limiting (превышения лимита запросов).
 
-**Реализация**: `ui/api/coingecko.js` - методы `increaseAdaptiveTimeout()`, `decreaseAdaptiveTimeout()`, `resetAdaptiveTimeout()`
+**Реализация**: `ui/api/coins-manager.js` - методы `increaseAdaptiveTimeout()`, `decreaseAdaptiveTimeout()`, `resetAdaptiveTimeout()`
 
 **Принципы работы**:
 
@@ -554,7 +574,7 @@ if (settings.secureData.apiKeyPerplexity) {
 
 **Назначение**: Избранное - это хранилище избранных монет (любого избранного, но пока только монеты). Монета может одновременно присутствовать в таблице и в избранном. Избранное не удаляется при добавлении монеты в таблицу.
 
-**Реализация**: `ui/api/coingecko.js` - методы `syncCoinWithFavorites()`, `syncAllCoinsWithFavorites()`, `addFavoriteToTableById()`
+**Реализация**: `ui/api/coins-manager.js` - методы `syncCoinWithFavorites()`, `syncAllCoinsWithFavorites()`, `addFavoriteToTableById()`
 
 **Принципы работы**:
 
@@ -616,13 +636,17 @@ Root/
 │       └── MM-DD.txt  # Дневные логи (например: 12-09.txt)
 ├── core/              # Ядро приложения
 │   ├── cfg-app.js     # Конфиг приложения
+│   ├── api/           # Утилиты для работы с внешними API
+│   │   ├── coingecko.js      # Утилиты для CoinGecko API
+│   │   ├── market-metrics.js # Утилиты для метрик рынка
+│   │   └── perplexity.js     # Утилиты для Perplexity API
 │   └── security/      # Безопасность
 │       └── u-sec-obfuscate.js
 ├── ui/                # UI компоненты
 │   ├── api/           # Компоненты для работы с API
 │   │   ├── import-export.js
 │   │   ├── perplexity.js
-│   │   └── coingecko.js
+│   │   └── coins-manager.js
 │   ├── interaction/   # Компоненты взаимодействия
 │   │   ├── splash.js
 │   │   ├── theme.js

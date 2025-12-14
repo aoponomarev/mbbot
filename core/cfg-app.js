@@ -13,5 +13,5 @@ window.appConfig = {
     { value: 'llama-3.1-sonar-small-128k-online', label: 'llama-3.1-sonar-small-128k-online' },
     { value: 'llama-3.1-sonar-large-128k-online', label: 'llama-3.1-sonar-large-128k-online' }
   ],
-  lastCommitMessage: 'Refactor documentation structure and add mandatory documentation reading principle'
+  lastCommitMessage: 'Extract Perplexity API utility and document core/api vs ui/api separation'
 };

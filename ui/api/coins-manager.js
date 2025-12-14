@@ -1,65 +1,34 @@
 // =========================
-// УТИЛИТА: Трансформация данных CoinGecko в формат со старыми переменными
-// Источник: old_app_not_write/parsing.js (строки 62-70)
-// =========================
-// Преобразует данные CoinGecko API в формат, совместимый со старым приложением:
-// - Создает массив pvs (Price Variations) из 6 интервалов времени
-// - Сохраняет структуру данных для совместимости с математической моделью
-// 
-// Маппинг интервалов CoinGecko → Старые переменные:
-// - price_change_percentage_1h_in_currency → PV1h (pvs[0])
-// - price_change_percentage_24h_in_currency → PV24h (pvs[1])
-// - price_change_percentage_7d_in_currency → PV7d (pvs[2])
-// - price_change_percentage_14d_in_currency → PV14d (pvs[3]) - НОВЫЙ интервал (заменяет 30d в старом индексе)
-// - price_change_percentage_30d_in_currency → PV30d (pvs[4]) - НОВЫЙ индекс (был pvs[3] в старом)
-// - price_change_percentage_200d_in_currency → PV200d (pvs[5]) - НОВЫЙ интервал (заменяет 60d и 90d)
-// 
-// ВАЖНО: Замененные интервалы (14d вместо 30d в индексе 3, 200d вместо 60d/90d в индексе 5)
-// потребуют анализа и пересмотра весов и коэффициентов в математической модели.
-// 
-// @param {Object} coinGeckoCoin - Объект монеты из CoinGecko API
-// @returns {Object} Объект монеты с добавленными полями pvs и отдельными переменными PV
-function transformCoinGeckoToPV(coinGeckoCoin) {
-  // Безопасное извлечение значений с fallback на 0
-  const safeValue = (value) => {
-    const num = parseFloat(value);
-    return Number.isFinite(num) ? num : 0;
-  };
-  
-  // Создаем массив pvs (Price Variations) - совместимый со старым форматом
-  // Источник: old_app_not_write/parsing.js, строка 70: pvs: values
-  const pvs = [
-    safeValue(coinGeckoCoin.price_change_percentage_1h_in_currency),   // pvs[0] - PV1h (1 час)
-    safeValue(coinGeckoCoin.price_change_percentage_24h_in_currency), // pvs[1] - PV24h (24 часа)
-    safeValue(coinGeckoCoin.price_change_percentage_7d_in_currency),  // pvs[2] - PV7d (7 дней)
-    safeValue(coinGeckoCoin.price_change_percentage_14d_in_currency), // pvs[3] - PV14d (14 дней) - НОВЫЙ интервал
-    safeValue(coinGeckoCoin.price_change_percentage_30d_in_currency), // pvs[4] - PV30d (30 дней) - сдвинут с индекса 3
-    safeValue(coinGeckoCoin.price_change_percentage_200d_in_currency)  // pvs[5] - PV200d (200 дней) - НОВЫЙ интервал (заменяет 60d и 90d)
-  ];
-  
-  // Добавляем pvs к объекту монеты для совместимости со старым форматом
-  // Также добавляем отдельные переменные для удобства (опционально, для совместимости)
-  return {
-    ...coinGeckoCoin,
-    pvs, // Массив дельт изменения цены (совместим со старым форматом)
-    // Отдельные переменные для удобства (совместимость со старым кодом)
-    PV1h: pvs[0],
-    PV24h: pvs[1],
-    PV7d: pvs[2],
-    PV14d: pvs[3],
-    PV30d: pvs[4],
-    PV200d: pvs[5]
-  };
-}
-
-// Компонент виджета CoinGecko
+// КОМПОНЕНТ МЕНЕДЖЕРА МОНЕТ
 // Vue компонент с x-template шаблоном
-window.cmpCoinGecko = {
-  template: '#coingecko-template',
+// Использует window.coinGeckoAPI для работы с CoinGecko API
+// =========================
+// Vue компонент с x-template шаблоном
+window.cmpCoinsManager = {
+  template: '#coins-manager-template',
   mixins: [
     window.tableSortMixin, // Подключаем глобальный mixin для сортировки
     window.columnVisibilityMixin // Подключаем mixin для управления видимостью колонок
   ],
+
+  props: {
+    // Горизонт прогноза (передается из корневого компонента)
+    horizonDays: {
+      type: Number,
+      default: 2,
+      validator: (value) => value >= 1 && value <= 90
+    }
+  },
+
+  watch: {
+    // Пересчитываем только CDH при изменении горизонта прогноза
+    // CD1-CD6 остаются неизменными, так как они зависят от фиксированных временных интервалов
+    horizonDays(newValue, oldValue) {
+      if (newValue !== oldValue && newValue >= 1 && newValue <= 90) {
+        this.recalculateCDHOnly();
+      }
+    }
+  },
 
   data() {
     // Загружаем сохраненные данные монет из localStorage
@@ -155,14 +124,19 @@ window.cmpCoinGecko = {
     // Источник трансформации: old_app_not_write/parsing.js
     if (loadedCoins.length > 0 && !loadedCoins[0].pvs) {
       // Трансформируем данные из старого формата CoinGecko в формат со старыми переменными
-      loadedCoins = loadedCoins.map(coin => transformCoinGeckoToPV(coin));
+      // Используем API из core/api/coingecko.js
+      if (window.coinGeckoAPI && window.coinGeckoAPI.transformCoinGeckoToPV) {
+        loadedCoins = loadedCoins.map(coin => window.coinGeckoAPI.transformCoinGeckoToPV(coin));
+      }
     }
     
     // Рассчитываем CPT для загруженных монет (если еще не рассчитан)
     // Источник: Этап 2 миграции математической модели
     // ВАЖНО: В data() нет доступа к this, поэтому используем прямую функцию из window
     if (loadedCoins.length > 0 && window.mmMedianCPT && window.mmMedianCPT.computeEnhancedCPT) {
-      const horizonDays = 2;
+      // Используем горизонт прогноза по умолчанию 2 дня при загрузке из localStorage
+      // (props еще не доступны в data(), поэтому используем значение по умолчанию)
+      const defaultHorizonDays = 2;
       loadedCoins = loadedCoins.map(coin => {
         // Если CPT уже рассчитан - не пересчитываем
         if (coin.enhancedCpt !== undefined && coin.enhancedCptFormatted !== undefined) {
@@ -173,7 +147,7 @@ window.cmpCoinGecko = {
           return coin;
         }
         // Рассчитываем CPT
-        const cptValue = window.mmMedianCPT.computeEnhancedCPT(coin.pvs, horizonDays);
+        const cptValue = window.mmMedianCPT.computeEnhancedCPT(coin.pvs, defaultHorizonDays);
         const cptFormatted = window.mmMedianCPT.formatEnhancedCPT(cptValue);
     return {
           ...coin,
@@ -225,8 +199,7 @@ window.cmpCoinGecko = {
       adaptiveTimeoutBase: 300, // Базовое значение таймаута (300ms)
       adaptiveTimeoutMax: 10000, // Максимальный таймаут (10 секунд)
       lastSuccessfulRequest: null, // Время последнего успешного запроса (для постепенного уменьшения таймаута)
-      // Горизонт прогноза в днях (по умолчанию 2 дня, как в старом приложении)
-      horizonDays: 2,
+      // Горизонт прогноза теперь передается через props из корневого компонента
       // Заглушка для CD значений (пока не мигрированы функции расчета)
       useStub: true,
       // Конфигурация видимости колонок в зависимости от активной вкладки
@@ -243,206 +216,23 @@ window.cmpCoinGecko = {
       },
       // =========================
       // КОНФИГУРАЦИЯ КОЛОНОК ТАБЛИЦЫ
-      // Централизованная конфигурация для будущего компонента таблицы
-      // Определяет: заголовки, поля сортировки, форматирование, видимость
+      // Использует конфигурацию из ui/config/table-columns-config.js
       // =========================
-      tableColumns: [
-        // Колонка чекбоксов - СПЕЦИАЛЬНАЯ (не через конфигурацию форматирования)
-        {
-          id: 'checkbox',
-          type: 'checkbox',
-          cssClass: 'col-checkbox',
-          width: '40px'
-        },
-        // Колонка монет - СПЕЦИАЛЬНАЯ (не через sortable-header)
-        {
-          id: 'coin',
-          type: 'coin',
-          label: 'Монета',
-          cssClass: 'col-coin',
-          sortable: false, // Использует кастомную сортировку через coinSortType
-          showSortIndicator: false, // Отключаем индикацию сортировки для кастомной сортировки
-          menuItems: [
-            { id: 'market_cap', label: 'По капитализации' },
-            { id: 'total_volume', label: 'По дневному объему' },
-            { id: 'alphabet', label: 'По алфавиту' },
-            { id: 'favorite', label: 'Избранное' },
-            { id: 'selected', label: 'Выбранные' }
-          ],
-          customSort: {
-            enabled: true,
-            sortType: 'custom'
-          }
-        },
-        // Процентные колонки - через конфигурацию форматирования
-        {
-          id: 'percent-1h',
-          type: 'numeric',
-          label: '1h %',
-          field: 'price_change_percentage_1h_in_currency',
-          cssClass: 'col-percent-1h',
-          sortable: true,
-          format: {
-            component: 'cell-num',
-            type: 'decimal',
-            precision: 2,
-            rounding: 'precision',
-            unit: '%',
-            colorize: true,
-            roundToHalf: true,
-            sectors: [
-              { range: [-Infinity, 0], cssClass: 'text-danger' },
-              { range: [0, Infinity], cssClass: 'text-success' }
-            ],
-            decimalSeparator: ',',
-            thousandsSeparator: ' '
-          }
-        },
-        {
-          id: 'percent-24h',
-          type: 'numeric',
-          label: '24h %',
-          field: 'price_change_percentage_24h_in_currency',
-          cssClass: 'col-percent-24h',
-          sortable: true,
-          format: {
-            component: 'cell-num',
-            type: 'decimal',
-            precision: 2,
-            rounding: 'precision',
-            unit: '%',
-            colorize: true,
-            roundToHalf: true,
-            sectors: [
-              { range: [-Infinity, 0], cssClass: 'text-danger' },
-              { range: [0, Infinity], cssClass: 'text-success' }
-            ],
-            decimalSeparator: ',',
-            thousandsSeparator: ' '
-          }
-        },
-        {
-          id: 'percent-7d',
-          type: 'numeric',
-          label: '7d %',
-          field: 'price_change_percentage_7d_in_currency',
-          cssClass: 'col-percent-7d',
-          sortable: true,
-          format: {
-            component: 'cell-num',
-            type: 'decimal',
-            precision: 2,
-            rounding: 'precision',
-            unit: '%',
-            colorize: true,
-            roundToHalf: true,
-            sectors: [
-              { range: [-Infinity, 0], cssClass: 'text-danger' },
-              { range: [0, Infinity], cssClass: 'text-success' }
-            ],
-            decimalSeparator: ',',
-            thousandsSeparator: ' '
-          }
-        },
-        {
-          id: 'percent-14d',
-          type: 'numeric',
-          label: '14d %',
-          field: 'price_change_percentage_14d_in_currency',
-          cssClass: 'col-percent-14d',
-          sortable: true,
-          format: {
-            component: 'cell-num',
-            type: 'decimal',
-            precision: 2,
-            rounding: 'precision',
-            unit: '%',
-            colorize: true,
-            roundToHalf: true,
-            sectors: [
-              { range: [-Infinity, 0], cssClass: 'text-danger' },
-              { range: [0, Infinity], cssClass: 'text-success' }
-            ],
-            decimalSeparator: ',',
-            thousandsSeparator: ' '
-          }
-        },
-        {
-          id: 'percent-30d',
-          type: 'numeric',
-          label: '30d %',
-          field: 'price_change_percentage_30d_in_currency',
-          cssClass: 'col-percent-30d',
-          sortable: true,
-          format: {
-            component: 'cell-num',
-            type: 'decimal',
-            precision: 2,
-            rounding: 'precision',
-            unit: '%',
-            colorize: true,
-            roundToHalf: true,
-            sectors: [
-              { range: [-Infinity, 0], cssClass: 'text-danger' },
-              { range: [0, Infinity], cssClass: 'text-success' }
-            ],
-            decimalSeparator: ',',
-            thousandsSeparator: ' '
-          }
-        },
-        {
-          id: 'percent-200d',
-          type: 'numeric',
-          label: '200d %',
-          field: 'price_change_percentage_200d_in_currency',
-          cssClass: 'col-percent-200d',
-          sortable: true,
-          format: {
-            component: 'cell-num',
-            type: 'decimal',
-            precision: 2,
-            rounding: 'precision',
-            unit: '%',
-            colorize: true,
-            roundToHalf: true,
-            sectors: [
-              { range: [-Infinity, 0], cssClass: 'text-danger' },
-              { range: [0, Infinity], cssClass: 'text-success' }
-            ],
-            decimalSeparator: ',',
-            thousandsSeparator: ' '
-          }
-        },
-        // CD колонки - динамические (будут развернуты через cdHeaders)
-        {
-          id: 'cd-dynamic',
-          type: 'numeric',
-          label: null, // Будет браться из cdHeaders
-          field: null, // Будет вычисляться через getCDField
-          cssClass: 'col-cd',
-          sortable: true,
-          dynamic: true, // Флаг для динамических колонок
-          format: {
-            component: 'cell-num',
-            type: 'decimal',
-            precision: 2,
-            rounding: 'precision',
-            colorize: true,
-            roundToHalf: true,
-            sectors: [
-              { range: [-Infinity, 0], cssClass: 'text-danger' },
-              { range: [0, Infinity], cssClass: 'text-success' }
-            ],
-            decimalSeparator: ',',
-            thousandsSeparator: ' ',
-            emptyValue: '—'
-          }
-        }
-      ]
+      tableColumns: (window.tableColumnsConfig && window.tableColumnsConfig.tableColumns) ? 
+        [...window.tableColumnsConfig.tableColumns] : // Создаем копию массива для реактивности Vue
+        []
     };
   },
   
   computed: {
+    // Объект для управления адаптивным таймаутом (передается в API функции)
+    timeoutManager() {
+      return {
+        increaseAdaptiveTimeout: () => this.increaseAdaptiveTimeout(),
+        decreaseAdaptiveTimeout: () => this.decreaseAdaptiveTimeout(),
+        adaptiveTimeout: this.adaptiveTimeout
+      };
+    },
     // Сортированный список монет
     sortedCoins() {
       // Если выбрана сортировка колонки монет - используем специальную логику
@@ -568,33 +358,23 @@ window.cmpCoinGecko = {
       this.cgError = null;
       this.cgIsLoading = true;
       try {
-        const priceChangeParams = '1h,24h,7d,14d,30d,200d';
-        const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${this.cgSelectedCoins.join(',')}&price_change_percentage=${priceChangeParams}`;
-        const res = await fetch(url);
-        
-        if (!res.ok) {
-          // Обработка rate limiting (429)
-          if (res.status === 429) {
-            this.increaseAdaptiveTimeout();
-            throw new Error(`HTTP ${res.status}`);
-          }
-          throw new Error(`HTTP ${res.status}`);
+        // Используем API из core/api/coingecko.js
+        if (!window.coinGeckoAPI || !window.coinGeckoAPI.fetchCoinsMarkets) {
+          throw new Error('coinGeckoAPI module not loaded');
         }
         
-        // Успешный запрос - уменьшаем таймаут
-        this.decreaseAdaptiveTimeout();
-        
-        const data = await res.json();
-        // Трансформируем данные CoinGecko в формат со старыми переменными (pvs, PV1h и т.д.)
-        // Источник трансформации: old_app_not_write/parsing.js
-        // Это обеспечивает преемственность с математической моделью из старого приложения
-        this.cgCoins = Array.isArray(data) ? data.map(coin => transformCoinGeckoToPV(coin)) : [];
+        // Получаем данные монет через API
+        this.cgCoins = await window.coinGeckoAPI.fetchCoinsMarkets(this.cgSelectedCoins, this.timeoutManager);
         
         // Рассчитываем CPT (Coin Potential) для каждой монеты
         // Источник: Этап 2 миграции математической модели
-        // Используем горизонт прогноза по умолчанию 2 дня (как в старом приложении)
-        const horizonDays = 2;
-        this.cgCoins = this.cgCoins.map(coin => this.calculateCPT(coin, horizonDays));
+        // Используем горизонт прогноза из props
+        this.cgCoins = this.cgCoins.map(coin => this.calculateCPT(coin, this.horizonDays));
+        
+        // Рассчитываем CD (Cumulative Delta) для каждой монеты
+        // Источник: Этап 3 миграции математической модели
+        // Вызываем после расчета CPT, так как CD использует те же pvs
+        this.cgCoins = this.cgCoins.map(coin => this.calculateCD(coin, this.horizonDays));
         
         this.cgLastUpdated = new Date().toISOString(); // Сохраняем ISO строку для парсинга
         
@@ -639,100 +419,141 @@ window.cmpCoinGecko = {
     },
     
     // =========================
-    // МЕТОДЫ ПОЛУЧЕНИЯ CD (Cumulative Delta) - ВРЕМЕННО ИСПОЛЬЗУЮТ ЗАГЛУШКИ
-    // Источник: ui/api/complex-deltas.js (методы getCDH, getCD, getCDValue)
-    // ВАЖНО: После миграции Этапа 3 будут использоваться реальные вычисления
+    // МЕТОДЫ ПОЛУЧЕНИЯ CD (Cumulative Delta)
+    // Используют утилиты из ui/utils/coins-cd-helpers.js
     // =========================
     
     /**
      * getCDH(coin)
      * Получить CDH (CD на горизонте) для монеты
-     * ВАЖНО: Пока используется заглушка, после миграции Этапа 3 будет реальный расчет
+     * Делегирует вызов утилите coinsCDHelpers.getCDH()
      * 
-     * @param {Object} coin - Объект монеты с полем pvs
-     * @returns {number} CDH значение (пока сумма всех pvs как заглушка)
+     * @param {Object} coin - Объект монеты с полями cdh (сырое) и cdhw (взвешенное)
+     * @returns {number} CDH значение
      */
     getCDH(coin) {
-      if (this.useStub) {
-        // Заглушка: используем сумму pvs как приблизительное значение CDH
-        if (coin.pvs && Array.isArray(coin.pvs)) {
-          return coin.pvs.reduce((sum, pv) => sum + (parseFloat(pv) || 0), 0);
-        }
+      if (!window.coinsCDHelpers || !window.coinsCDHelpers.getCDH) {
+        console.warn('coinsCDHelpers.getCDH not available');
         return 0;
       }
-      // После миграции: return parseFloat(coin.cdhw) || 0;
-      return parseFloat(coin.cdhw) || 0;
+      return window.coinsCDHelpers.getCDH(coin);
+    },
+    
+    /**
+     * getCDHRaw(coin)
+     * Получить сырое CDH значение для tooltip
+     * Делегирует вызов утилите coinsCDHelpers.getCDHRaw()
+     * 
+     * @param {Object} coin - Объект монеты с полем cdh (сырое CDH)
+     * @returns {number} Сырое CDH значение
+     */
+    getCDHRaw(coin) {
+      if (!window.coinsCDHelpers || !window.coinsCDHelpers.getCDHRaw) {
+        console.warn('coinsCDHelpers.getCDHRaw not available');
+        return 0;
+      }
+      return window.coinsCDHelpers.getCDHRaw(coin);
     },
     
     /**
      * getCD(coin, index)
      * Получить CD значение по индексу (1-6)
-     * ВАЖНО: Пока используется заглушка, после миграции Этапа 3 будет реальный расчет
+     * Делегирует вызов утилите coinsCDHelpers.getCD()
      * 
-     * @param {Object} coin - Объект монеты с полем pvs
+     * @param {Object} coin - Объект монеты с полями cd1..cd6 (сырые) и cd1w..cd6w (взвешенные)
      * @param {number} index - Индекс CD (1-6)
-     * @returns {number|string} CD значение (пока частичная сумма pvs как заглушка)
+     * @returns {number} CD значение
      */
     getCD(coin, index) {
-      if (this.useStub) {
-        // Заглушка: используем частичную сумму pvs
-        if (coin.pvs && Array.isArray(coin.pvs)) {
-          const sum = coin.pvs.slice(0, index).reduce((sum, pv) => sum + (parseFloat(pv) || 0), 0);
-          return sum;
-        }
+      if (!window.coinsCDHelpers || !window.coinsCDHelpers.getCD) {
+        console.warn('coinsCDHelpers.getCD not available');
         return 0;
       }
-      // После миграции: return coin[`cd${index}`] || coin[`cd${index}w`] || 0;
-      const cdValue = coin[`cd${index}`] || coin[`cd${index}w`];
-      return cdValue !== undefined ? cdValue : 0;
+      return window.coinsCDHelpers.getCD(coin, index);
+    },
+    
+    /**
+     * getCDRaw(coin, index)
+     * Получить сырое CD значение для tooltip
+     * Делегирует вызов утилите coinsCDHelpers.getCDRaw()
+     * 
+     * @param {Object} coin - Объект монеты с полями cd1..cd6 (сырые CD)
+     * @param {number} index - Индекс CD (1-6)
+     * @returns {number} Сырое CD значение
+     */
+    getCDRaw(coin, index) {
+      if (!window.coinsCDHelpers || !window.coinsCDHelpers.getCDRaw) {
+        console.warn('coinsCDHelpers.getCDRaw not available');
+        return 0;
+      }
+      return window.coinsCDHelpers.getCDRaw(coin, index);
     },
     
     /**
      * getCDValue(coin, field)
-     * Получить значение CD для отображения в таблице по полю сортировки
+     * Получить взвешенное значение CD для отображения в таблице по полю сортировки
+     * Делегирует вызов утилите coinsCDHelpers.getCDValue()
      * 
      * @param {Object} coin - Объект монеты
      * @param {string} field - Поле сортировки ('cdh', 'cd1', 'cd2', 'cd3', 'cd4', 'cd5', 'cd6')
-     * @returns {number} CD значение
+     * @returns {number} Взвешенное CD значение
      */
     getCDValue(coin, field) {
-      if (field === 'cdh') {
-        return this.getCDH(coin);
+      if (!window.coinsCDHelpers || !window.coinsCDHelpers.getCDValue) {
+        console.warn('coinsCDHelpers.getCDValue not available');
+        return 0;
       }
-      // Извлекаем индекс из поля (cd1 -> 1, cd2 -> 2, и т.д.)
-      const index = parseInt(field.replace('cd', ''));
-      if (index >= 1 && index <= 6) {
-        return this.getCD(coin, index);
+      return window.coinsCDHelpers.getCDValue(coin, field);
+    },
+    
+    /**
+     * getCDTooltip(coin, field)
+     * Получить строку с сырым значением CD для tooltip
+     * Делегирует вызов утилите coinsCDHelpers.getCDTooltip()
+     * 
+     * @param {Object} coin - Объект монеты
+     * @param {string} field - Поле сортировки ('cdh', 'cd1', 'cd2', 'cd3', 'cd4', 'cd5', 'cd6')
+     * @returns {string|null} Строка с сырым значением для tooltip или null
+     */
+    getCDTooltip(coin, field) {
+      if (!window.coinsCDHelpers || !window.coinsCDHelpers.getCDTooltip) {
+        console.warn('coinsCDHelpers.getCDTooltip not available');
+        return null;
       }
-      return 0;
+      return window.coinsCDHelpers.getCDTooltip(coin, field);
     },
     
     /**
      * cgFormatCD(value)
      * Форматирование CD значения для отображения
+     * Делегирует вызов утилите coinsCDHelpers.formatCD()
      * 
      * @param {number} value - CD значение
      * @returns {string} Отформатированное значение
      */
     cgFormatCD(value) {
-      if (value === null || value === undefined || value === 0) return '—';
-      const num = parseFloat(value);
-      if (Number.isFinite(num)) {
-        return num.toFixed(2);
+      if (!window.coinsCDHelpers || !window.coinsCDHelpers.formatCD) {
+        console.warn('coinsCDHelpers.formatCD not available');
+        return '—';
       }
-      return '—';
+      return window.coinsCDHelpers.formatCD(value);
     },
     
     /**
      * getCDField(header, index)
      * Получить поле для сортировки по заголовку CD колонки
+     * Делегирует вызов утилите coinsCDHelpers.getCDField()
      * 
      * @param {string} header - Заголовок колонки ('CDH', 'CD1', 'CD2', и т.д.)
      * @param {number} index - Индекс колонки в массиве cdHeaders (не используется, оставлен для совместимости)
      * @returns {string} Поле для сортировки ('cdh', 'cd1', 'cd2', и т.д.)
      */
     getCDField(header, index) {
-      return header.toLowerCase();
+      if (!window.coinsCDHelpers || !window.coinsCDHelpers.getCDField) {
+        console.warn('coinsCDHelpers.getCDField not available');
+        return header ? header.toLowerCase() : '';
+      }
+      return window.coinsCDHelpers.getCDField(header, index);
     },
     
     // =========================
@@ -760,16 +581,27 @@ window.cmpCoinGecko = {
     },
     
     /**
-     * getColumnFormatProps(column)
+     * getColumnFormatProps(column, item)
      * Получить настройки форматирования для колонки (props для cell-num)
+     * Добавляет tooltip с сырым значением для CD колонок
      * 
      * @param {Object} column - Конфигурация колонки
+     * @param {Object} item - Объект монеты (для получения сырого значения CD)
      * @returns {Object} Props для компонента форматирования
      */
-    getColumnFormatProps(column) {
+    getColumnFormatProps(column, item) {
       if (!column.format) return {};
       // Копируем все свойства format, кроме component
       const { component, ...formatProps } = column.format;
+      
+      // Если это CD колонка - добавляем tooltip с сырым значением
+      if (column.field && column.field.toLowerCase().startsWith('cd') && item) {
+        const tooltip = this.getCDTooltip(item, column.field);
+        if (tooltip) {
+          formatProps.customTooltip = tooltip;
+        }
+      }
+      
       return formatProps;
     },
     
@@ -856,6 +688,234 @@ window.cmpCoinGecko = {
       };
     },
     
+    /**
+     * calculateCD(coin, hDays)
+     * Расчет CD (Cumulative Delta) для монеты
+     * Источник: Этап 3 миграции математической модели
+     * 
+     * @param {Object} coin - Объект монеты с полем pvs (массив из 6 значений PV)
+     * @param {number} hDays - Горизонт прогноза в днях (если не указан, используется this.horizonDays)
+     * @returns {Object} Объект монеты с добавленными полями:
+     *   - cd1..cd6 (сырые CD значения)
+     *   - cd1w..cd6w (взвешенные CD значения)
+     *   - cdh (CDH сырое)
+     *   - cdhw (CDH взвешенное)
+     */
+    calculateCD(coin, hDays = null) {
+      // Если hDays не указан, используем горизонт из props
+      if (hDays === null) {
+        hDays = this.horizonDays;
+      }
+      // Проверяем доступность функций расчета CD
+      if (!window.mmMedianCD || !window.mmMedianCD.calculateCDsWeighted || !window.mmMedianCD.approximateCDHFromSeries) {
+        console.warn('mmMedianCD функции не доступны. CD не будет рассчитан.');
+        return coin;
+      }
+      
+      // Проверяем доступность функции расчета PRC-весов
+      if (!window.mmMedianPRCWeights || !window.mmMedianPRCWeights.computePRCWeights) {
+        console.warn('mmMedianPRCWeights.computePRCWeights не доступна. CD не будет рассчитан.');
+        return coin;
+      }
+      
+      // Проверяем наличие массива pvs
+      if (!coin.pvs || !Array.isArray(coin.pvs) || coin.pvs.length !== 6) {
+        console.warn('Монета не содержит корректный массив pvs. CD не будет рассчитан.', coin);
+        return coin;
+      }
+      
+      // Рассчитываем PRC-веса для заданного горизонта
+      const prcWeights = window.mmMedianPRCWeights.computePRCWeights(hDays);
+      
+      // Рассчитываем CD (сырые и взвешенные) используя функцию из математической модели
+      const { cdRaw, cdW } = window.mmMedianCD.calculateCDsWeighted(coin.pvs, prcWeights);
+      
+      // Рассчитываем CDH (CD на горизонте) используя интерполяцию
+      const cdhRaw = window.mmMedianCD.approximateCDHFromSeries(cdRaw, hDays);
+      const cdhW = window.mmMedianCD.approximateCDHFromSeries(cdW, hDays);
+      
+      // Добавляем поля к объекту монеты
+      const result = {
+        ...coin,
+        // Сырые CD значения
+        cd1: cdRaw[0],
+        cd2: cdRaw[1],
+        cd3: cdRaw[2],
+        cd4: cdRaw[3],
+        cd5: cdRaw[4],
+        cd6: cdRaw[5],
+        // Взвешенные CD значения
+        cd1w: cdW[0],
+        cd2w: cdW[1],
+        cd3w: cdW[2],
+        cd4w: cdW[3],
+        cd5w: cdW[4],
+        cd6w: cdW[5],
+        // CDH (CD на горизонте)
+        cdh: cdhRaw,
+        cdhw: cdhW
+      };
+      return result;
+    },
+    
+    /**
+     * Пересчет взвешенных CD и CDH при изменении горизонта прогноза
+     * 
+     * ВАЖНО:
+     * - Сырые CD (cd1..cd6, cdh) НЕ пересчитываются - они зависят только от PV и не зависят от hDays
+     * - Взвешенные CD (cd1w..cd6w, cdhw) ПЕРЕСЧИТЫВАЮТСЯ - они зависят от PRC-весов, которые зависят от hDays
+     * 
+     * Вызывается автоматически через watch при изменении horizonDays
+     */
+    recalculateCDHOnly() {
+      if (!this.cgCoins || this.cgCoins.length === 0) {
+        console.log('ℹ️ Нет монет для пересчета взвешенных CD');
+        return;
+      }
+      
+      // Проверяем доступность функций расчета CD
+      if (!window.mmMedianCD || !window.mmMedianCD.calculateCDsWeighted || !window.mmMedianCD.approximateCDHFromSeries) {
+        console.warn('mmMedianCD функции не доступны. Взвешенные CD не будут пересчитаны.');
+        return;
+      }
+      
+      // Проверяем доступность функции расчета PRC-весов
+      if (!window.mmMedianPRCWeights || !window.mmMedianPRCWeights.computePRCWeights) {
+        console.warn('mmMedianPRCWeights.computePRCWeights не доступна. Взвешенные CD не будут пересчитаны.');
+        return;
+      }
+      
+      console.log(`🔄 Пересчет взвешенных CD для горизонта ${this.horizonDays} дней`);
+      
+      // Рассчитываем новые PRC-веса для текущего горизонта
+      const prcWeights = window.mmMedianPRCWeights.computePRCWeights(this.horizonDays);
+      
+      // Создаем новый массив для правильной реактивности Vue
+      const updatedCoins = this.cgCoins.map(coin => {
+        // Проверяем наличие массива pvs
+        if (!coin.pvs || !Array.isArray(coin.pvs) || coin.pvs.length !== 6) {
+          console.warn(`⚠️ Монета ${coin.symbol || coin.id} не содержит корректный массив pvs. Взвешенные CD не будут пересчитаны.`);
+          return coin;
+        }
+        
+        // Пересчитываем взвешенные CD с новыми PRC-весами
+        // Сырые CD остаются неизменными (они не зависят от hDays)
+        const { cdW } = window.mmMedianCD.calculateCDsWeighted(coin.pvs, prcWeights);
+        
+        // Используем существующие сырые CD для интерполяции CDH (они не меняются)
+        const cdRaw = [
+          coin.cd1 || 0,
+          coin.cd2 || 0,
+          coin.cd3 || 0,
+          coin.cd4 || 0,
+          coin.cd5 || 0,
+          coin.cd6 || 0
+        ];
+        
+        // Пересчитываем только взвешенное CDH (CD на горизонте) используя интерполяцию
+        // Сырое CDH (cdh) НЕ пересчитывается - оно зависит только от сырых CD, которые не меняются
+        // Взвешенное CDH - интерполяция между новыми взвешенными CD
+        const cdhW = window.mmMedianCD.approximateCDHFromSeries(cdW, this.horizonDays);
+        
+        // Возвращаем монету с обновленными взвешенными CD и взвешенным CDH
+        // Сырые CD и сырое CDH остаются неизменными
+        return {
+          ...coin,
+          // Сырые CD остаются неизменными (не пересчитываем)
+          // cd1, cd2, cd3, cd4, cd5, cd6, cdh - остаются как есть (не зависят от hDays)
+          
+          // Взвешенные CD пересчитываются с новыми PRC-весами
+          cd1w: cdW[0],
+          cd2w: cdW[1],
+          cd3w: cdW[2],
+          cd4w: cdW[3],
+          cd5w: cdW[4],
+          cd6w: cdW[5],
+          
+          // Пересчитывается только взвешенное CDH
+          // cdh - остается неизменным (не пересчитываем)
+          cdhw: cdhW    // Взвешенное CDH (интерполяция между новыми взвешенными CD)
+        };
+      });
+      
+      this.cgCoins = updatedCoins;
+      
+      // Сохраняем обновленные данные
+      localStorage.setItem('cgCoins', JSON.stringify(this.cgCoins));
+      
+      console.log(`✅ Взвешенные CD пересчитаны для ${this.cgCoins.length} монет`);
+      
+      // Принудительное обновление для гарантии перерисовки таблицы
+      this.$nextTick(() => {
+        this.$forceUpdate();
+      });
+    },
+    
+    /**
+     * Пересчет всех метрик (CPT и CD) - используется при первоначальной загрузке или полном обновлении
+     * ВАЖНО: При изменении горизонта прогноза используется recalculateCDHOnly() вместо этого метода
+     */
+    recalculateAllMetrics() {
+      if (!this.cgCoins || this.cgCoins.length === 0) {
+        console.log('ℹ️ Нет монет для пересчета метрик');
+        return;
+      }
+      
+      console.log(`🔄 Пересчет метрик для горизонта ${this.horizonDays} дней`);
+      
+      // Создаем новый массив для правильной реактивности Vue
+      // Это важно: Vue должен видеть, что массив изменился
+      const updatedCoins = this.cgCoins.map((coin) => {
+        // Пересчитываем CPT и CD для каждой монеты
+        let updatedCoin = this.calculateCPT(coin, this.horizonDays);
+        updatedCoin = this.calculateCD(updatedCoin, this.horizonDays);
+        return updatedCoin;
+      });
+      
+      this.cgCoins = updatedCoins;
+      
+      // Сохраняем обновленные данные
+      localStorage.setItem('cgCoins', JSON.stringify(this.cgCoins));
+      
+      console.log(`✅ Метрики пересчитаны для ${this.cgCoins.length} монет`);
+      
+      // Принудительное обновление для гарантии перерисовки таблицы
+      this.$nextTick(() => {
+        this.$forceUpdate();
+      });
+    },
+    
+    /**
+     * Проверка расчета CD для всех монет (для отладки)
+     * Вызывается в mounted() для проверки корректности расчета
+     */
+    checkCDCalculation() {
+      if (!this.cgCoins || this.cgCoins.length === 0) {
+        console.log('ℹ️ Нет монет для проверки CD');
+        return;
+      }
+      
+      if (!window.mmMedianCD || !window.mmMedianCD.calculateCDsWeighted) {
+        console.warn('⚠️ mmMedianCD не доступен. CD не может быть проверен.');
+        return;
+      }
+      
+      // Проверяем первую монету с рассчитанным CD
+      const coinWithCD = this.cgCoins.find(coin => 
+        coin.cd1 !== undefined && coin.cdhw !== undefined
+      );
+      
+      if (coinWithCD) {
+        console.log('✅ CD рассчитан для монет:');
+        console.log(`   - Пример монеты: ${coinWithCD.symbol || coinWithCD.id}`);
+        console.log(`   - CD1: ${coinWithCD.cd1}, CD1w: ${coinWithCD.cd1w}`);
+        console.log(`   - CD6: ${coinWithCD.cd6}, CD6w: ${coinWithCD.cd6w}`);
+        console.log(`   - CDH: ${coinWithCD.cdh}, CDHw: ${coinWithCD.cdhw}`);
+      } else {
+        console.warn('⚠️ CD не рассчитан ни для одной монеты. Возможно, требуется пересчет.');
+      }
+    },
+    
     // Парсинг строки на тикеры (разделители: любые символы кроме букв)
     parseTickersFromString(str) {
       if (!str || str.trim().length === 0) return [];
@@ -883,35 +943,13 @@ window.cmpCoinGecko = {
     // Получение CoinGecko ID по тикеру (symbol)
     async getCoinIdBySymbol(ticker) {
       try {
-        // Используем поиск CoinGecko для получения ID монеты по тикеру
-        const url = `https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(ticker)}`;
-        const res = await fetch(url);
-        
-        if (!res.ok) {
-          // Обработка rate limiting (429)
-          if (res.status === 429) {
-            this.increaseAdaptiveTimeout();
-            return null;
-          }
+        // Используем API из core/api/coingecko.js
+        if (!window.coinGeckoAPI || !window.coinGeckoAPI.getCoinIdBySymbol) {
+          console.error('coinGeckoAPI.getCoinIdBySymbol not available');
           return null;
         }
         
-        // Успешный запрос - уменьшаем таймаут
-        this.decreaseAdaptiveTimeout();
-        
-        const data = await res.json();
-        const coins = data.coins || [];
-        
-        // Ищем точное совпадение по тикеру (case-insensitive)
-        const tickerUpper = ticker.toUpperCase();
-        const exactMatch = coins.find(coin => coin.symbol && coin.symbol.toUpperCase() === tickerUpper);
-        
-        if (exactMatch) {
-          return exactMatch.id;
-        }
-        
-        // Если точного совпадения нет, возвращаем первый результат (самый популярный)
-        return coins.length > 0 ? coins[0].id : null;
+        return await window.coinGeckoAPI.getCoinIdBySymbol(ticker, this.timeoutManager);
       } catch (error) {
         console.error(`Error getting coin ID for ticker ${ticker}:`, error);
         return null;
@@ -1099,79 +1137,21 @@ window.cmpCoinGecko = {
     },
     
     // Добавление неудачного тикера в избранное (после 5 попыток)
+    // Использует утилиту из ui/utils/coins-favorites-helpers.js
     async archiveFailedTicker(ticker) {
-      try {
-        // Пытаемся найти монету через поиск CoinGecko (даже если точного совпадения нет)
-        const url = `https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(ticker)}`;
-        const res = await fetch(url);
-        
-        if (!res.ok) {
-          // Обработка rate limiting (429) - пропускаем добавление в избранное через API
-          if (res.status === 429) {
-            this.increaseAdaptiveTimeout();
-          }
-          // При любой ошибке API - все равно сохраняем в избранное с тикером как ID
-          const failedId = `failed-${ticker.toLowerCase()}`;
-          const existsInFavorites = this.cgFavoriteCoins.some(favorite => favorite.id === failedId);
-          if (!existsInFavorites) {
-            this.cgFavoriteCoins.push({
-              id: failedId,
-              symbol: ticker.toUpperCase(),
-              name: ticker
-            });
-            localStorage.setItem('cgFavoriteCoins', JSON.stringify(this.cgFavoriteCoins));
-          }
-          return;
-        }
-        
-        // Успешный запрос - уменьшаем таймаут
-        this.decreaseAdaptiveTimeout();
-        
-        const data = await res.json();
-        const coins = data.coins || [];
-        
-        if (coins.length > 0) {
-          // Используем первый результат поиска (самый популярный)
-          const coin = coins[0];
-          
-          // Проверяем, нет ли уже этой монеты в избранном
-          const existsInFavorites = this.cgFavoriteCoins.some(favorite => favorite.id === coin.id);
-          if (!existsInFavorites) {
-            // Сохраняем объект с id, symbol (тикер) и name (полное название)
-            this.cgFavoriteCoins.push({
-              id: coin.id,
-              symbol: (coin.symbol || ticker).toUpperCase(),
-              name: coin.name || ticker
-            });
-            localStorage.setItem('cgFavoriteCoins', JSON.stringify(this.cgFavoriteCoins));
-          }
-        } else {
-          // Если ничего не найдено - все равно сохраняем в избранное с тикером как ID
-          const failedId = `failed-${ticker.toLowerCase()}`;
-          const existsInFavorites = this.cgFavoriteCoins.some(favorite => favorite.id === failedId);
-          if (!existsInFavorites) {
-            this.cgFavoriteCoins.push({
-              id: failedId,
-              symbol: ticker.toUpperCase(),
-              name: ticker
-            });
-            localStorage.setItem('cgFavoriteCoins', JSON.stringify(this.cgFavoriteCoins));
-          }
-        }
-      } catch (error) {
-        console.error(`Error archiving failed ticker ${ticker}:`, error);
-        // Даже при ошибке пытаемся сохранить тикер в избранное
-        const failedId = `failed-${ticker.toLowerCase()}`;
-        const existsInFavorites = this.cgFavoriteCoins.some(favorite => favorite.id === failedId);
-          if (!existsInFavorites) {
-            this.cgFavoriteCoins.push({
-              id: failedId,
-            symbol: ticker.toUpperCase(),
-            name: ticker
-          });
-          localStorage.setItem('cgFavoriteCoins', JSON.stringify(this.cgFavoriteCoins));
-        }
+      if (!window.coinsFavoritesHelpers || !window.coinsFavoritesHelpers.archiveFailedTicker) {
+        console.warn('coinsFavoritesHelpers.archiveFailedTicker not available');
+        return;
       }
+      
+      await window.coinsFavoritesHelpers.archiveFailedTicker(
+        ticker,
+        this.cgFavoriteCoins,
+        this.timeoutManager,
+        (favoriteCoins) => {
+          localStorage.setItem('cgFavoriteCoins', JSON.stringify(favoriteCoins));
+        }
+      );
     },
     
     // Обновление отображения списка тикеров в поле поиска
@@ -1243,74 +1223,26 @@ window.cmpCoinGecko = {
         
         // Если один термин - используем обычный поиск
         if (searchTerms.length === 1) {
-          const url = `https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(searchTerms[0])}`;
-          const res = await fetch(url);
-          
-          if (!res.ok) {
-            // Обработка rate limiting (429)
-            if (res.status === 429) {
-              this.increaseAdaptiveTimeout();
-              this.cgSearchResults = [];
-              return;
-            }
-            throw new Error(`HTTP ${res.status}`);
+          // Используем API из core/api/coingecko.js
+          if (!window.coinGeckoAPI || !window.coinGeckoAPI.searchCoins) {
+            this.cgSearchResults = [];
+            return;
           }
           
-          // Успешный запрос - уменьшаем таймаут
-          this.decreaseAdaptiveTimeout();
-          
-          const data = await res.json();
-          let coins = data.coins || [];
-          
-          // Сортируем результаты: полные совпадения с тикером вверху
-          const queryLower = searchTerms[0].toLowerCase();
-          coins.sort((a, b) => {
-            const aSymbol = a.symbol.toLowerCase();
-            const bSymbol = b.symbol.toLowerCase();
-            
-            // Полное совпадение тикера - в начало
-            const aExactMatch = aSymbol === queryLower ? 1 : 0;
-            const bExactMatch = bSymbol === queryLower ? 1 : 0;
-            if (aExactMatch !== bExactMatch) {
-              return bExactMatch - aExactMatch;
-            }
-            
-            // Тикер начинается с запроса - выше
-            const aStartsWith = aSymbol.startsWith(queryLower) ? 1 : 0;
-            const bStartsWith = bSymbol.startsWith(queryLower) ? 1 : 0;
-            if (aStartsWith !== bStartsWith) {
-              return bStartsWith - aStartsWith;
-            }
-            
-            // Остальные по market_cap_rank (популярности)
-            return (a.market_cap_rank || 9999) - (b.market_cap_rank || 9999);
-          });
-          
-          this.cgSearchResults = coins.slice(0, 10);
+          const coins = await window.coinGeckoAPI.searchCoins(searchTerms[0], this.timeoutManager);
+          this.cgSearchResults = coins;
         } else {
           // Множественный поиск: ищем каждую монету отдельно и объединяем результаты
+          // Используем API из core/api/coingecko.js
+          if (!window.coinGeckoAPI || !window.coinGeckoAPI.searchCoins) {
+            this.cgSearchResults = [];
+            return;
+          }
+          
           const allResults = new Map(); // Используем Map для уникальности по ID
           
           for (const term of searchTerms) {
-            const url = `https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(term)}`;
-            const res = await fetch(url);
-            
-            if (!res.ok) {
-              // Обработка rate limiting (429)
-              if (res.status === 429) {
-                this.increaseAdaptiveTimeout();
-                // Добавляем задержку перед следующей попыткой
-                await new Promise(resolve => setTimeout(resolve, this.adaptiveTimeout));
-                continue; // Пропускаем этот термин и переходим к следующему
-              }
-              continue; // Пропускаем этот термин при других ошибках
-            }
-            
-            // Успешный запрос - уменьшаем таймаут
-            this.decreaseAdaptiveTimeout();
-            
-            const data = await res.json();
-            const coins = data.coins || [];
+            const coins = await window.coinGeckoAPI.searchCoins(term, this.timeoutManager);
             
             // Добавляем результаты в общую карту (приоритет первым найденным)
             coins.forEach(coin => {
@@ -1428,33 +1360,22 @@ window.cmpCoinGecko = {
       this.cgError = null;
       
       try {
-        const priceChangeParams = '1h,24h,7d,14d,30d,200d';
-        const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=${count}&page=1&price_change_percentage=${priceChangeParams}`;
-        const res = await fetch(url);
-        
-        if (!res.ok) {
-          if (res.status === 429) {
-            this.increaseAdaptiveTimeout();
-            throw new Error(`HTTP ${res.status}`);
-          }
-          throw new Error(`HTTP ${res.status}`);
+        // Используем API из core/api/coingecko.js
+        if (!window.coinGeckoAPI || !window.coinGeckoAPI.getTopCoinsByMarketCap) {
+          throw new Error('coinGeckoAPI.getTopCoinsByMarketCap not available');
         }
         
-        this.decreaseAdaptiveTimeout();
-        
-        const data = await res.json();
-        // Трансформируем данные CoinGecko в формат со старыми переменными (pvs, PV1h и т.д.)
-        // Источник трансформации: old_app_not_write/parsing.js
-        const coins = Array.isArray(data) ? data.map(coin => transformCoinGeckoToPV(coin)) : [];
+        const coins = await window.coinGeckoAPI.getTopCoinsByMarketCap(count, this.timeoutManager);
         
         // Рассчитываем CPT (Coin Potential) для каждой монеты
         // Источник: Этап 2 миграции математической модели
-        const horizonDays = 2;
-        const coinsWithCPT = coins.map(coin => this.calculateCPT(coin, horizonDays));
+        // Используем горизонт прогноза из props
+        const coinsWithCPT = coins.map(coin => this.calculateCPT(coin, this.horizonDays));
+        const coinsWithCD = coinsWithCPT.map(coin => this.calculateCD(coin, this.horizonDays));
         
         // Добавляем все монеты в список выбранных (если их еще нет)
         const newCoinIds = [];
-        coinsWithCPT.forEach(coin => {
+        coinsWithCD.forEach(coin => {
           if (!this.cgSelectedCoins.includes(coin.id)) {
             this.cgSelectedCoins.push(coin.id);
             newCoinIds.push(coin.id);
@@ -1486,33 +1407,22 @@ window.cmpCoinGecko = {
       this.cgError = null;
       
       try {
-        const priceChangeParams = '1h,24h,7d,14d,30d,200d';
-        const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=volume_desc&per_page=${count}&page=1&price_change_percentage=${priceChangeParams}`;
-        const res = await fetch(url);
-        
-        if (!res.ok) {
-          if (res.status === 429) {
-            this.increaseAdaptiveTimeout();
-            throw new Error(`HTTP ${res.status}`);
-          }
-          throw new Error(`HTTP ${res.status}`);
+        // Используем API из core/api/coingecko.js
+        if (!window.coinGeckoAPI || !window.coinGeckoAPI.getTopCoinsByVolume) {
+          throw new Error('coinGeckoAPI.getTopCoinsByVolume not available');
         }
         
-        this.decreaseAdaptiveTimeout();
-        
-        const data = await res.json();
-        // Трансформируем данные CoinGecko в формат со старыми переменными (pvs, PV1h и т.д.)
-        // Источник трансформации: old_app_not_write/parsing.js
-        const coins = Array.isArray(data) ? data.map(coin => transformCoinGeckoToPV(coin)) : [];
+        const coins = await window.coinGeckoAPI.getTopCoinsByVolume(count, this.timeoutManager);
         
         // Рассчитываем CPT (Coin Potential) для каждой монеты
         // Источник: Этап 2 миграции математической модели
-        const horizonDays = 2;
-        const coinsWithCPT = coins.map(coin => this.calculateCPT(coin, horizonDays));
+        // Используем горизонт прогноза из props
+        const coinsWithCPT = coins.map(coin => this.calculateCPT(coin, this.horizonDays));
+        const coinsWithCD = coinsWithCPT.map(coin => this.calculateCD(coin, this.horizonDays));
         
         // Добавляем все монеты в список выбранных (если их еще нет)
         const newCoinIds = [];
-        coinsWithCPT.forEach(coin => {
+        coinsWithCD.forEach(coin => {
           if (!this.cgSelectedCoins.includes(coin.id)) {
             this.cgSelectedCoins.push(coin.id);
             newCoinIds.push(coin.id);
@@ -1581,43 +1491,33 @@ window.cmpCoinGecko = {
     },
     
     // Проверка, является ли монета избранной (проверяет cgFavoriteCoins)
+    // Использует утилиту из ui/utils/coins-favorites-helpers.js
     isFavorite(coinId) {
-      if (!coinId) return false;
-      return this.cgFavoriteCoins.some(favorite => favorite.id === coinId);
+      if (!window.coinsFavoritesHelpers || !window.coinsFavoritesHelpers.isFavorite) {
+        console.warn('coinsFavoritesHelpers.isFavorite not available');
+        return false;
+      }
+      return window.coinsFavoritesHelpers.isFavorite(coinId, this.cgFavoriteCoins);
     },
     
     // Переключение избранного статуса монеты (работает с cgFavoriteCoins)
+    // Использует утилиту из ui/utils/coins-favorites-helpers.js
     toggleFavorite(coinId) {
       if (!coinId) return;
       
-      // Находим монету в текущих данных для получения symbol и name
-      const coin = this.cgCoins.find(c => c.id === coinId);
-      
-      const favoriteIndex = this.cgFavoriteCoins.findIndex(favorite => favorite.id === coinId);
-      if (favoriteIndex > -1) {
-        // Убираем из избранного
-        this.cgFavoriteCoins.splice(favoriteIndex, 1);
-      } else {
-        // Добавляем в избранное
-        if (coin) {
-          // Если монета есть в таблице - берем данные оттуда
-          this.cgFavoriteCoins.push({
-            id: coin.id,
-            symbol: (coin.symbol || '').toUpperCase(),
-            name: coin.name || coin.id
-          });
-        } else {
-          // Если монеты нет в таблице - создаем минимальный объект
-          this.cgFavoriteCoins.push({
-            id: coinId,
-            symbol: coinId.toUpperCase(),
-            name: coinId
-          });
-        }
+      if (!window.coinsFavoritesHelpers || !window.coinsFavoritesHelpers.toggleFavorite) {
+        console.warn('coinsFavoritesHelpers.toggleFavorite not available');
+        return;
       }
       
-      // Сохраняем в localStorage
-      localStorage.setItem('cgFavoriteCoins', JSON.stringify(this.cgFavoriteCoins));
+      window.coinsFavoritesHelpers.toggleFavorite(
+        coinId,
+        this.cgFavoriteCoins,
+        this.cgCoins,
+        (favoriteCoins) => {
+          localStorage.setItem('cgFavoriteCoins', JSON.stringify(favoriteCoins));
+        }
+      );
       
       // Закрываем контекстное меню
       this.closeContextMenu();
@@ -1629,15 +1529,22 @@ window.cmpCoinGecko = {
     },
     
     // Удаление монеты из избранного
+    // Использует утилиту из ui/utils/coins-favorites-helpers.js
     removeFavoriteFromFavorites(coinId) {
       if (!coinId) return;
       
-      const favoriteIndex = this.cgFavoriteCoins.findIndex(favorite => favorite.id === coinId);
-      if (favoriteIndex > -1) {
-        this.cgFavoriteCoins.splice(favoriteIndex, 1);
-        // Сохраняем в localStorage
-        localStorage.setItem('cgFavoriteCoins', JSON.stringify(this.cgFavoriteCoins));
+      if (!window.coinsFavoritesHelpers || !window.coinsFavoritesHelpers.removeFavoriteFromFavorites) {
+        console.warn('coinsFavoritesHelpers.removeFavoriteFromFavorites not available');
+        return;
       }
+      
+      window.coinsFavoritesHelpers.removeFavoriteFromFavorites(
+        coinId,
+        this.cgFavoriteCoins,
+        (favoriteCoins) => {
+          localStorage.setItem('cgFavoriteCoins', JSON.stringify(favoriteCoins));
+        }
+      );
     },
     
     // Контекстное меню: закрытие
@@ -1990,55 +1897,58 @@ window.cmpCoinGecko = {
     },
     
     // Получение названия монеты из избранного
+    // Использует утилиту из ui/utils/coins-favorites-helpers.js
     getFavoriteCoinName(favoriteCoin) {
-      // favoriteCoin может быть объектом {id, symbol, name} или строкой (старый формат)
-      if (typeof favoriteCoin === 'object' && favoriteCoin.name) {
-        return favoriteCoin.name;
+      if (!window.coinsFavoritesHelpers || !window.coinsFavoritesHelpers.getFavoriteCoinName) {
+        console.warn('coinsFavoritesHelpers.getFavoriteCoinName not available');
+        return typeof favoriteCoin === 'object' ? favoriteCoin.name : favoriteCoin;
       }
-      // Fallback: ищем в текущих данных или возвращаем ID
-      const coin = this.cgCoins.find(c => c.id === (favoriteCoin.id || favoriteCoin));
-      return coin ? coin.name : (favoriteCoin.id || favoriteCoin);
+      return window.coinsFavoritesHelpers.getFavoriteCoinName(favoriteCoin, this.cgCoins);
     },
     
     // Получение тикера монеты из избранного
+    // Использует утилиту из ui/utils/coins-favorites-helpers.js
     getFavoriteCoinSymbol(favoriteCoin) {
-      // favoriteCoin может быть объектом {id, symbol, name} или строкой (старый формат)
-      if (typeof favoriteCoin === 'object' && favoriteCoin.symbol) {
-        return favoriteCoin.symbol;
+      if (!window.coinsFavoritesHelpers || !window.coinsFavoritesHelpers.getFavoriteCoinSymbol) {
+        console.warn('coinsFavoritesHelpers.getFavoriteCoinSymbol not available');
+        return typeof favoriteCoin === 'object' ? favoriteCoin.symbol : favoriteCoin;
       }
-      // Fallback: ищем в текущих данных или возвращаем ID
-      const coin = this.cgCoins.find(c => c.id === (favoriteCoin.id || favoriteCoin));
-      return coin ? coin.symbol.toUpperCase() : (favoriteCoin.id || favoriteCoin).toUpperCase();
+      return window.coinsFavoritesHelpers.getFavoriteCoinSymbol(favoriteCoin, this.cgCoins);
     },
     
     // Получение ID монеты из избранного
+    // Использует утилиту из ui/utils/coins-favorites-helpers.js
     getFavoriteCoinId(favoriteCoin) {
-      // favoriteCoin может быть объектом {id, symbol, name} или строкой (старый формат)
-      return typeof favoriteCoin === 'object' ? favoriteCoin.id : favoriteCoin;
+      if (!window.coinsFavoritesHelpers || !window.coinsFavoritesHelpers.getFavoriteCoinId) {
+        console.warn('coinsFavoritesHelpers.getFavoriteCoinId not available');
+        return typeof favoriteCoin === 'object' ? favoriteCoin.id : favoriteCoin;
+      }
+      return window.coinsFavoritesHelpers.getFavoriteCoinId(favoriteCoin);
     },
     
     // Получение иконки монеты из избранного
+    // Использует утилиту из ui/utils/coins-favorites-helpers.js
     getFavoriteCoinIcon(favoriteCoin) {
-      const coinId = typeof favoriteCoin === 'object' ? favoriteCoin.id : favoriteCoin;
-      
-      // Если это автоматически добавленная монета с неудачным тикером (неудачная попытка добавления)
-      // определяем по префиксу "failed-" в ID
-      if (coinId && typeof coinId === 'string' && coinId.startsWith('failed-')) {
-        return null; // Возвращаем null, чтобы показать иконку рефреша в шаблоне
+      if (!window.coinsFavoritesHelpers || !window.coinsFavoritesHelpers.getFavoriteCoinIcon) {
+        console.warn('coinsFavoritesHelpers.getFavoriteCoinIcon not available');
+        return null;
       }
-      
-      const coin = this.cgCoins.find(c => c.id === coinId);
-      if (coin) {
-        return this.getCoinIcon(coin);
-      }
-      // Пытаемся получить из кэша
-      return this.cgIconsCache[coinId] || null;
+      return window.coinsFavoritesHelpers.getFavoriteCoinIcon(
+        favoriteCoin,
+        this.cgCoins,
+        this.cgIconsCache,
+        (coin) => this.getCoinIcon(coin)
+      );
     },
     
-    // Проверка, является ли монета из избранного автоматически добавленной с неудачным тикером (неудачной попыткой)
+    // Проверка, является ли монета из избранного автоматически добавленной с неудачным тикером
+    // Использует утилиту из ui/utils/coins-favorites-helpers.js
     isFailedFavoriteCoin(favoriteCoin) {
-      const coinId = typeof favoriteCoin === 'object' ? favoriteCoin.id : favoriteCoin;
-      return coinId && typeof coinId === 'string' && coinId.startsWith('failed-');
+      if (!window.coinsFavoritesHelpers || !window.coinsFavoritesHelpers.isFailedFavoriteCoin) {
+        console.warn('coinsFavoritesHelpers.isFailedFavoriteCoin not available');
+        return false;
+      }
+      return window.coinsFavoritesHelpers.isFailedFavoriteCoin(favoriteCoin);
     },
     
     // Форматирование даты обновления (дата)
@@ -2218,7 +2128,9 @@ window.cmpCoinGecko = {
   },
 
   mounted() {
-    console.log('🔍 CoinGecko component mounted');
+    // Инициализируем предыдущее значение horizonDays для отслеживания изменений в updated hook
+    this._previousHorizonDays = this.horizonDays;
+    console.log('🔍 Coins Manager component mounted');
     // Проверяем и очищаем дубликаты между таблицей и избранным при загрузке
     this.syncAllCoinsWithFavorites();
     
@@ -2238,7 +2150,7 @@ window.cmpCoinGecko = {
           return;
         }
         
-        const horizonDays = 2;
+        // Используем горизонт прогноза из props
         let needsUpdate = false;
         let calculatedCount = 0;
         const updatedCoins = this.cgCoins.map(coin => {
@@ -2252,7 +2164,7 @@ window.cmpCoinGecko = {
             return coin;
           }
           // Рассчитываем CPT
-          const cptValue = window.mmMedianCPT.computeEnhancedCPT(coin.pvs, horizonDays);
+          const cptValue = window.mmMedianCPT.computeEnhancedCPT(coin.pvs, this.horizonDays);
           const cptFormatted = window.mmMedianCPT.formatEnhancedCPT(cptValue);
           needsUpdate = true;
           calculatedCount++;
@@ -2273,6 +2185,61 @@ window.cmpCoinGecko = {
         } else {
           console.log('ℹ️ CPT уже рассчитан для всех монет или нет монет для расчета');
         }
+        
+        // Рассчитываем CD для монет, которые имеют CPT, но не имеют CD
+        console.log('🔍 Проверка расчета CD в mounted():');
+        console.log('  - mmMedianCD доступен:', !!window.mmMedianCD);
+        console.log('  - calculateCDsWeighted доступен:', !!window.mmMedianCD?.calculateCDsWeighted);
+        console.log('  - approximateCDHFromSeries доступен:', !!window.mmMedianCD?.approximateCDHFromSeries);
+        console.log('  - mmMedianPRCWeights доступен:', !!window.mmMedianPRCWeights);
+        console.log('  - computePRCWeights доступен:', !!window.mmMedianPRCWeights?.computePRCWeights);
+        
+        if (!window.mmMedianCD || !window.mmMedianCD.calculateCDsWeighted || !window.mmMedianCD.approximateCDHFromSeries) {
+          console.warn('⚠️ mmMedianCD не доступен. CD не будет рассчитан.');
+        } else if (!window.mmMedianPRCWeights || !window.mmMedianPRCWeights.computePRCWeights) {
+          console.warn('⚠️ mmMedianPRCWeights не доступен. CD не будет рассчитан.');
+        } else {
+          let needsCDUpdate = false;
+          let calculatedCDCount = 0;
+          const updatedCoinsWithCD = this.cgCoins.map(coin => {
+            // Если CD уже рассчитан - не пересчитываем
+            if (coin.cdhw !== undefined && coin.cd1w !== undefined) {
+              return coin;
+            }
+            // Проверяем наличие массива pvs
+            if (!coin.pvs || !Array.isArray(coin.pvs) || coin.pvs.length !== 6) {
+              return coin;
+            }
+            // Рассчитываем CD
+            needsCDUpdate = true;
+            calculatedCDCount++;
+            return this.calculateCD(coin, this.horizonDays);
+          });
+          
+          // Обновляем реактивные данные
+          this.cgCoins = updatedCoinsWithCD;
+          
+          // Сохраняем обновленные данные в localStorage, если были изменения
+          if (needsCDUpdate) {
+            localStorage.setItem('cgCoins', JSON.stringify(this.cgCoins));
+            console.log(`✅ CD рассчитан для ${calculatedCDCount} монет из ${updatedCoinsWithCD.length}`);
+          } else {
+            console.log('ℹ️ CD уже рассчитан для всех монет');
+          }
+          
+          // Проверяем первую монету с рассчитанным CD для отладки
+          const coinWithCD = this.cgCoins.find(coin => 
+            coin.cd1 !== undefined && coin.cdhw !== undefined
+          );
+          
+          if (coinWithCD) {
+            console.log('✅ Пример монеты с CD:');
+            console.log(`   - Символ: ${coinWithCD.symbol || coinWithCD.id}`);
+            console.log(`   - CD1: ${coinWithCD.cd1?.toFixed(2)}, CD1w: ${coinWithCD.cd1w?.toFixed(2)}`);
+            console.log(`   - CD6: ${coinWithCD.cd6?.toFixed(2)}, CD6w: ${coinWithCD.cd6w?.toFixed(2)}`);
+            console.log(`   - CDH: ${coinWithCD.cdh?.toFixed(2)}, CDHw: ${coinWithCD.cdhw?.toFixed(2)}`);
+          }
+        }
       } else {
         console.log('ℹ️ Нет монет для расчета CPT');
       }
@@ -2292,6 +2259,21 @@ window.cmpCoinGecko = {
     // Подписываемся на глобальное событие закрытия всех выпадающих списков
     this.handleCloseAllDropdownsBound = this.handleCloseAllDropdowns.bind(this);
     document.addEventListener('close-all-dropdowns', this.handleCloseAllDropdownsBound);
+  },
+
+  updated() {
+    // Если horizonDays изменился - пересчитываем только CDH
+    // CD1-CD6 остаются неизменными, так как они зависят от фиксированных временных интервалов
+    const currentHorizonDays = this.horizonDays;
+    const previousHorizonDays = this._previousHorizonDays || currentHorizonDays;
+    
+    if (currentHorizonDays !== previousHorizonDays && currentHorizonDays >= 1 && currentHorizonDays <= 90) {
+      this.recalculateCDHOnly();
+      this._previousHorizonDays = currentHorizonDays;
+    } else if (currentHorizonDays === previousHorizonDays) {
+      // Сохраняем текущее значение для следующего сравнения
+      this._previousHorizonDays = currentHorizonDays;
+    }
   },
 
   beforeUnmount() {
