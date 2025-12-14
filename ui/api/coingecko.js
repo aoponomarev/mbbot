@@ -1628,6 +1628,18 @@ window.cmpCoinGecko = {
       this.showFavoritesDropdown = !this.showFavoritesDropdown;
     },
     
+    // Удаление монеты из избранного
+    removeFavoriteFromFavorites(coinId) {
+      if (!coinId) return;
+      
+      const favoriteIndex = this.cgFavoriteCoins.findIndex(favorite => favorite.id === coinId);
+      if (favoriteIndex > -1) {
+        this.cgFavoriteCoins.splice(favoriteIndex, 1);
+        // Сохраняем в localStorage
+        localStorage.setItem('cgFavoriteCoins', JSON.stringify(this.cgFavoriteCoins));
+      }
+    },
+    
     // Контекстное меню: закрытие
     closeContextMenu() {
       this.showContextMenu = false;

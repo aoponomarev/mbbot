@@ -6,42 +6,14 @@
     <title>Каталог иконок проекта</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <style>
-        body { padding: 2rem; background: white; }
-        .icon-preview-cell { text-align: center; width: 80px; }
-        .icon-preview { font-size: 1.5rem; display: inline-block; line-height: 1; }
-        .icon-preview svg, .icon-preview object { width: 1em; height: 1em; max-width: 1.5rem; max-height: 1.5rem; }
-        .icon-preview img { width: 1em; height: 1em; max-width: 1.5rem; max-height: 1.5rem; }
-        .icon-preview object { color: #000; }
-        .icon-preview .icon-cross { color: #000; }
-        .table-icons { background: white; margin-bottom: 2rem; }
-        .table-icons th { background: white; font-weight: normal; cursor: pointer; user-select: none; font-size: 0.85rem; opacity: 0.6; }
-        .table-icons th:hover { background: white; opacity: 0.8; }
-        .table-icons th.icon-header { text-align: center; }
-        .table-icons th.sort-asc::after { content: ' ▲'; font-size: 0.7em; color: #333; }
-        .table-icons th.sort-desc::after { content: ' ▼'; font-size: 0.7em; color: #333; }
-        .table-icons td { vertical-align: middle; padding-top: 0.75rem; padding-bottom: 0.75rem; }
-        .table-icons tbody tr { background: white; }
-        .section-header { background: #e9ecef; font-weight: 600; padding: 0.75rem 1rem; }
-        .section-header td { border: none; text-align: center; }
-        .commands-list { text-align: right; max-width: 300px; }
-        .commands-list .badge { margin: 0.1rem; display: inline-block; background-color: #6c757d; color: white; }
-        .identifier-cell { color: #000; line-height: 1; }
-        .identifier-cell code { display: block; background: transparent; padding: 0; border-radius: 0; color: #000; margin: 0; line-height: 1; }
-        .identifier-cell .file-extension { margin: 0; line-height: 1; }
-        .usage-list { max-width: 200px; font-size: 0.85rem; color: #000; }
-        .usage-list code { font-size: 0.75rem; background: transparent; padding: 0; border-radius: 0; color: #000; }
-        .file-cell { font-size: 0.85rem; color: #000; width: 1%; white-space: nowrap; line-height: 1; text-align: right; }
-        .file-cell code { background: transparent; padding: 0; border-radius: 0; color: #000; line-height: 1; }
-        .file-cell div { line-height: 1; }
-        .table-icons tbody tr.unused { opacity: 0.5; }
-        .badge { border-radius: 0; padding: 0.15rem 0.3rem; font-weight: normal; font-size: 0.75rem; }
-        .badge-category { font-size: 0.75rem; }
-        .filter-controls { background: white; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; }
-        .file-extension { color: #666; font-size: 0.75rem; margin-left: 0.25rem; }
-    </style>
+    <!-- Единые стили для всех review -->
+    <link rel="stylesheet" href="../review-styles.css">
+    <!-- Единый менеджер для всех review (хедер с вкладками) - загружаем в head для ранней инициализации -->
+    <script src="../review-manager.js"></script>
 </head>
 <body>
+    <!-- Хедер с вкладками будет вставлен здесь через review-manager.js -->
+    
     <div class="container-fluid">
         <!-- Фильтры -->
         <div class="filter-controls">
@@ -566,7 +538,7 @@
             if (icons.length === 0) return;
             
             const table = document.createElement('table');
-            table.className = 'table table-sm table-icons';
+            table.className = 'table table-sm review-table table-icons';
             
             // Заголовок секции
             const headerRow = document.createElement('tr');

@@ -55,7 +55,7 @@ window.cmpMenuItem = {
         if (!validTypes.includes(value.type)) return false;
         
         if (value.type === 'status') {
-          const validStatuses = ['selected', 'disabled', 'loading', 'warning', 'error', 'favorite', 'not-favorite'];
+          const validStatuses = ['selected', 'disabled', 'loading', 'warning', 'error', 'favorite', 'not-favorite', 'not-in-table'];
           return validStatuses.includes(value.value);
         }
         
@@ -103,7 +103,15 @@ window.cmpMenuItem = {
     tooltip: {
       type: String,
       default: null
-    } // Всплывающая подсказка для основной части (если не указан, берется из ui-element-mapping.json)
+    }, // Всплывающая подсказка для основной части (если не указан, берется из ui-element-mapping.json)
+    indicatorTooltip: {
+      type: String,
+      default: null
+    }, // Всплывающая подсказка для индикатора (если не указан, берется из ui-element-mapping.json)
+    indicatorHoverIcon: {
+      type: String,
+      default: null
+    } // Иконка для индикатора при наведении (например, 'icon-cross' для крестика)
   },
   
   data() {
@@ -113,7 +121,8 @@ window.cmpMenuItem = {
       iconTooltip: '', // Tooltip из ui-element-mapping.json
       indicatorIcon: '', // Иконка indicator из uiElementHelper
       indicatorLabel: '', // Label indicator из uiElementHelper
-      indicatorTooltip: '' // Tooltip indicator из uiElementHelper
+      indicatorTooltipFromMapping: '', // Tooltip indicator из ui-element-mapping.json
+      isIndicatorHovered: false // Флаг наведения на индикатор
     };
   },
   
@@ -170,9 +179,36 @@ window.cmpMenuItem = {
       return this.tooltip || this.iconTooltip || this.iconLabel || this.displayLabel;
     },
     
-    // Tooltip для индикатора - приоритет: indicatorTooltip > indicatorLabel
+    // Tooltip для индикатора - приоритет: indicatorTooltip (prop) > indicatorTooltipFromMapping > indicatorLabel
     indicatorTooltipText() {
-      return this.indicatorTooltip || this.indicatorLabel || null;
+      if (this.indicatorTooltip !== null && this.indicatorTooltip !== undefined) {
+        return this.indicatorTooltip === '' ? null : this.indicatorTooltip;
+      }
+      return this.indicatorTooltipFromMapping || this.indicatorLabel || null;
+    },
+    
+    // Эффективная иконка индикатора - при наведении показываем indicatorHoverIcon, иначе обычную
+    effectiveIndicatorIconWithHover() {
+      if (this.isIndicatorHovered && this.indicatorHoverIcon) {
+        // Если указан indicatorHoverIcon, используем его
+        if (this.uiElementHelper && this.uiElementHelper.isSVGIcon(this.indicatorHoverIcon)) {
+          return null; // Для SVG иконок возвращаем null, так как они рендерятся через template
+        }
+        return this.indicatorHoverIcon;
+      }
+      return this.indicatorIcon || null;
+    },
+    
+    // Проверка, является ли hover-иконка SVG
+    isIndicatorHoverIconSVG() {
+      if (!this.isIndicatorHovered || !this.indicatorHoverIcon || !this.uiElementHelper) return false;
+      return this.uiElementHelper.isSVGIcon(this.indicatorHoverIcon);
+    },
+    
+    // Путь к SVG hover-иконке индикатора
+    indicatorHoverIconPath() {
+      if (!this.isIndicatorHovered || !this.indicatorHoverIcon || !this.uiElementHelper) return '';
+      return this.uiElementHelper.getSVGIconPath(this.indicatorHoverIcon);
     },
     
     // Эффективная иконка слева - приоритет: iconImage > iconStateMap (динамическая) > iconClass (из iconsHelper)
@@ -235,25 +271,49 @@ window.cmpMenuItem = {
         if (this.indicator && this.indicator.type && this.indicator.value) {
           this.indicatorIcon = window.uiElementHelper.getIndicatorIcon(this.indicator.type, this.indicator.value);
           this.indicatorLabel = window.uiElementHelper.getIndicatorLabel(this.indicator.type, this.indicator.value);
-          this.indicatorTooltip = window.uiElementHelper.getIndicatorTooltip(this.indicator.type, this.indicator.value);
+          this.indicatorTooltipFromMapping = window.uiElementHelper.getIndicatorTooltip(this.indicator.type, this.indicator.value);
         }
       } catch (error) {
         console.error('Error loading icon:', error);
       }
     },
     
-    // Обработчик клика по пункту меню
+    // Обработчик клика по пункту меню (основная часть)
     handleClick(event) {
       if (this.disabled) {
         event.preventDefault();
         return;
       }
       
+      // Проверяем, был ли клик на индикаторе
+      const indicatorElement = event.target.closest('.menu-item-indicator');
+      if (indicatorElement) {
+        // Клик на индикаторе - эмитим отдельное событие
+        event.stopPropagation();
+        this.$emit('indicator-click', {
+          itemId: this.itemId,
+          iconCommand: this.iconCommand,
+          label: this.displayLabel,
+          indicator: this.indicator
+        });
+        return;
+      }
+      
+      // Клик на основной части
       this.$emit('click', {
         itemId: this.itemId,
         iconCommand: this.iconCommand,
         label: this.displayLabel
       });
+    },
+    
+    // Обработчики наведения на индикатор
+    handleIndicatorMouseEnter() {
+      this.isIndicatorHovered = true;
+    },
+    
+    handleIndicatorMouseLeave() {
+      this.isIndicatorHovered = false;
     }
   },
   

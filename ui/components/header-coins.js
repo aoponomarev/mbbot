@@ -50,6 +50,10 @@ window.cmpHeaderCoins = {
       type: Array,
       default: () => []
     },
+    cgCoins: {
+      type: Array,
+      default: () => []
+    },
     // Избранное
     showFavoritesDropdown: {
       type: Boolean,
@@ -249,6 +253,15 @@ window.cmpHeaderCoins = {
     
     handleAddFavoriteToTable(coinId) {
       this.$emit('add-favorite-to-table', coinId);
+    },
+    
+    handleRemoveFavoriteFromFavorites(coinId) {
+      this.$emit('remove-favorite-from-favorites', coinId);
+    },
+    
+    // Проверка, есть ли монета в таблице
+    isCoinInTable(coinId) {
+      return this.cgCoins.some(coin => coin.id === coinId);
     },
     
     handleFetchCoins(event, data) {

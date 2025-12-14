@@ -346,13 +346,7 @@ table td.col-hidden {
 }
 
 
-.card-header .btn:focus:not(:disabled) {
-    /* В светлой теме - темнее при фокусе */
-    background-color: var(--color-button-hover);
-    border-color: var(--color-border-hover);
-    color: var(--bs-body-color);
-    box-shadow: 0 0 0 0.25rem rgba(var(--bs-secondary-rgb), 0.25);
-}
+/* Стиль фокуса для кнопок в хедере карточек наследуется от общего стиля фокуса выше */
 
 
 .card-header .btn:active:not(:disabled) {
@@ -376,12 +370,7 @@ table td.col-hidden {
 }
 
 
-.card-header .form-control:focus {
-    /* Светло-синяя обводка вокруг поля ввода (яркий синий Bootstrap) */
-    border-color: hsl(210, 100%, 50%) !important;
-    box-shadow: 0 0 0 0.25rem hsla(210, 100%, 50%, 0.25) !important;
-    outline: none !important;
-}
+/* Стиль фокуса для полей ввода в хедере карточек наследуется от общего стиля фокуса выше */
 
 
 /* Селекты в хедерах карточек: контрастные рамки и hover эффекты */
@@ -397,12 +386,7 @@ table td.col-hidden {
 }
 
 
-.card-header .form-select:focus {
-    /* Светло-синяя обводка вокруг селекта (яркий синий Bootstrap) */
-    border-color: hsl(210, 100%, 50%) !important;
-    box-shadow: 0 0 0 0.25rem hsla(210, 100%, 50%, 0.25) !important;
-    outline: none !important;
-}
+/* Стиль фокуса для селектов в хедере карточек наследуется от общего стиля фокуса выше */
 
 
 /* Глобальные стили для disabled полей ввода в темной теме */
@@ -466,12 +450,18 @@ table td.col-hidden {
 }
 
 
-/* Глобальные стили фокуса для всех полей ввода (единый стиль с чекбоксами) */
+/* =========================
+   ОБЩИЙ СТИЛЬ ФОКУСА ДЛЯ ПОЛЕЙ ВВОДА И КНОПОК
+   Единый дефолтный стиль фокуса для всех интерактивных элементов
+   ========================= */
+
+/* Глобальные стили фокуса для всех полей ввода и кнопок (единый стиль, зависит от темы Bootstrap) */
 .form-control:focus,
-.form-select:focus {
-    /* Светло-синяя обводка вокруг поля ввода (яркий синий Bootstrap) */
-    border-color: hsl(210, 100%, 50%) !important;
-    box-shadow: 0 0 0 0.25rem hsla(210, 100%, 50%, 0.25) !important;
+.form-select:focus,
+.cmp-button.btn:focus:not(:disabled) {
+    /* Обводка и тень фокуса используют цвет темы Bootstrap (--bs-primary) */
+    border-color: var(--bs-primary) !important;
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25) !important;
     outline: none !important;
 }
 

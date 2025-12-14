@@ -1,0 +1,368 @@
+/* Единые стили для всех review-файлов документации */
+
+/* Общие стили */
+body {
+    padding: 2rem;
+    background: white;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Хедер с вкладками (стиль 2010-х) */
+.review-header {
+    background: linear-gradient(to bottom, #f8f9fa 0%, #e9ecef 100%);
+    border-bottom: 2px solid #dee2e6;
+    padding: 0;
+    margin-bottom: 0;
+}
+
+.review-tabs {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-bottom: 1px solid #dee2e6;
+    background: linear-gradient(to bottom, #ffffff 0%, #f8f9fa 100%);
+    justify-content: center;
+}
+
+.review-tabs li {
+    margin: 0;
+    padding: 0;
+}
+
+.review-tabs a {
+    display: block;
+    padding: 12px 24px;
+    text-decoration: none;
+    color: #495057;
+    font-weight: 500;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    border: 1px solid transparent;
+    border-bottom: none;
+    background: linear-gradient(to bottom, #ffffff 0%, #f8f9fa 100%);
+    transition: all 0.2s ease;
+    position: relative;
+    margin-right: 2px;
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.review-tabs a:hover {
+    background: linear-gradient(to bottom, #ffffff 0%, #e9ecef 100%);
+    color: #212529;
+    box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.review-tabs a.active {
+    background: linear-gradient(to bottom, #ffffff 0%, #ffffff 100%);
+    color: #0d6efd;
+    border-color: #dee2e6;
+    border-bottom-color: white;
+    box-shadow: 0 -3px 8px rgba(0, 0, 0, 0.15);
+    z-index: 10;
+    position: relative;
+    transform: translateY(-2px);
+    font-weight: 600;
+}
+
+.review-tabs a.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: white;
+}
+
+/* Фильтры */
+.filter-controls {
+    background: white;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    border: none;
+    box-shadow: none;
+}
+
+/* Таблицы */
+.review-table,
+.table-icons,
+.table-colors {
+    background: white;
+    margin-bottom: 2rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.review-table th,
+.table-icons th,
+.table-colors th {
+    background: white;
+    font-weight: normal;
+    cursor: pointer;
+    user-select: none;
+    font-size: 0.85rem;
+    opacity: 0.6;
+    padding: 0.75rem;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.review-table th:hover,
+.table-icons th:hover,
+.table-colors th:hover {
+    background: #f8f9fa;
+    opacity: 0.8;
+}
+
+.review-table th.sort-asc::after,
+.table-icons th.sort-asc::after,
+.table-colors th.sort-asc::after {
+    content: ' ▲';
+    font-size: 0.7em;
+    color: #333;
+}
+
+.review-table th.sort-desc::after,
+.table-icons th.sort-desc::after,
+.table-colors th.sort-desc::after {
+    content: ' ▼';
+    font-size: 0.7em;
+    color: #333;
+}
+
+.review-table td,
+.table-icons td,
+.table-colors td {
+    vertical-align: middle;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.review-table tbody tr:hover,
+.table-icons tbody tr:hover,
+.table-colors tbody tr:hover {
+    background: #f8f9fa;
+}
+
+.review-table tbody tr.unused,
+.table-icons tbody tr.unused,
+.table-colors tbody tr.unused {
+    opacity: 0.5;
+}
+
+/* Заголовки секций */
+.section-header {
+    background: linear-gradient(to bottom, #e9ecef 0%, #dee2e6 100%);
+    font-weight: 600;
+    padding: 0.75rem 1rem;
+    border-bottom: 2px solid #ced4da;
+}
+
+.section-header td {
+    border: none;
+    text-align: center;
+    color: #495057;
+}
+
+/* Ячейки */
+.identifier-cell {
+    color: #000;
+    line-height: 1;
+}
+
+.identifier-cell code {
+    display: block;
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    color: #000;
+    margin: 0;
+    line-height: 1;
+    font-family: 'Courier New', monospace;
+}
+
+.value-cell {
+    font-size: 0.85rem;
+    color: #000;
+    font-family: monospace;
+    line-height: 1;
+}
+
+.value-cell code {
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    color: #000;
+    line-height: 1;
+}
+
+.usage-cell {
+    font-size: 0.85rem;
+    color: #000;
+    width: 1%;
+    white-space: nowrap;
+    line-height: 1;
+    text-align: right;
+}
+
+.usage-cell code {
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    color: #000;
+    line-height: 1;
+}
+
+.usage-cell div {
+    line-height: 1;
+}
+
+.file-cell {
+    font-size: 0.85rem;
+    color: #000;
+    width: 1%;
+    white-space: nowrap;
+    line-height: 1;
+    text-align: right;
+}
+
+.file-cell code {
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    color: #000;
+    line-height: 1;
+}
+
+.file-cell div {
+    line-height: 1;
+}
+
+/* Превью иконок */
+.icon-preview-cell {
+    text-align: center;
+    width: 80px;
+}
+
+.icon-preview {
+    font-size: 1.5rem;
+    display: inline-block;
+    line-height: 1;
+}
+
+.icon-preview svg,
+.icon-preview object {
+    width: 1em;
+    height: 1em;
+    max-width: 1.5rem;
+    max-height: 1.5rem;
+}
+
+.icon-preview img {
+    width: 1em;
+    height: 1em;
+    max-width: 1.5rem;
+    max-height: 1.5rem;
+}
+
+.icon-preview object {
+    color: #000;
+}
+
+.icon-preview .icon-cross {
+    color: #000;
+}
+
+/* Превью цветов */
+.color-preview-cell {
+    text-align: center;
+    width: 100px;
+}
+
+.review-table th.color-header,
+.table-icons th.icon-header,
+.table-colors th.color-header {
+    text-align: center;
+}
+
+.color-preview {
+    width: 60px;
+    height: 30px;
+    display: inline-block;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Бейджи */
+.badge {
+    border-radius: 0;
+    padding: 0.15rem 0.3rem;
+    font-weight: normal;
+    font-size: 0.75rem;
+    background-color: #6c757d;
+    color: white;
+}
+
+.category-badge {
+    font-size: 0.75rem;
+    border-radius: 0;
+    padding: 0.15rem 0.3rem;
+    font-weight: normal;
+    background-color: #6c757d;
+    color: white;
+}
+
+.file-extension {
+    color: #666;
+    font-size: 0.75rem;
+    margin-left: 0.25rem;
+}
+
+/* Списки команд */
+.commands-list {
+    text-align: right;
+    max-width: 300px;
+}
+
+.commands-list .badge {
+    margin: 0.1rem;
+    display: inline-block;
+    background-color: #6c757d;
+    color: white;
+}
+
+/* Списки использования */
+.usage-list {
+    max-width: 200px;
+    font-size: 0.85rem;
+    color: #000;
+}
+
+.usage-list code {
+    font-size: 0.75rem;
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    color: #000;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    body {
+        padding: 1rem;
+    }
+    
+    .review-tabs {
+        flex-wrap: wrap;
+    }
+    
+    .review-tabs a {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+    }
+}
+

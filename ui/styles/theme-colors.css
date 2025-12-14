@@ -3,16 +3,9 @@
 /* Светлая тема */
 :root,
 [data-bs-theme="light"] {
-    /* Базовые HSL значения для primary цвета - более приглушенный и мягкий синий */
-    --color-primary-h: 208; /* Чуть более мягкий синий тон (вместо 210) */
-    --color-primary-s: 12%;  /* Более приглушенная насыщенность для мягкости (вместо 20%) */
-    --color-primary-l: 42%;  /* Чуть темнее для лучшего контраста (вместо 45%) */
-    
-    /* Генерируем primary цвет из HSL */
-    --bs-primary: hsl(var(--color-primary-h), var(--color-primary-s), var(--color-primary-l));
-    
-    /* RGB для совместимости с Bootstrap (вычислено из HSL(208, 12%, 42%)) */
-    --bs-primary-rgb: 95, 110, 125;
+    /* Нативный Bootstrap primary цвет (яркий синий) */
+    --bs-primary: hsl(217, 91%, 60%); /* Стандартный Bootstrap blue #0d6efd */
+    --bs-primary-rgb: 13, 110, 253; /* RGB для совместимости с Bootstrap */
     
     /* Цвета для ошибок (danger) - малиновый оттенок */
     --color-danger-h: 340; /* Малиновый тон (пурпурно-розовый) */
@@ -148,15 +141,9 @@
 
 /* Темная тема */
 [data-bs-theme="dark"] {
-    /* Более приглушенный и мягкий primary для темной темы */
-    --color-primary-h: 208; /* Тот же мягкий тон */
-    --color-primary-s: 10%; /* Еще более приглушенная насыщенность для мягкости (вместо 15%) */
-    --color-primary-l: 58%;  /* Чуть темнее для лучшего контраста (вместо 60%) */
-    
-    --bs-primary: hsl(var(--color-primary-h), var(--color-primary-s), var(--color-primary-l));
-    
-    /* RGB для совместимости с Bootstrap (вычислено из HSL(208, 10%, 58%)) */
-    --bs-primary-rgb: 133, 146, 158;
+    /* Нативный Bootstrap primary цвет (яркий синий) - тот же, что и в светлой теме */
+    --bs-primary: hsl(217, 91%, 60%); /* Стандартный Bootstrap blue #0d6efd */
+    --bs-primary-rgb: 13, 110, 253; /* RGB для совместимости с Bootstrap */
     
     /* Цвета для ошибок (danger) - более светлый малиновый для темной темы */
     --color-danger-h: 340; /* Малиновый тон (пурпурно-розовый) */

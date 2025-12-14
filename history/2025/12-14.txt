@@ -53,6 +53,31 @@
 
 ## Architect (архитектура, настройки)
 
+### Коммит: Move review files to ui/, remove unused color variable, and update documentation
+- **Что сделано**: Перемещены review-файлы из `docs/` в `ui/`, удалена неиспользуемая переменная `--color-primary-muted`, обновлена документация и исправлены несоответствия
+- **Как сделано**:
+  * **Перемещение review-файлов**:
+    - Перемещен `docs/review-manager.js` → `ui/review-manager.js`
+    - Перемещен `docs/review-styles.css` → `ui/review-styles.css`
+    - Обновлены пути в `ui/assets/icons-review.html` и `ui/styles/colors-review.html` на `../review-manager.js` и `../review-styles.css`
+    - Обновлена логика определения путей в `ui/review-manager.js` для корректной навигации между review-файлами
+    - Обновлены ссылки в `.cursorrules` на новые пути
+  * **Удаление неиспользуемой переменной**:
+    - Удалена переменная `--color-primary-muted` и связанные переменные (`--color-primary-muted-h`, `--color-primary-muted-s`, `--color-primary-muted-l`, `--color-primary-muted-rgb`) из `ui/styles/theme-colors.css` (светлая и темная темы)
+    - Удалены записи о `--color-primary-muted` и `--color-primary-muted-rgb` из `ui/styles/colors-review.html`
+    - Удалена категория "Primary" из выпадающего списка категорий в `ui/styles/colors-review.html` (так как цветов с этой категорией больше нет)
+  * **Обновление стилей review-файлов**:
+    - Убрана тень (`box-shadow`) у `.review-header` в `ui/review-styles.css`
+    - Убран вертикальный гэп (`margin-bottom: 0`) между вкладками и блоком фильтров
+    - Убрана внешняя рамка (`border: none`, `box-shadow: none`) у блока фильтров
+  * **Обновление документации**:
+    - Добавлено описание каталога цветов (`ui/styles/colors-review.html`) в `architect.md` и `ui/guide-ii.md`
+    - Добавлено описание системы управления review-файлами (`ui/review-manager.js` и `ui/review-styles.css`) в `architect.md` и `ui/guide-ii.md`
+    - Обновлена структура проекта в `architect.md`: добавлены `review-manager.js`, `review-styles.css`, `colors-review.html`
+    - Исправлены несоответствия в структуре проекта: добавлены `button.js`, `dropdown-menu.js` в список компонентов и `button.css` в список стилей
+    - Добавлено упоминание `ui/styles/button.css` в раздел "Текущее размещение файлов"
+- **Функциональность**: Review-файлы теперь находятся в более логичном месте (`ui/`), неиспользуемый код удален, документация актуализирована и соответствует кодовой базе. Интерфейс review-файлов упрощен (убрана тень, рамка фильтров, вертикальный гэп).
+
 ### Коммит: Start of day: 12-14
 - **Что сделано**: Открыт новый рабочий день 14 декабря 2025
 - **Как сделано**:

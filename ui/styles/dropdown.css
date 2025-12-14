@@ -308,6 +308,11 @@ a.menu-item.list-group-item.list-group-item-action.disabled .menu-item-icon img 
     color: var(--color-danger);
 }
 
+.indicator-not-in-table {
+    color: var(--bs-body-color);
+    opacity: 0.5; /* Полупрозрачный цвет для монет, которых нет в таблице */
+}
+
 /* Переходы */
 .indicator-navigation {
     color: var(--bs-secondary-color);

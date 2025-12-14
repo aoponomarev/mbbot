@@ -394,6 +394,7 @@
                     :pending-tickers="pendingTickers"
                     :cg-search-results="cgSearchResults"
                     :cg-selected-coins="cgSelectedCoins"
+                    :cg-coins="cgCoins"
                     :show-favorites-dropdown="showFavoritesDropdown"
                     :cg-favorite-coins="cgFavoriteCoins"
                     :cg-icons-cache="cgIconsCache"
@@ -413,6 +414,7 @@
                     @toggle-favorites-dropdown="toggleFavoritesDropdown"
                     @close-favorites-dropdown="closeFavoritesDropdown"
                     @add-favorite-to-table="addFavoriteToTableById"
+                    @remove-favorite-from-favorites="removeFavoriteFromFavorites"
                     @fetch-coins="fetchCoinGecko"
                 ></header-coins>
                 <div class="card-body">
@@ -564,23 +566,9 @@
                         >
                             <menu-item
                                 icon-category="actions"
-                                icon-command="select-all"
-                                item-id="counter-select-all"
-                                :disabled="selectedCoinsCount === totalCoinsCount && totalCoinsCount > 0"
-                                @click="handleSelectAllCoins"
-                            ></menu-item>
-                            <menu-item
-                                icon-category="actions"
                                 icon-command="favorite"
                                 item-id="counter-favorite"
                                 @click="handleSelectFavorites"
-                            ></menu-item>
-                            <menu-item
-                                icon-category="actions"
-                                icon-command="deselect-all"
-                                item-id="counter-deselect-all"
-                                :disabled="selectedCoinsCount === 0"
-                                @click="handleDeselectAllCoins"
                             ></menu-item>
                             <div class="dropdown-divider"></div>
                             <menu-item
@@ -710,10 +698,13 @@
                                 :icon-state-map="isFailedFavoriteCoin(favoriteCoin) ? { 'failed': 'fas fa-sync-alt opacity-25' } : null"
                                 :icon-state="isFailedFavoriteCoin(favoriteCoin) ? 'failed' : null"
                                 :label="getFavoriteCoinSymbol(favoriteCoin)"
-                                :tooltip="getFavoriteCoinName(favoriteCoin)"
-                                :indicator="!isFailedFavoriteCoin(favoriteCoin) && cgSelectedCoins.includes(getFavoriteCoinId(favoriteCoin)) ? { type: 'status', value: 'selected' } : null"
+                                :tooltip="'Добавить в таблицу'"
+                                :indicator="!isFailedFavoriteCoin(favoriteCoin) ? (isCoinInTable(getFavoriteCoinId(favoriteCoin)) ? { type: 'status', value: 'selected' } : { type: 'status', value: 'not-in-table' }) : null"
+                                :indicator-tooltip="'Удалить из Избранного'"
+                                :indicator-hover-icon="'icon-cross'"
                                 :item-id="'favorite-' + getFavoriteCoinId(favoriteCoin)"
                                 @click="handleAddFavoriteToTable(getFavoriteCoinId(favoriteCoin))"
+                                @indicator-click="handleRemoveFavoriteFromFavorites(getFavoriteCoinId(favoriteCoin))"
                             ></menu-item>
                         </dropdown-menu>
                     </div>
@@ -1031,13 +1022,29 @@
                 </span>
             </span>
             
-            <!-- Индикатор с отдельным tooltip -->
+            <!-- Индикатор с отдельным tooltip и hover-эффектом -->
             <span 
                 v-if="indicator"
                 :class="indicatorClasses"
                 :title="indicatorTooltipText"
+                @mouseenter="handleIndicatorMouseEnter"
+                @mouseleave="handleIndicatorMouseLeave"
             >
-                <i v-if="effectiveIndicatorIcon" :class="effectiveIndicatorIcon"></i>
+                <!-- SVG hover-иконка (крестик при наведении) -->
+                <object v-if="isIndicatorHoverIconSVG" 
+                        :data="indicatorHoverIconPath" 
+                        type="image/svg+xml"
+                        :class="indicatorHoverIcon"
+                        style="width: 1em; height: 1em; vertical-align: middle; pointer-events: none;">
+                    <img :src="indicatorHoverIconPath" 
+                         :alt="indicatorLabel"
+                         :class="indicatorHoverIcon"
+                         style="width: 1em; height: 1em; vertical-align: middle;">
+                </object>
+                <!-- Font Awesome hover-иконка -->
+                <i v-else-if="isIndicatorHovered && indicatorHoverIcon && !isIndicatorHoverIconSVG" :class="indicatorHoverIcon"></i>
+                <!-- Обычная иконка индикатора -->
+                <i v-else-if="effectiveIndicatorIconWithHover" :class="effectiveIndicatorIconWithHover"></i>
             </span>
         </a>
     </script>

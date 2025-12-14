@@ -357,6 +357,13 @@
           "value": "disabled",
           "label": "Отключено",
           "tooltip": "Элемент недоступен для взаимодействия"
+        },
+        "not-in-table-indicator": {
+          "category": "indicators",
+          "type": "status",
+          "value": "not-in-table",
+          "label": "Не в таблице",
+          "tooltip": "Монета не находится в открытой таблице"
         }
       },
       "defaultCommand": "disabled-indicator",
