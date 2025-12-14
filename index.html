@@ -957,7 +957,20 @@
                 
                 <!-- Иконка (скрывается при loading) -->
                 <span v-if="!loading && (effectiveIconClass || hasIconImage)" class="button-icon">
-                    <i v-if="effectiveIconClass" :class="effectiveIconClass"></i>
+                    <!-- SVG-иконка из файла (используется object для поддержки currentColor и CSS переменных) -->
+                    <object v-if="effectiveIconClass && window.uiElementHelper && window.uiElementHelper.isSVGIcon(effectiveIconClass)" 
+                            :data="window.uiElementHelper.getSVGIconPath(effectiveIconClass)" 
+                            type="image/svg+xml"
+                            :class="effectiveIconClass"
+                            style="width: 1em; height: 1em; vertical-align: middle; pointer-events: none;">
+                        <!-- Fallback на img если object не поддерживается -->
+                        <img :src="window.uiElementHelper.getSVGIconPath(effectiveIconClass)" 
+                             :alt="displayLabel"
+                             :class="effectiveIconClass"
+                             style="width: 1em; height: 1em; vertical-align: middle;">
+                    </object>
+                    <!-- Font Awesome иконки (используется i) -->
+                    <i v-else-if="effectiveIconClass" :class="effectiveIconClass"></i>
                     <img v-if="hasIconImage" :src="iconImage" :alt="displayLabel" width="16" height="16">
                 </span>
                 
@@ -994,7 +1007,20 @@
             >
                 <!-- Иконка -->
                 <span v-if="effectiveIconClass || hasIconImage" class="menu-item-icon">
-                    <i v-if="effectiveIconClass" :class="effectiveIconClass"></i>
+                    <!-- SVG-иконка из файла (используется object для поддержки currentColor и CSS переменных) -->
+                    <object v-if="effectiveIconClass && window.uiElementHelper && window.uiElementHelper.isSVGIcon(effectiveIconClass)" 
+                            :data="window.uiElementHelper.getSVGIconPath(effectiveIconClass)" 
+                            type="image/svg+xml"
+                            :class="effectiveIconClass"
+                            style="width: 1em; height: 1em; vertical-align: middle; pointer-events: none;">
+                        <!-- Fallback на img если object не поддерживается -->
+                        <img :src="window.uiElementHelper.getSVGIconPath(effectiveIconClass)" 
+                             :alt="displayLabel"
+                             :class="effectiveIconClass"
+                             style="width: 1em; height: 1em; vertical-align: middle;">
+                    </object>
+                    <!-- Font Awesome иконки (используется i) -->
+                    <i v-else-if="effectiveIconClass" :class="effectiveIconClass"></i>
                     <img v-if="hasIconImage" :src="iconImage" :alt="displayLabel" width="20" height="20">
                 </span>
                 

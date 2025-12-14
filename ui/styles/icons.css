@@ -21,6 +21,10 @@
   --icon-action-color: var(--bs-body-color);
   --icon-action-hover-color: var(--bs-primary);
   --icon-action-disabled-color: var(--bs-secondary);
+  
+  /* SVG-иконка крестика */
+  --icon-cross-stroke-width: 0.5px; /* Толщина линий крестика (минимальная, регулируется через CSS) */
+  --icon-cross-color: var(--bs-body-color); /* Цвет крестика */
 }
 
 /* Темная тема */
@@ -154,6 +158,45 @@ button:disabled .fa-robot,
 button:disabled .fa-database,
 button:disabled .fa-bars {
   color: var(--icon-action-disabled-color);
+  opacity: 0.6;
+}
+
+/* SVG-иконка крестика (две тонкие линии) */
+.icon-cross {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  vertical-align: middle;
+  color: var(--icon-cross-color);
+}
+
+/* Стили для SVG внутри object (наследуют currentColor и CSS переменные) */
+.icon-cross object {
+  width: 100%;
+  height: 100%;
+  color: inherit;
+}
+
+/* Стили для SVG внутри object (через CSS переменные) */
+.icon-cross object svg {
+  width: 100%;
+  height: 100%;
+  stroke: currentColor;
+  stroke-width: var(--icon-cross-stroke-width);
+  stroke-linecap: round;
+  fill: none;
+}
+
+/* Hover эффект для крестика */
+button:hover .icon-cross,
+a:hover .icon-cross {
+  --icon-cross-color: var(--icon-action-hover-color);
+}
+
+/* Disabled состояние для крестика */
+button:disabled .icon-cross,
+a[aria-disabled="true"] .icon-cross {
+  --icon-cross-color: var(--icon-action-disabled-color);
   opacity: 0.6;
 }
 

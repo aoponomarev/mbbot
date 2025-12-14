@@ -175,6 +175,32 @@ const uiElementMapping = {
       "defaultCommand": "delete",
       "baseIcon": "fas fa-trash"
     },
+    "icon-cross": {
+      "commands": {
+        "close": {
+          "category": "actions",
+          "label": "Закрыть",
+          "tooltip": "Закрыть окно или панель"
+        },
+        "clear": {
+          "category": "actions",
+          "label": "Очистить",
+          "tooltip": "Очистить поле или список"
+        },
+        "remove": {
+          "category": "actions",
+          "label": "Убрать",
+          "tooltip": "Убрать элемент из списка"
+        },
+        "exclude": {
+          "category": "actions",
+          "label": "Исключить",
+          "tooltip": "Исключить элемент"
+        }
+      },
+      "defaultCommand": "close",
+      "baseIcon": "icon-cross"
+    },
     "fas fa-archive": {
       "commands": {
         "archive": {
@@ -729,6 +755,27 @@ function getIndicatorTooltip(type, value) {
   return indicatorData?.tooltip || '';
 }
 
+/**
+ * Получает путь к SVG-файлу иконки
+ * @param {string} iconName - Название иконки без префикса (например, 'cross' для 'icon-cross')
+ * @returns {string} Путь к SVG-файлу или пустая строка
+ */
+function getSVGIconPath(iconName) {
+  if (!iconName) return '';
+  // Убираем префикс 'icon-' если он есть
+  const cleanName = iconName.startsWith('icon-') ? iconName.replace('icon-', '') : iconName;
+  return `ui/assets/icons/icon-${cleanName}.svg`;
+}
+
+/**
+ * Проверяет, является ли иконка SVG-файлом (начинается с 'icon-')
+ * @param {string} iconClass - CSS класс иконки
+ * @returns {boolean} true если это SVG-иконка
+ */
+function isSVGIcon(iconClass) {
+  return iconClass && iconClass.startsWith('icon-');
+}
+
 // Экспорт функций для использования в компонентах
 if (typeof window !== 'undefined') {
   window.uiElementHelper = {
@@ -746,6 +793,9 @@ if (typeof window !== 'undefined') {
     getIndicatorIcon,
     getIndicatorLabel,
     getIndicatorTooltip,
+    // Функции для SVG-иконок
+    getSVGIconPath,
+    isSVGIcon,
     // Функции для схемы "одна иконка → много команд"
     getIconCommands,
     getIconByCommand,
