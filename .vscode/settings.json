@@ -57,5 +57,10 @@
   "[plaintext]": {
     "editor.wordWrap": "on",
     "editor.wordWrapColumn": 0
-  }
+  },
+  
+  // Автоматическое открытие файла при старте workspace
+  "openFileOnStartup.files": [
+    "docs/TODO.TXT"
+  ]
 }

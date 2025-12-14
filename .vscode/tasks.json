@@ -15,6 +15,24 @@
         "showReuseMessage": false,
         "clear": false
       }
+    },
+    {
+      "label": "Open TODO.TXT",
+      "type": "process",
+      "command": "${execPath}",
+      "args": [
+        "${workspaceFolder}/docs/TODO.TXT"
+      ],
+      "problemMatcher": [],
+      "runOptions": {
+        "runOn": "folderOpen"
+      },
+      "presentation": {
+        "reveal": "silent",
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": false
+      }
     }
   ]
 }

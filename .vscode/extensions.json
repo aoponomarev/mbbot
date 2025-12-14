@@ -1,6 +1,7 @@
 {
   "recommendations": [
     "mhutchie.git-graph",
-    "eamodio.gitlens"
+    "eamodio.gitlens",
+    "philhindle.openFileOnStartup"
   ]
 }
