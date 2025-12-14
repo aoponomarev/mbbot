@@ -236,7 +236,17 @@ window.cmpDropdownMenu = {
     // Обработка клика вне меню
     handleClickOutside(event) {
       if (this.closeOnClickOutside && this.show) {
-        if (!this.$el.contains(event.target)) {
+        // Проверяем, не является ли клик на триггере
+        let isTriggerClick = false;
+        if (this.triggerSelector) {
+          const trigger = document.querySelector(this.triggerSelector);
+          if (trigger && (trigger.contains(event.target) || trigger === event.target)) {
+            isTriggerClick = true;
+          }
+        }
+        
+        // Закрываем меню только если клик не на триггере и не внутри меню
+        if (!isTriggerClick && !this.$el.contains(event.target)) {
           this.close();
         }
       }

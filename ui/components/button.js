@@ -241,7 +241,14 @@ window.cmpButton = {
         return;
       }
       
-      this.$emit('click', {
+      // Останавливаем всплытие нативного события, чтобы предотвратить двойную обработку
+      if (event && typeof event.stopPropagation === 'function') {
+        event.stopPropagation();
+      }
+      
+      // Эмитим событие с данными, передавая оригинальное событие как первый аргумент
+      // Это позволяет использовать модификаторы событий Vue (@click.stop, @click.prevent и т.д.)
+      this.$emit('click', event, {
         buttonId: this.buttonId,
         iconCommand: this.iconCommand,
         label: this.displayLabel

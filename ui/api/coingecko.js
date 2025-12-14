@@ -598,8 +598,11 @@ window.cmpCoinGecko = {
         
         this.cgLastUpdated = new Date().toISOString(); // Сохраняем ISO строку для парсинга
         
-        // Очищаем выбранные монеты, так как список мог измениться
-        this.selectedCoinIds = [];
+        // Сохраняем выбранные монеты, фильтруя только те, которые все еще есть в списке
+        // Создаем Set из ID монет для быстрой проверки
+        const availableCoinIds = new Set(this.cgCoins.map(coin => coin.id));
+        // Фильтруем selectedCoinIds, оставляя только те, которые есть в новом списке
+        this.selectedCoinIds = this.selectedCoinIds.filter(coinId => availableCoinIds.has(coinId));
         localStorage.setItem('cgSelectedCoinIds', JSON.stringify(this.selectedCoinIds));
         
         // Кэшируем иконки монет для быстрой загрузки

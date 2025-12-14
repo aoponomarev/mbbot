@@ -99,6 +99,12 @@ window.cmpHeaderCoins = {
     'fetch-coins'
   ],
   
+  data() {
+    return {
+      isTogglingFavorites: false // Флаг для предотвращения двойной обработки события
+    };
+  },
+  
   computed: {
     // Динамический текст для кнопки обновления во время загрузки
     updateButtonLoadingText() {
@@ -218,15 +224,36 @@ window.cmpHeaderCoins = {
       this.$emit('add-coin', coinId);
     },
     
-    handleToggleFavoritesDropdown() {
+    handleToggleFavoritesDropdown(event, data) {
+      // Предотвращаем двойную обработку события
+      if (this.isTogglingFavorites) {
+        return;
+      }
+      
+      // Устанавливаем флаг
+      this.isTogglingFavorites = true;
+      
+      // Если передан объект события, останавливаем всплытие
+      if (event && typeof event.stopPropagation === 'function') {
+        event.stopPropagation();
+      }
+      
+      // Эмитим событие для родительского компонента
       this.$emit('toggle-favorites-dropdown');
+      
+      // Сбрасываем флаг после небольшой задержки, чтобы предотвратить повторную обработку
+      setTimeout(() => {
+        this.isTogglingFavorites = false;
+      }, 100);
     },
     
     handleAddFavoriteToTable(coinId) {
       this.$emit('add-favorite-to-table', coinId);
     },
     
-    handleFetchCoins() {
+    handleFetchCoins(event, data) {
+      // Если передан объект события, можем его использовать (например, для preventDefault)
+      // Но для этого обработчика это не обязательно
       this.$emit('fetch-coins');
     }
   },
