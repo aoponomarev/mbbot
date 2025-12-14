@@ -170,6 +170,32 @@
       "defaultCommand": "delete",
       "baseIcon": "fas fa-trash"
     },
+    "icon-cross": {
+      "commands": {
+        "close": {
+          "category": "actions",
+          "label": "Закрыть",
+          "tooltip": "Закрыть окно или панель"
+        },
+        "clear": {
+          "category": "actions",
+          "label": "Очистить",
+          "tooltip": "Очистить поле или список"
+        },
+        "remove": {
+          "category": "actions",
+          "label": "Убрать",
+          "tooltip": "Убрать элемент из списка"
+        },
+        "exclude": {
+          "category": "actions",
+          "label": "Исключить",
+          "tooltip": "Исключить элемент"
+        }
+      },
+      "defaultCommand": "close",
+      "baseIcon": "icon-cross"
+    },
     "fas fa-archive": {
       "commands": {
         "archive": {

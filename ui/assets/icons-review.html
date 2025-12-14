@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Каталог иконок проекта</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { padding: 2rem; background: white; }
+        .icon-preview-cell { text-align: center; width: 80px; }
+        .icon-preview { font-size: 1.5rem; display: inline-block; line-height: 1; }
+        .icon-preview svg, .icon-preview object { width: 1em; height: 1em; max-width: 1.5rem; max-height: 1.5rem; }
+        .icon-preview img { width: 1em; height: 1em; max-width: 1.5rem; max-height: 1.5rem; }
+        .icon-preview object { color: #000; }
+        .icon-preview .icon-cross { color: #000; }
+        .table-icons { background: white; margin-bottom: 2rem; }
+        .table-icons th { background: white; font-weight: normal; cursor: pointer; user-select: none; font-size: 0.85rem; opacity: 0.6; }
+        .table-icons th:hover { background: white; opacity: 0.8; }
+        .table-icons th.icon-header { text-align: center; }
+        .table-icons th.sort-asc::after { content: ' ▲'; font-size: 0.7em; color: #333; }
+        .table-icons th.sort-desc::after { content: ' ▼'; font-size: 0.7em; color: #333; }
+        .table-icons td { vertical-align: middle; padding-top: 0.75rem; padding-bottom: 0.75rem; }
+        .table-icons tbody tr { background: white; }
+        .section-header { background: #e9ecef; font-weight: 600; padding: 0.75rem 1rem; }
+        .section-header td { border: none; text-align: center; }
+        .commands-list { text-align: right; max-width: 300px; }
+        .commands-list .badge { margin: 0.1rem; display: inline-block; background-color: #6c757d; color: white; }
+        .identifier-cell { color: #000; line-height: 1; }
+        .identifier-cell code { display: block; background: transparent; padding: 0; border-radius: 0; color: #000; margin: 0; line-height: 1; }
+        .identifier-cell .file-extension { margin: 0; line-height: 1; }
+        .usage-list { max-width: 200px; font-size: 0.85rem; color: #000; }
+        .usage-list code { font-size: 0.75rem; background: transparent; padding: 0; border-radius: 0; color: #000; }
+        .file-cell { font-size: 0.85rem; color: #000; width: 1%; white-space: nowrap; line-height: 1; text-align: right; }
+        .file-cell code { background: transparent; padding: 0; border-radius: 0; color: #000; line-height: 1; }
+        .file-cell div { line-height: 1; }
+        .table-icons tbody tr.unused { opacity: 0.5; }
+        .badge { border-radius: 0; padding: 0.15rem 0.3rem; font-weight: normal; font-size: 0.75rem; }
+        .badge-category { font-size: 0.75rem; }
+        .filter-controls { background: white; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; }
+        .file-extension { color: #666; font-size: 0.75rem; margin-left: 0.25rem; }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- Фильтры -->
+        <div class="filter-controls">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Тип иконки</label>
+                    <select class="form-select form-select-sm" id="filter-type">
+                        <option value="">Все типы</option>
+                        <option value="fontawesome">Font Awesome</option>
+                        <option value="svg-file">SVG файл</option>
+                        <option value="inline-svg">Inline SVG</option>
+                        <option value="data-uri">Data URI</option>
+                        <option value="bitmap">Битмап</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Категория</label>
+                    <select class="form-select form-select-sm" id="filter-category">
+                        <option value="">Все категории</option>
+                        <option value="actions">Actions</option>
+                        <option value="navigation">Navigation</option>
+                        <option value="status">Status</option>
+                        <option value="metrics">Metrics</option>
+                        <option value="frameworks">Frameworks</option>
+                        <option value="other">Other</option>
+                        <option value="indicators">Indicators</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Поиск</label>
+                    <input type="text" class="form-control form-control-sm" id="filter-search" placeholder="Поиск по идентификатору, команде, компоненту...">
+                </div>
+            </div>
+        </div>
+
+        <!-- Контейнер для таблиц по секциям -->
+        <div id="icons-container"></div>
+    </div>
+
+    <!-- Подключаем ui-element-helper.js -->
+    <script src="../utils/ui-element-helper.js"></script>
+    
+    <script>
+        // Данные о дополнительных иконках (не из ui-element-mapping.json)
+        const additionalIcons = {
+            'hamburger-inline': {
+                type: 'inline-svg',
+                identifier: 'hamburger (inline)',
+                iconClass: 'hamburger-inline',
+                category: 'other',
+                commands: [{ name: 'hamburger', label: 'Меню', tooltip: 'Иконка гамбургер-меню' }],
+                usage: ['app-header'],
+                file: 'index.html (строка 149-153)',
+                svgCode: '<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="5" width="16" height="2" fill="currentColor" rx="0.5"/><rect x="2" y="9" width="16" height="2" fill="currentColor" rx="0.5"/><rect x="2" y="13" width="16" height="2" fill="currentColor" rx="0.5"/></svg>'
+            },
+            'counter-ring': {
+                type: 'inline-svg',
+                identifier: 'counter-ring',
+                iconClass: 'cg-counter-ring',
+                category: 'other',
+                commands: [],
+                usage: ['header-coins'],
+                file: 'index.html (строка 526+)',
+                svgCode: '<svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15.915" fill="none" stroke="currentColor" stroke-width="0.5" stroke-dasharray="25 75"/></svg>'
+            },
+            'dropdown-arrow': {
+                type: 'data-uri',
+                identifier: 'dropdown-arrow',
+                iconClass: 'app-header-select-model',
+                category: 'navigation',
+                commands: [],
+                usage: ['app-header (селект модели)'],
+                file: 'ui/styles/header.css (строка 87)',
+                dataUri: 'data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 16 16\'%3e%3cpath fill=\'none\' stroke=\'%23ffffff80\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M2 5l6 6 6-6\'/%3e%3c/svg%3e'
+            },
+            'checkbox-checked': {
+                type: 'data-uri',
+                identifier: 'checkbox-checked',
+                iconClass: 'form-check-input:checked',
+                category: 'status',
+                commands: [],
+                usage: ['Все чекбоксы'],
+                file: 'ui/styles/layout.css (строка 459)',
+                dataUri: 'data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 20 20\'%3e%3cpath fill=\'none\' stroke=\'%23fff\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'3\' d=\'M6 10l3 3l6-6\'/%3e%3c/svg%3e'
+            },
+            'checkbox-indeterminate': {
+                type: 'data-uri',
+                identifier: 'checkbox-indeterminate',
+                iconClass: 'form-check-input:indeterminate',
+                category: 'status',
+                commands: [],
+                usage: ['Все чекбоксы'],
+                file: 'ui/styles/layout.css (строка 465)',
+                dataUri: 'data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 20 20\'%3e%3cpath fill=\'none\' stroke=\'%23fff\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'3\' d=\'M6 10h8\'/%3e%3c/svg%3e'
+            },
+            'coin-icons': {
+                type: 'bitmap',
+                identifier: 'coin-icons',
+                iconClass: 'coin-icon',
+                category: 'other',
+                commands: [],
+                usage: ['cell-coin', 'table-coin-row'],
+                file: 'CoinGecko API (кэш localStorage.cgIconsCache)',
+                description: 'Иконки монет из CoinGecko API'
+            }
+        };
+
+        // Компоненты, использующие иконки
+        const componentUsage = {
+            'cmp-button': ['Все команды из ui-element-mapping.json'],
+            'menu-item': ['Все команды из ui-element-mapping.json', 'iconImage prop'],
+            'app-header': ['theme-light', 'theme-dark', 'hamburger (inline)', 'dropdown-arrow'],
+            'app-footer': ['bitcoin', 'fgi', 'vix', 'oi', 'fr', 'lsr', 'vuejs', 'bootstrap'],
+            'cell-coin': ['coin-icons (bitmap)', 'open-external'],
+            'sortable-header': ['sort', 'sort-up', 'sort-down'],
+            'header-coins': ['counter-ring', 'refresh', 'favorite']
+        };
+
+        // Названия категорий
+        const categoryNames = {
+            'actions': 'Actions',
+            'navigation': 'Navigation',
+            'status': 'Status',
+            'metrics': 'Metrics',
+            'frameworks': 'Frameworks',
+            'other': 'Other',
+            'indicators': 'Indicators'
+        };
+
+        // Определяет компоненты, использующие команду
+        function getComponentsForCommand(commandName) {
+            const components = [];
+            for (const [component, commands] of Object.entries(componentUsage)) {
+                // Проверяем специальные случаи
+                if (commands.includes('Все команды из ui-element-mapping.json')) {
+                    // cmp-button и menu-item используют ВСЕ команды из mapping
+                    components.push(component);
+                } else if (commands.some(cmd => cmd === commandName || cmd.includes(commandName))) {
+                    components.push(component);
+                }
+            }
+            return components;
+        }
+
+        // Определяет тип иконки
+        function getIconType(iconClass) {
+            if (!iconClass) return 'unknown';
+            if (iconClass.startsWith('icon-')) return 'svg-file';
+            if (iconClass.startsWith('fas ') || iconClass.startsWith('fab ')) return 'fontawesome';
+            return 'unknown';
+        }
+
+        // Получает категорию иконки (основную)
+        function getMainCategory(commands) {
+            if (!commands || commands.length === 0) return 'other';
+            const categories = commands.map(cmd => cmd.category).filter(Boolean);
+            return categories[0] || 'other';
+        }
+
+        // Проверяет, используется ли иконка
+        function isIconUsed(icon) {
+            // Иконка считается используемой, если:
+            // 1. Есть команды (все команды из ui-element-mapping.json используются в cmp-button и menu-item)
+            // 2. Или есть явное использование в компонентах
+            if (icon.commands && icon.commands.length > 0) {
+                // Если есть команды, проверяем использование
+                if (icon.usage && icon.usage.length > 0) {
+                    return true;
+                }
+                // Если команды есть, но usage пустой - проверяем, используются ли команды в универсальных компонентах
+                const universalComponents = ['cmp-button', 'menu-item'];
+                // Если иконка из ui-element-mapping.json, она используется в универсальных компонентах
+                if (icon.file === 'ui/config/ui-element-mapping.json') {
+                    return true;
+                }
+            }
+            // Для дополнительных иконок проверяем явное использование
+            return icon.usage && icon.usage.length > 0;
+        }
+
+        // Генерирует превью иконки
+        function renderIconPreview(icon) {
+            const cell = document.createElement('td');
+            cell.className = 'icon-preview-cell';
+            const preview = document.createElement('div');
+            preview.className = 'icon-preview';
+
+            if (icon.type === 'fontawesome') {
+                const i = document.createElement('i');
+                i.className = icon.iconClass;
+                preview.appendChild(i);
+            } else if (icon.type === 'svg-file') {
+                // Для icon-cross используем inline SVG для лучшего контроля
+                if (icon.iconClass === 'icon-cross') {
+                    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                    svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+                    svg.setAttribute('viewBox', '0 0 16 16');
+                    svg.style.width = '1em';
+                    svg.style.height = '1em';
+                    svg.style.maxWidth = '1.5rem';
+                    svg.style.maxHeight = '1.5rem';
+                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    path.setAttribute('d', 'M2 2 L14 14 M14 2 L2 14');
+                    path.setAttribute('stroke', '#000');
+                    path.setAttribute('stroke-width', '1');
+                    path.setAttribute('stroke-linecap', 'round');
+                    path.setAttribute('fill', 'none');
+                    svg.appendChild(path);
+                    preview.appendChild(svg);
+                } else {
+                    const object = document.createElement('object');
+                    object.data = window.uiElementHelper ? window.uiElementHelper.getSVGIconPath(icon.iconClass) : '';
+                    object.type = 'image/svg+xml';
+                    object.className = icon.iconClass;
+                    object.style.color = '#000';
+                    object.style.width = '1em';
+                    object.style.height = '1em';
+                    object.style.maxWidth = '1.5rem';
+                    object.style.maxHeight = '1.5rem';
+                    preview.appendChild(object);
+                }
+            } else if (icon.type === 'inline-svg' && icon.svgCode) {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = icon.svgCode;
+                const svg = tempDiv.querySelector('svg');
+                if (svg) {
+                    svg.style.width = '1em';
+                    svg.style.height = '1em';
+                    svg.style.maxWidth = '1.5rem';
+                    svg.style.maxHeight = '1.5rem';
+                }
+                preview.appendChild(tempDiv.firstChild || tempDiv);
+            } else if (icon.type === 'data-uri' && icon.dataUri) {
+                // Для чекбоксов создаем SVG с черным цветом
+                if (icon.identifier && icon.identifier.includes('checkbox')) {
+                    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                    svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+                    if (icon.iconClass.includes('checked')) {
+                        svg.setAttribute('viewBox', '0 0 20 20');
+                        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                        path.setAttribute('d', 'M6 10l3 3l6-6');
+                        path.setAttribute('stroke', '#000');
+                        path.setAttribute('stroke-width', '3');
+                        path.setAttribute('stroke-linecap', 'round');
+                        path.setAttribute('stroke-linejoin', 'round');
+                        path.setAttribute('fill', 'none');
+                        svg.appendChild(path);
+                    } else if (icon.iconClass.includes('indeterminate')) {
+                        svg.setAttribute('viewBox', '0 0 20 20');
+                        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                        path.setAttribute('d', 'M6 10h8');
+                        path.setAttribute('stroke', '#000');
+                        path.setAttribute('stroke-width', '3');
+                        path.setAttribute('stroke-linecap', 'round');
+                        path.setAttribute('stroke-linejoin', 'round');
+                        path.setAttribute('fill', 'none');
+                        svg.appendChild(path);
+                    }
+                    svg.style.width = '1em';
+                    svg.style.height = '1em';
+                    svg.style.maxWidth = '1.5rem';
+                    svg.style.maxHeight = '1.5rem';
+                    preview.appendChild(svg);
+                } else if (icon.identifier && icon.identifier.includes('dropdown-arrow')) {
+                    // Для dropdown-arrow создаем SVG с черным цветом
+                    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                    svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+                    svg.setAttribute('viewBox', '0 0 16 16');
+                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    path.setAttribute('d', 'M2 5l6 6 6-6');
+                    path.setAttribute('stroke', '#000');
+                    path.setAttribute('stroke-width', '2');
+                    path.setAttribute('stroke-linecap', 'round');
+                    path.setAttribute('stroke-linejoin', 'round');
+                    path.setAttribute('fill', 'none');
+                    svg.appendChild(path);
+                    svg.style.width = '1em';
+                    svg.style.height = '1em';
+                    svg.style.maxWidth = '1.5rem';
+                    svg.style.maxHeight = '1.5rem';
+                    preview.appendChild(svg);
+                } else {
+                    const img = document.createElement('img');
+                    img.src = icon.dataUri;
+                    img.style.width = '1em';
+                    img.style.height = '1em';
+                    img.style.maxWidth = '1.5rem';
+                    img.style.maxHeight = '1.5rem';
+                    preview.appendChild(img);
+                }
+            } else if (icon.type === 'bitmap') {
+                const span = document.createElement('span');
+                span.style.cssText = 'background-color: #6c757d; color: white; padding: 0.15rem 0.3rem; font-size: 0.75rem; border-radius: 0; font-weight: normal;';
+                span.textContent = 'IMG';
+                preview.appendChild(span);
+            } else {
+                const span = document.createElement('span');
+                span.textContent = '?';
+                span.style.color = '#666';
+                preview.appendChild(span);
+            }
+
+            cell.appendChild(preview);
+            return cell;
+        }
+
+        // Получает расширение файла
+        function getFileExtension(file) {
+            if (!file) return '';
+            const match = file.match(/\.(\w+)(?:\s|$)/);
+            return match ? match[1] : '';
+        }
+
+        // Генерирует ячейку с идентификатором
+        function renderIdentifierCell(icon) {
+            const cell = document.createElement('td');
+            cell.className = 'identifier-cell';
+            
+            const code = document.createElement('code');
+            code.textContent = icon.identifier;
+            cell.appendChild(code);
+            
+            // Показываем расширение файла, если есть
+            const ext = getFileExtension(icon.file);
+            if (ext) {
+                const extSpan = document.createElement('span');
+                extSpan.className = 'file-extension';
+                extSpan.textContent = '.' + ext;
+                cell.appendChild(extSpan);
+            }
+            
+            return cell;
+        }
+
+        // Генерирует ячейку с командами
+        function renderCommandsCell(commands) {
+            const cell = document.createElement('td');
+            cell.className = 'commands-list';
+            if (!commands || commands.length === 0) {
+                return cell;
+            }
+            
+            // Если команд больше 1 - используем select
+            if (commands.length > 1) {
+                const select = document.createElement('select');
+                select.className = 'form-select form-select-sm';
+                select.style.width = 'auto';
+                select.style.display = 'inline-block';
+                select.style.minWidth = '150px';
+                
+                commands.forEach(cmd => {
+                    const option = document.createElement('option');
+                    option.value = cmd.name;
+                    option.textContent = cmd.name;
+                    option.title = cmd.tooltip || '';
+                    select.appendChild(option);
+                });
+                
+                cell.appendChild(select);
+            } else {
+                // Если команда одна - просто текст
+                const span = document.createElement('span');
+                span.textContent = commands[0].name;
+                span.title = commands[0].tooltip || '';
+                cell.appendChild(span);
+            }
+            
+            return cell;
+        }
+
+        // Получает только имя файла из пути
+        function getFileName(filePath) {
+            if (!filePath) return '';
+            // Извлекаем имя файла из пути
+            const match = filePath.match(/([^\/\\]+\.\w+)(?:\s|$)/);
+            if (match) return match[1];
+            // Если нет расширения, берем последнюю часть пути
+            const parts = filePath.split(/[\/\\]/);
+            return parts[parts.length - 1] || filePath;
+        }
+
+        // Извлекает основной текст и пояснение в скобках
+        function extractMainTextAndTooltip(text) {
+            if (!text) return { main: '', tooltip: '' };
+            const match = text.match(/^([^(]+)(\s*\([^)]+\))?$/);
+            if (match) {
+                const main = match[1].trim();
+                const tooltip = match[2] ? match[2].trim() : '';
+                return { main, tooltip: tooltip ? text : '' };
+            }
+            return { main: text, tooltip: '' };
+        }
+
+        // Генерирует ячейку с использованием (для вставки в файл/источник)
+        function renderUsageText(usage) {
+            if (!usage || usage.length === 0) {
+                return '';
+            }
+            return usage.join(', ');
+        }
+
+        // Сортировка иконок
+        function sortIcons(icons, column, direction) {
+            const sorted = [...icons];
+            sorted.sort((a, b) => {
+                let valA, valB;
+                
+                switch(column) {
+                    case 'identifier':
+                        valA = a.identifier || '';
+                        valB = b.identifier || '';
+                        break;
+                    case 'commands':
+                        valA = (a.commands?.length || 0);
+                        valB = (b.commands?.length || 0);
+                        break;
+                    case 'file':
+                        valA = getFileName(a.file || '');
+                        valB = getFileName(b.file || '');
+                        break;
+                    default:
+                        return 0;
+                }
+                
+                if (typeof valA === 'string') {
+                    valA = valA.toLowerCase();
+                    valB = valB.toLowerCase();
+                }
+                
+                if (valA < valB) return direction === 'asc' ? -1 : 1;
+                if (valA > valB) return direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+            
+            return sorted;
+        }
+
+        // Рендерит строку таблицы
+        function renderTableRow(icon) {
+            const row = document.createElement('tr');
+            
+            // Добавляем класс для неиспользуемых иконок
+            if (!isIconUsed(icon)) {
+                row.className = 'unused';
+            }
+            
+            // Команды (первая колонка)
+            row.appendChild(renderCommandsCell(icon.commands));
+            
+            // Иконка
+            row.appendChild(renderIconPreview(icon));
+            
+            // Идентификатор
+            row.appendChild(renderIdentifierCell(icon));
+            
+            // Файл/Источник с использованием
+            const fileCell = document.createElement('td');
+            fileCell.className = 'file-cell';
+            
+            // Имя файла
+            const fileName = getFileName(icon.file);
+            if (fileName) {
+                const fileCode = document.createElement('code');
+                const { main, tooltip } = extractMainTextAndTooltip(fileName);
+                fileCode.textContent = main;
+                if (tooltip) {
+                    fileCode.title = icon.file; // Полный текст с пояснением в tooltip
+                }
+                fileCell.appendChild(fileCode);
+            } else if (icon.file) {
+                // Если не удалось извлечь имя файла, обрабатываем весь текст
+                const fileCode = document.createElement('code');
+                const { main, tooltip } = extractMainTextAndTooltip(icon.file);
+                fileCode.textContent = main;
+                if (tooltip) {
+                    fileCode.title = icon.file; // Полный текст с пояснением в tooltip
+                }
+                fileCell.appendChild(fileCode);
+            }
+            
+            // Использование (вторая строка, жирным)
+            const usageText = renderUsageText(icon.usage);
+            if (usageText) {
+                const usageDiv = document.createElement('div');
+                usageDiv.style.fontWeight = 'bold';
+                usageDiv.style.marginTop = '0.1rem';
+                usageDiv.style.fontSize = '0.85rem';
+                
+                // Если мест применения больше 1 - используем select
+                if (icon.usage && icon.usage.length > 1) {
+                    const select = document.createElement('select');
+                    select.className = 'form-select form-select-sm';
+                    select.style.width = 'auto';
+                    select.style.display = 'inline-block';
+                    select.style.minWidth = '150px';
+                    select.style.fontWeight = 'bold';
+                    select.style.fontSize = '0.85rem';
+                    
+                    icon.usage.forEach(comp => {
+                        const option = document.createElement('option');
+                        option.value = comp;
+                        option.textContent = comp;
+                        select.appendChild(option);
+                    });
+                    
+                    usageDiv.appendChild(select);
+                } else {
+                    // Если место применения одно - просто текст
+                    usageDiv.textContent = usageText;
+                }
+                
+                fileCell.appendChild(usageDiv);
+            }
+            
+            row.appendChild(fileCell);
+            
+            return row;
+        }
+
+        // Рендерит таблицу для секции
+        function renderSectionTable(category, icons, container) {
+            if (icons.length === 0) return;
+            
+            const table = document.createElement('table');
+            table.className = 'table table-sm table-icons';
+            
+            // Заголовок секции
+            const headerRow = document.createElement('tr');
+            headerRow.className = 'section-header';
+            const headerCell = document.createElement('td');
+            headerCell.colSpan = 4;
+            headerCell.textContent = categoryNames[category] || category;
+            headerRow.appendChild(headerCell);
+            
+            // Заголовки колонок
+            const thead = document.createElement('thead');
+            const headerTr = document.createElement('tr');
+            const headers = [
+                { text: 'Команды', col: 'commands', sortable: true },
+                { text: 'Иконка', col: 'icon', sortable: false },
+                { text: 'Идентификатор', col: 'identifier', sortable: true },
+                { text: 'Файл/Источник', col: 'file', sortable: true }
+            ];
+            
+            headers.forEach(header => {
+                const th = document.createElement('th');
+                th.textContent = header.text;
+                if (header.col === 'icon') {
+                    th.className = 'icon-header';
+                }
+                if (header.sortable) {
+                    th.dataset.column = header.col;
+                    th.style.cursor = 'pointer';
+                }
+                headerTr.appendChild(th);
+            });
+            
+            thead.appendChild(headerTr);
+            
+            // Тело таблицы
+            const tbody = document.createElement('tbody');
+            icons.forEach(icon => {
+                tbody.appendChild(renderTableRow(icon));
+            });
+            
+            table.appendChild(headerRow);
+            table.appendChild(thead);
+            table.appendChild(tbody);
+            
+            // Обработчики сортировки
+            headerTr.querySelectorAll('th[data-column]').forEach(th => {
+                let sortDirection = null;
+                th.addEventListener('click', () => {
+                    const column = th.dataset.column;
+                    
+                    // Переключаем направление сортировки
+                    if (th.classList.contains('sort-asc')) {
+                        sortDirection = 'desc';
+                        th.classList.remove('sort-asc');
+                        th.classList.add('sort-desc');
+                    } else if (th.classList.contains('sort-desc')) {
+                        sortDirection = 'asc';
+                        th.classList.remove('sort-desc');
+                        th.classList.add('sort-asc');
+                    } else {
+                        sortDirection = 'asc';
+                        // Убираем сортировку с других колонок
+                        headerTr.querySelectorAll('th').forEach(h => {
+                            h.classList.remove('sort-asc', 'sort-desc');
+                        });
+                        th.classList.add('sort-asc');
+                    }
+                    
+                    // Сортируем иконки в этой секции
+                    const sortedIcons = sortIcons(icons, column, sortDirection);
+                    tbody.innerHTML = '';
+                    sortedIcons.forEach(icon => {
+                        tbody.appendChild(renderTableRow(icon));
+                    });
+                });
+            });
+            
+            container.appendChild(table);
+        }
+
+        // Загружает все иконки из ui-element-helper
+        function loadIconsFromHelper() {
+            if (!window.uiElementHelper) {
+                console.error('uiElementHelper не загружен');
+                return [];
+            }
+
+            const mapping = window.uiElementHelper.loadUIElementMapping();
+            const icons = [];
+
+            if (mapping && mapping.icons) {
+                for (const [iconClass, iconData] of Object.entries(mapping.icons)) {
+                    const commands = [];
+                    if (iconData.commands) {
+                        for (const [cmdName, cmdData] of Object.entries(iconData.commands)) {
+                            commands.push({
+                                name: cmdName,
+                                label: cmdData.label || '',
+                                tooltip: cmdData.tooltip || '',
+                                category: cmdData.category || 'other',
+                                type: cmdData.type,
+                                value: cmdData.value
+                            });
+                        }
+                    }
+
+                    // Определяем компоненты, использующие эту иконку
+                    const usage = new Set();
+                    commands.forEach(cmd => {
+                        const comps = getComponentsForCommand(cmd.name);
+                        comps.forEach(comp => usage.add(comp));
+                    });
+
+                    icons.push({
+                        type: getIconType(iconClass),
+                        identifier: iconClass,
+                        iconClass: iconClass,
+                        category: getMainCategory(commands),
+                        commands: commands,
+                        usage: Array.from(usage),
+                        file: 'ui/config/ui-element-mapping.json',
+                        baseIcon: iconData.baseIcon || iconClass
+                    });
+                }
+            }
+
+            return icons;
+        }
+
+        // Загружает все иконки
+        function loadAllIcons() {
+            const icons = [];
+            
+            // Иконки из ui-element-helper
+            const helperIcons = loadIconsFromHelper();
+            icons.push(...helperIcons);
+
+            // Дополнительные иконки
+            for (const [key, icon] of Object.entries(additionalIcons)) {
+                icons.push(icon);
+            }
+
+            return icons;
+        }
+
+        // Группирует иконки по категориям
+        function groupIconsByCategory(icons) {
+            const grouped = {};
+            icons.forEach(icon => {
+                const category = icon.category || 'other';
+                if (!grouped[category]) {
+                    grouped[category] = [];
+                }
+                grouped[category].push(icon);
+            });
+            return grouped;
+        }
+
+        // Сортирует иконки: используемые вверху, неиспользуемые внизу
+        function sortIconsByUsage(icons) {
+            return icons.sort((a, b) => {
+                const aUsed = isIconUsed(a);
+                const bUsed = isIconUsed(b);
+                if (aUsed && !bUsed) return -1;
+                if (!aUsed && bUsed) return 1;
+                return 0;
+            });
+        }
+
+        // Рендерит все таблицы по секциям
+        function renderTables(icons) {
+            const container = document.getElementById('icons-container');
+            container.innerHTML = '';
+
+            if (icons.length === 0) {
+                container.innerHTML = '<p class="text-center text-muted">Иконки не найдены</p>';
+                return;
+            }
+
+            // Группируем по категориям
+            const grouped = groupIconsByCategory(icons);
+            
+            // Порядок категорий
+            const categoryOrder = ['actions', 'navigation', 'status', 'metrics', 'frameworks', 'other', 'indicators'];
+            
+            categoryOrder.forEach(category => {
+                if (grouped[category]) {
+                    // Сортируем: используемые вверху, неиспользуемые внизу
+                    const sorted = sortIconsByUsage(grouped[category]);
+                    renderSectionTable(category, sorted, container);
+                }
+            });
+        }
+
+
+        // Фильтрация
+        let allIcons = [];
+        function applyFilters() {
+            const typeFilter = document.getElementById('filter-type').value;
+            const categoryFilter = document.getElementById('filter-category').value;
+            const searchFilter = document.getElementById('filter-search').value.toLowerCase();
+
+            let filtered = allIcons;
+
+            if (typeFilter) {
+                filtered = filtered.filter(icon => icon.type === typeFilter);
+            }
+
+            if (categoryFilter) {
+                filtered = filtered.filter(icon => icon.category === categoryFilter);
+            }
+
+            if (searchFilter) {
+                filtered = filtered.filter(icon => {
+                    const searchText = (
+                        icon.identifier + ' ' +
+                        (icon.commands?.map(c => c.name + ' ' + c.label).join(' ') || '') +
+                        (icon.usage?.join(' ') || '') +
+                        (icon.file || '')
+                    ).toLowerCase();
+                    return searchText.includes(searchFilter);
+                });
+            }
+
+            renderTables(filtered);
+        }
+
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', function() {
+            // Ждем загрузки ui-element-helper
+            setTimeout(() => {
+                allIcons = loadAllIcons();
+                renderTables(allIcons);
+
+                // Настройка фильтров
+                document.getElementById('filter-type').addEventListener('change', applyFilters);
+                document.getElementById('filter-category').addEventListener('change', applyFilters);
+                document.getElementById('filter-search').addEventListener('input', applyFilters);
+            }, 100);
+        });
+    </script>
+</body>
+</html>

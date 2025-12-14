@@ -2,6 +2,30 @@
 
 ## UI (оформление)
 
+### Коммит: Fix window.uiElementHelper access in Vue templates and restore icons catalog
+- **Что сделано**: Исправлена проблема с доступом к `window.uiElementHelper` в шаблонах Vue, восстановлен каталог иконок и документация из коммита b04fb21
+- **Как сделано**:
+  * **Восстановление изменений из коммита b04fb21**:
+    - Восстановлен файл `ui/assets/icons-review.html` - интерактивный каталог всех иконок проекта
+    - Восстановлен файл `ui/assets/icons/icon-cross.svg` - SVG иконка крестика
+    - Восстановлены обновления в `ui/config/ui-element-mapping.json` с командами для иконки крестика
+    - Восстановлены обновления в `ui/styles/icons.css` со стилями для SVG иконки крестика
+    - Восстановлены обновления в `ui/utils/ui-element-helper.js` с функциями для работы с SVG иконками
+    - Восстановлены обновления документации в `architect.md` и `ui/guide-ii.md` про каталог иконок
+  * **Исправление проблемы window.uiElementHelper**:
+    - Добавлены computed свойства в `ui/components/button.js`:
+      - `uiElementHelper()` - безопасный доступ к `window.uiElementHelper`
+      - `isSVGIcon()` - проверка, является ли иконка SVG
+      - `svgIconPath()` - путь к SVG иконке
+    - Добавлены computed свойства в `ui/components/menu-item.js`:
+      - `uiElementHelper()` - безопасный доступ к `window.uiElementHelper`
+      - `isSVGIcon()` - проверка, является ли иконка SVG
+      - `svgIconPath()` - путь к SVG иконке
+    - Обновлены шаблоны в `index.html`:
+      - В шаблоне `button-template` заменены прямые обращения `window.uiElementHelper.isSVGIcon()` и `window.uiElementHelper.getSVGIconPath()` на computed свойства `isSVGIcon` и `svgIconPath`
+      - В шаблоне `menu-item-template` заменены прямые обращения `window.uiElementHelper.isSVGIcon()` и `window.uiElementHelper.getSVGIconPath()` на computed свойства `isSVGIcon` и `svgIconPath`
+- **Функциональность**: Кнопки и выпадающие списки теперь работают корректно, так как доступ к `window.uiElementHelper` в шаблонах Vue осуществляется через computed свойства, которые безопасно обрабатывают случаи, когда `window` недоступен. Каталог иконок восстановлен и доступен для просмотра всех иконок проекта.
+
 ## UX (паттерны взаимодействий)
 
 ## MM (математическая модель)

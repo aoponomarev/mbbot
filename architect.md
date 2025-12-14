@@ -301,6 +301,11 @@ Bootstrap 5 определяет следующие z-index переменные
     - `getIndicatorIcon(type, value)`: Получить иконку для indicator
     - `getIndicatorLabel(type, value)`: Получить label для indicator
     - `getIndicatorTooltip(type, value)`: Получить tooltip для indicator
+  - **Функции для SVG-иконок**:
+    - `isSVGIcon(iconClass)`: Проверить, является ли иконка SVG-файлом (начинается с 'icon-')
+    - `getSVGIconPath(iconName)`: Получить путь к SVG-файлу иконки (например, 'icon-cross' → 'ui/assets/icons/icon-cross.svg')
+- **Каталог иконок** (`ui/assets/icons-review.html`): Интерактивный каталог всех иконок проекта с интеграцией `ui-element-helper.js`. Отображает все иконки в табличном формате, сгруппированные по категориям (Actions, Navigation, Status, Metrics, Frameworks, Other, Indicators). Показывает превью иконок, идентификаторы, команды, использование в компонентах, файлы/источники. Поддерживает фильтрацию по типу иконки, категории и поиск. Автоматически определяет использование иконок в компонентах и помечает неиспользуемые иконки полупрозрачными. Интегрирован с `ui-element-helper.js` для динамической загрузки данных из `ui-element-mapping.json`.
+- **SVG-иконки** (`ui/assets/icons/`): Папка для хранения SVG-иконок проекта. Иконки хранятся с префиксом `icon-` (например, `icon-cross.svg`). SVG-иконки поддерживают CSS переменные для настройки цвета и толщины линий (например, `--icon-cross-stroke-width`, `--icon-cross-color`). Загружаются через `<object>` тег для поддержки `currentColor` и CSS переменных. Компоненты `button` и `menu-item` автоматически определяют SVG-иконки через `uiElementHelper.isSVGIcon()` и загружают их через `uiElementHelper.getSVGIconPath()`.
 
 **Правила использования:**
 - **Единая схема "одна иконка → много команд"**: Все иконки и команды хранятся в схеме `icons`. Даже если у иконки только одна команда, она все равно должна быть в этой схеме для единообразия.
@@ -310,6 +315,8 @@ Bootstrap 5 определяет следующие z-index переменные
 - **Цвета иконок должны быть зарутованы от Bootstrap переменных**: Для автоматической адаптации к темам.
 - **Компоненты `button` и `menu-item` используют схему `icons`**: При указании `icon-command` компоненты ищут команду в схеме `icons` через `uiElementHelper`.
 - **Раздельные tooltips**: Компоненты `button` и `menu-item` поддерживают раздельные tooltips для основной части (иконка + текст) и индикатора. Паддинги Bootstrap переносятся на дочерние элементы (`.button-main`, `.button-indicator`, `.menu-item-main`, `.menu-item-indicator`) для корректной работы tooltips.
+- **SVG-иконки**: SVG-иконки хранятся в `ui/assets/icons/` с префиксом `icon-`. Поддерживают CSS переменные для настройки цвета и толщины. Загружаются через `<object>` тег для поддержки `currentColor` и CSS переменных. Определяются через `uiElementHelper.isSVGIcon()` и загружаются через `uiElementHelper.getSVGIconPath()`.
+- **Каталог иконок**: Интерактивный каталог `ui/assets/icons-review.html` отображает все иконки проекта с интеграцией `ui-element-helper.js`, группировкой по категориям, фильтрацией и поиском.
 
 **Связь с Bootstrap:**
 CSS переменные иконок используют Bootstrap переменные как основу:
@@ -870,6 +877,10 @@ Root/
 │   │   └── icons.css
 │   ├── config/        # Конфигурационные файлы
 │   │   └── ui-element-mapping.json
+│   ├── assets/        # Ресурсы (иконки, изображения)
+│   │   ├── icons/     # SVG-иконки проекта
+│   │   │   └── icon-cross.svg
+│   │   └── icons-review.html  # Каталог иконок проекта
 │   ├── components/    # Переиспользуемые компоненты
 │   │   ├── header-coins.js
 │   │   ├── sortable-header.js

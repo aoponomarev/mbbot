@@ -118,6 +118,23 @@ window.cmpMenuItem = {
   },
   
   computed: {
+    // Проверка доступности uiElementHelper
+    uiElementHelper() {
+      return typeof window !== 'undefined' ? window.uiElementHelper : null;
+    },
+    
+    // Проверка, является ли иконка SVG
+    isSVGIcon() {
+      if (!this.effectiveIconClass || !this.uiElementHelper) return false;
+      return this.uiElementHelper.isSVGIcon(this.effectiveIconClass);
+    },
+    
+    // Путь к SVG иконке
+    svgIconPath() {
+      if (!this.effectiveIconClass || !this.uiElementHelper) return '';
+      return this.uiElementHelper.getSVGIconPath(this.effectiveIconClass);
+    },
+    
     // Детерминированный хэш экземпляра на основе itemId, iconCommand или label
     // Стабилен между сессиями - один и тот же идентификатор всегда дает один и тот же хэш
     instanceHash() {

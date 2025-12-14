@@ -115,6 +115,23 @@ window.cmpButton = {
   },
   
   computed: {
+    // Проверка доступности uiElementHelper
+    uiElementHelper() {
+      return typeof window !== 'undefined' ? window.uiElementHelper : null;
+    },
+    
+    // Проверка, является ли иконка SVG
+    isSVGIcon() {
+      if (!this.effectiveIconClass || !this.uiElementHelper) return false;
+      return this.uiElementHelper.isSVGIcon(this.effectiveIconClass);
+    },
+    
+    // Путь к SVG иконке
+    svgIconPath() {
+      if (!this.effectiveIconClass || !this.uiElementHelper) return '';
+      return this.uiElementHelper.getSVGIconPath(this.effectiveIconClass);
+    },
+    
     // Детерминированный хэш экземпляра
     instanceHash() {
       if (!window.hashGenerator) {
@@ -194,6 +211,11 @@ window.cmpButton = {
           this.iconClass = iconClass || '';
           this.iconLabel = commandData?.label || '';
           this.iconTooltip = commandData?.tooltip || '';
+        } else {
+          // Очищаем данные иконки, если iconCommand отсутствует
+          this.iconClass = '';
+          this.iconLabel = '';
+          this.iconTooltip = '';
         }
         
         // Загружаем данные indicator через uiElementHelper
@@ -201,6 +223,11 @@ window.cmpButton = {
           this.indicatorIcon = window.uiElementHelper.getIndicatorIcon(this.indicator.type, this.indicator.value);
           this.indicatorLabel = window.uiElementHelper.getIndicatorLabel(this.indicator.type, this.indicator.value);
           this.indicatorTooltip = window.uiElementHelper.getIndicatorTooltip(this.indicator.type, this.indicator.value);
+        } else {
+          // Очищаем данные индикатора, если indicator отсутствует
+          this.indicatorIcon = '';
+          this.indicatorLabel = '';
+          this.indicatorTooltip = '';
         }
       } catch (error) {
         console.error('Error loading icon:', error);
@@ -235,13 +262,18 @@ window.cmpButton = {
     }
   },
   
-  // Отслеживаем изменения indicator для перезагрузки данных
+  // Отслеживаем изменения indicator и iconCommand для перезагрузки данных
   watch: {
     indicator: {
       handler() {
         this.loadIcon();
       },
       deep: true
+    },
+    iconCommand: {
+      handler() {
+        this.loadIcon();
+      }
     }
   }
 };
