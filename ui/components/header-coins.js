@@ -91,7 +91,6 @@ window.cmpHeaderCoins = {
     'deselect-all-coins',
     'select-favorites',
     'delete-selected-coins',
-    'remove-selected-coins',
     'search-input',
     'search-focus',
     'close-search-dropdown',
@@ -100,6 +99,7 @@ window.cmpHeaderCoins = {
     'toggle-favorites-dropdown',
     'close-favorites-dropdown',
     'add-favorite-to-table',
+    'remove-favorite-from-favorites',
     'fetch-coins'
   ],
   
@@ -116,18 +116,16 @@ window.cmpHeaderCoins = {
         return this.totalCoinsCount.toString();
       }
       return null;
-    }
-  },
-  
-  methods: {
-    // Получение количества оставшихся тикеров
-    getRemainingTickersCount() {
+    },
+    
+    // Количество оставшихся тикеров для добавления
+    remainingTickersCount() {
       const pendingCount = this.pendingTickers ? this.pendingTickers.length : 0;
       return pendingCount + this.failedTickers.length + (this.currentAddingTicker ? 1 : 0);
     },
     
-    // Получение списка оставшихся тикеров для отображения
-    getRemainingTickersDisplay() {
+    // Список оставшихся тикеров для отображения
+    remainingTickersDisplay() {
       const allTickers = [];
       if (this.currentAddingTicker) {
         allTickers.push(this.currentAddingTicker);
@@ -136,27 +134,35 @@ window.cmpHeaderCoins = {
         allTickers.push(...this.pendingTickers);
       }
       return allTickers;
+    }
+  },
+  
+  methods: {
+    // Вспомогательный метод для получения данных монеты из избранного
+    _getFavoriteCoinData(favoriteCoin) {
+      if (typeof favoriteCoin === 'object') {
+        return {
+          id: favoriteCoin.id,
+          name: favoriteCoin.name || favoriteCoin.id,
+          symbol: favoriteCoin.symbol || favoriteCoin.id
+        };
+      }
+      return { id: favoriteCoin, name: favoriteCoin, symbol: favoriteCoin };
     },
     
     // Получение ID монеты из избранного
     getFavoriteCoinId(favoriteCoin) {
-      return typeof favoriteCoin === 'object' ? favoriteCoin.id : favoriteCoin;
+      return this._getFavoriteCoinData(favoriteCoin).id;
     },
     
     // Получение названия монеты из избранного
     getFavoriteCoinName(favoriteCoin) {
-      if (typeof favoriteCoin === 'object' && favoriteCoin.name) {
-        return favoriteCoin.name;
-      }
-      return typeof favoriteCoin === 'object' ? favoriteCoin.id : favoriteCoin;
+      return this._getFavoriteCoinData(favoriteCoin).name;
     },
     
     // Получение тикера монеты из избранного
     getFavoriteCoinSymbol(favoriteCoin) {
-      if (typeof favoriteCoin === 'object' && favoriteCoin.symbol) {
-        return favoriteCoin.symbol;
-      }
-      return typeof favoriteCoin === 'object' ? favoriteCoin.id : favoriteCoin;
+      return this._getFavoriteCoinData(favoriteCoin).symbol;
     },
     
     // Получение иконки монеты из избранного
@@ -228,7 +234,7 @@ window.cmpHeaderCoins = {
       this.$emit('add-coin', coinId);
     },
     
-    handleToggleFavoritesDropdown(event, data) {
+    handleToggleFavoritesDropdown(event) {
       // Предотвращаем двойную обработку события
       if (this.isTogglingFavorites) {
         return;
@@ -245,10 +251,11 @@ window.cmpHeaderCoins = {
       // Эмитим событие для родительского компонента
       this.$emit('toggle-favorites-dropdown');
       
-      // Сбрасываем флаг после небольшой задержки, чтобы предотвратить повторную обработку
+      // Задержка для предотвращения повторной обработки события (время анимации открытия меню)
+      const TOGGLE_FAVORITES_DELAY = 100;
       setTimeout(() => {
         this.isTogglingFavorites = false;
-      }, 100);
+      }, TOGGLE_FAVORITES_DELAY);
     },
     
     handleAddFavoriteToTable(coinId) {
@@ -264,9 +271,7 @@ window.cmpHeaderCoins = {
       return this.cgCoins.some(coin => coin.id === coinId);
     },
     
-    handleFetchCoins(event, data) {
-      // Если передан объект события, можем его использовать (например, для preventDefault)
-      // Но для этого обработчика это не обязательно
+    handleFetchCoins() {
       this.$emit('fetch-coins');
     }
   },

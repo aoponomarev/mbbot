@@ -78,11 +78,6 @@ window.cmpTableData = {
       type: Function,
       default: null
     },
-    // Методы для динамических колонок (CD)
-    getCDField: {
-      type: Function,
-      default: null
-    },
     // Обработчик сортировки
     onSort: {
       type: Function,
@@ -103,7 +98,11 @@ window.cmpTableData = {
     // Проверка, выбраны ли все элементы
     allSelected() {
       if (!this.selectedIds || this.data.length === 0) return false;
-      return this.selectedIds.length === this.data.length;
+      // Проверяем, что все элементы из data выбраны (учитываем только валидные ID)
+      const validSelectedIds = this.selectedIds.filter(id => 
+        this.data.some(item => item.id === id)
+      );
+      return validSelectedIds.length === this.data.length && this.data.length > 0;
     }
   },
   
@@ -117,26 +116,25 @@ window.cmpTableData = {
     
     // Обработчик переключения всех чекбоксов
     handleToggleAll(checked, event) {
+      // Защита от неправильных аргументов: если первый параметр - объект события, а не boolean
+      if (typeof checked !== 'boolean' && checked && typeof checked === 'object' && !event) {
+        // Это означает, что Vue передал только один аргумент (объект события)
+        // Нормализуем: checked становится event, а event становится undefined
+        event = checked;
+        checked = event?.target?.checked ?? false;
+      }
+      
       if (this.onToggleAll) {
         // Компонент header-cell-check эмитит (checked, event)
         // Метод toggleAllCoins ожидает event.target.checked
-        if (typeof checked === 'boolean') {
-          // Создаем синтетическое событие с правильной структурой
-          const syntheticEvent = event || { target: { checked } };
-          // Если event не передан, но есть checked - создаем объект события
-          if (!event) {
-            syntheticEvent.target = { checked };
-          } else {
-            // Если event передан, но у него нет target.checked - добавляем
-            if (!event.target || event.target.checked === undefined) {
-              event.target = { ...(event.target || {}), checked };
-            }
-          }
-          this.onToggleAll(syntheticEvent);
-        } else if (event) {
-          // Старый способ - передаем событие как есть
-          this.onToggleAll(event);
+        // Нормализуем событие для совместимости, всегда используя значение checked из параметра
+        const normalizedEvent = event || {};
+        if (!normalizedEvent.target) {
+          normalizedEvent.target = {};
         }
+        // Всегда устанавливаем checked из параметра (это актуальное значение после клика)
+        normalizedEvent.target.checked = checked;
+        this.onToggleAll(normalizedEvent);
       }
     },
     

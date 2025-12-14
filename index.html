@@ -610,12 +610,12 @@
                                     <i class="fas fa-stop me-1"></i>Остановить
                                 </button>
                             </div>
-                            <div v-if="getRemainingTickersCount() > 0" class="small text-muted mb-2">
-                                Осталось: {{ getRemainingTickersCount() }} {{ getRemainingTickersCount() === 1 ? 'монета' : getRemainingTickersCount() < 5 ? 'монеты' : 'монет' }}
+                            <div v-if="remainingTickersCount > 0" class="small text-muted mb-2">
+                                Осталось: {{ remainingTickersCount }} {{ remainingTickersCount === 1 ? 'монета' : remainingTickersCount < 5 ? 'монеты' : 'монет' }}
                             </div>
-                            <div v-if="getRemainingTickersDisplay().length > 0" class="d-flex flex-wrap gap-1 mb-2">
+                            <div v-if="remainingTickersDisplay.length > 0" class="d-flex flex-wrap gap-1 mb-2">
                                 <span 
-                                    v-for="ticker in getRemainingTickersDisplay().slice(0, 15)" 
+                                    v-for="ticker in remainingTickersDisplay.slice(0, 15)" 
                                     :key="ticker"
                                     class="badge"
                                     :class="{
@@ -630,8 +630,8 @@
                                         ({{ tickerAttempts[ticker] || 0 }}/5)
                                     </span>
                                 </span>
-                                <span v-if="getRemainingTickersDisplay().length > 15" class="badge bg-light text-dark">
-                                    +{{ getRemainingTickersDisplay().length - 15 }}...
+                                <span v-if="remainingTickersDisplay.length > 15" class="badge bg-light text-dark">
+                                    +{{ remainingTickersDisplay.length - 15 }}...
                                 </span>
                             </div>
                             <div v-if="failedTickers.length > 0" class="small text-warning-dark">
@@ -1191,7 +1191,7 @@
                 </tbody>
                 <transition-group v-else name="coin-row" tag="tbody">
                     <tr 
-                        v-for="item in data" 
+                        v-for="(item, index) in data" 
                         :key="item.id" 
                         class="coin-row-item"
                         :class="{'coin-row-selected': isSelected(item.id)}"
@@ -1221,7 +1221,7 @@
                             <!-- Колонка монет -->
                             <template v-else-if="column.type === 'coin'">
                                 <cell-coin
-                                    :icon-url="getCoinIcon && getCoinIcon(item) ? getCoinIcon(item) : ''"
+                                    :icon-url="getCoinIcon ? (getCoinIcon(item) || '') : ''"
                                     :ticker="item.symbol"
                                     :full-name="item.name"
                                     :coin-id="item.id"
