@@ -708,6 +708,9 @@
                 headerTr.appendChild(th);
             });
             
+            // Сначала добавляем заголовок секции в thead
+            thead.appendChild(headerRow);
+            // Затем добавляем заголовки колонок в thead (после заголовка секции)
             thead.appendChild(headerTr);
             
             // Тело таблицы
@@ -716,9 +719,12 @@
                 tbody.appendChild(renderTableRow(color));
             });
             
-            table.appendChild(headerRow);
             table.appendChild(thead);
             table.appendChild(tbody);
+            
+            // #region agent log
+            fetch('http://127.0.0.1:7242/ingest/e7733f3e-f060-46bf-8fe8-79b2bd25ac6d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'review-colors.html:721',message:'Table structure order check',data:{childrenOrder:Array.from(table.children).map((el,i)=>({index:i,tagName:el.tagName,className:el.className,textContent:el.textContent?.substring(0,50)})),theadChildren:Array.from(thead.children).map((el,i)=>({index:i,tagName:el.tagName,className:el.className,textContent:el.textContent?.substring(0,50)})),headerRowTag:headerRow.tagName,headerRowClass:headerRow.className,theadTag:thead.tagName,theadClass:thead.className},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+            // #endregion
             
             // Обработчики сортировки
             headerTr.querySelectorAll('th[data-column]').forEach(th => {
