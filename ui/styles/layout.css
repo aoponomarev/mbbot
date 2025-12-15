@@ -582,6 +582,7 @@ main .cg-coin-sort-dropdown {
 
 .cg-coins-table thead th {
     background-color: transparent !important;
+    white-space: nowrap;
 }
 
 /* Подсветка выбранных строк таблицы с монетами - слабо-слабо прозрачная нейтрально-серовая подсветка */

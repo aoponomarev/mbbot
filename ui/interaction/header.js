@@ -38,24 +38,19 @@ window.cmpHeader = {
       // Состояние открытия dropdown для мобильной версии
       showModelDropdown: false,
       showTabDropdown: false,
+      showSettingsDropdown: false,
+      // Флаг для предотвращения двойной обработки клика в меню настроек
+      isProcessingSettingsClick: false,
       // Уникальные ID для dropdown
       modelDropdownId: 'modelDropdown-' + Math.random().toString(36).substr(2, 9),
-      tabDropdownId: 'tabDropdown-' + Math.random().toString(36).substr(2, 9),
-      // Экземпляры Bootstrap tooltips для управления
-      tooltipInstances: []
+      tabDropdownId: 'tabDropdown-' + Math.random().toString(36).substr(2, 9)
     };
   },
 
   methods: {
     // Обработка изменения горизонта прогноза
     handleHorizonChange(newValue) {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/e7733f3e-f060-46bf-8fe8-79b2bd25ac6d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'header.js:51',message:'handleHorizonChange called',data:{newValue,currentHorizonDays:this.horizonDays},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-      // #endregion
       this.$emit('update:horizonDays', newValue);
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/e7733f3e-f060-46bf-8fe8-79b2bd25ac6d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'header.js:54',message:'handleHorizonChange emitted',data:{newValue},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-      // #endregion
     },
     
     // Переключение вкладки отображения
@@ -105,6 +100,8 @@ window.cmpHeader = {
         // Fallback: через window.appRoot (сохраненный корневой компонент)
         window.appRoot.refreshPage();
       }
+      // Закрываем выпадающее меню после обновления страницы
+      this.showSettingsDropdown = false;
     },
 
     toggleTheme() {
@@ -115,25 +112,106 @@ window.cmpHeader = {
         // Fallback: через window.appRoot (сохраненный корневой компонент)
         window.appRoot.toggleTheme();
       }
+      // Закрываем выпадающее меню после переключения темы
+      this.showSettingsDropdown = false;
     },
-
-    // Получение текущей темы из родительского компонента
-    getCurrentTheme() {
-      // Получаем тему из корневого компонента приложения через this.$root
-      if (this.$root && this.$root.theme) {
-        return this.$root.theme;
-      } else if (window.appRoot && window.appRoot.theme) {
-        // Fallback: через window.appRoot (сохраненный корневой компонент)
-        return window.appRoot.theme;
+    
+    // Переключение выпадающего меню настроек
+    toggleSettingsDropdown() {
+      this.showSettingsDropdown = !this.showSettingsDropdown;
+    },
+    
+    // Закрытие выпадающего меню настроек
+    closeSettingsDropdown() {
+      this.showSettingsDropdown = false;
+    },
+    
+    // Обработчик клика по пункту меню переключения темы
+    handleThemeMenuClick(event) {
+      // Защита от двойной обработки события
+      if (this.isProcessingSettingsClick) {
+        return;
       }
-      // Fallback: из localStorage
-      return localStorage.getItem('theme') || 'light';
+      
+      this.isProcessingSettingsClick = true;
+      this.toggleTheme();
+      
+      // Сбрасываем флаг через небольшую задержку (время обработки события)
+      setTimeout(() => {
+        this.isProcessingSettingsClick = false;
+      }, 100);
+    },
+    
+    // Обработчик клика по пункту меню обновления страницы
+    handleRefreshMenuClick() {
+      // Защита от двойной обработки события
+      if (this.isProcessingSettingsClick) {
+        return;
+      }
+      
+      this.isProcessingSettingsClick = true;
+      this.refreshPage();
+      
+      // Сбрасываем флаг через небольшую задержку (время обработки события)
+      setTimeout(() => {
+        this.isProcessingSettingsClick = false;
+      }, 100);
+    },
+    
+    // Обработчик клика по пункту меню экспорта настроек
+    handleExportMenuClick() {
+      // Защита от двойной обработки события
+      if (this.isProcessingSettingsClick) {
+        return;
+      }
+      
+      this.isProcessingSettingsClick = true;
+      
+      // Вызываем метод экспорта из корневого компонента
+      if (this.$root && typeof this.$root.exportSettings === 'function') {
+        this.$root.exportSettings();
+      } else if (window.appRoot && typeof window.appRoot.exportSettings === 'function') {
+        window.appRoot.exportSettings();
+      }
+      
+      // Закрываем выпадающее меню
+      this.showSettingsDropdown = false;
+      
+      // Сбрасываем флаг через небольшую задержку
+      setTimeout(() => {
+        this.isProcessingSettingsClick = false;
+      }, 100);
+    },
+    
+    // Обработчик клика по пункту меню импорта настроек
+    handleImportMenuClick() {
+      // Защита от двойной обработки события
+      if (this.isProcessingSettingsClick) {
+        return;
+      }
+      
+      this.isProcessingSettingsClick = true;
+      
+      // Вызываем метод импорта из корневого компонента
+      if (this.$root && typeof this.$root.triggerImport === 'function') {
+        this.$root.triggerImport();
+      } else if (window.appRoot && typeof window.appRoot.triggerImport === 'function') {
+        window.appRoot.triggerImport();
+      }
+      
+      // Закрываем выпадающее меню
+      this.showSettingsDropdown = false;
+      
+      // Сбрасываем флаг через небольшую задержку
+      setTimeout(() => {
+        this.isProcessingSettingsClick = false;
+      }, 100);
     },
 
-    // Получение инверсной темы для dropdown и tooltips (инверсны включенной теме)
+    // Получение темы для dropdown (всегда темная)
+    // Хедер всегда в темной теме, не реагирует на переключение темы приложения
     getInverseTheme() {
-      const currentTheme = this.getCurrentTheme();
-      return currentTheme === 'light' ? 'dark' : 'light';
+      return 'dark';
     },
 
     // Установка точной ширины селектов и dropdown кнопок на основе выбранного значения
@@ -175,42 +253,6 @@ window.cmpHeader = {
       document.body.removeChild(measureEl);
     },
 
-    // Инициализация Bootstrap tooltips с инверсной темой
-    initTooltips() {
-      // Уничтожаем существующие tooltips
-      if (this.tooltipInstances && this.tooltipInstances.length > 0) {
-        this.tooltipInstances.forEach(instance => {
-          if (instance && typeof instance.dispose === 'function') {
-            instance.dispose();
-          }
-        });
-      }
-      this.tooltipInstances = [];
-
-      // Находим все элементы с атрибутом title в хедере
-      const tooltipElements = this.$el?.querySelectorAll('[title]');
-      if (!tooltipElements || tooltipElements.length === 0) return;
-
-      const inverseTheme = this.inverseTheme;
-
-      // Инициализируем tooltips для каждого элемента
-      tooltipElements.forEach(element => {
-        // Пропускаем элементы, которые уже имеют data-bs-toggle="tooltip"
-        if (element.getAttribute('data-bs-toggle') === 'tooltip') {
-          return;
-        }
-
-        // Устанавливаем инверсную тему через data-bs-theme
-        element.setAttribute('data-bs-theme', inverseTheme);
-
-        // Создаем tooltip
-        const tooltip = new bootstrap.Tooltip(element, {
-          trigger: 'hover focus'
-        });
-
-        this.tooltipInstances.push(tooltip);
-      });
-    }
   },
 
   computed: {
@@ -252,19 +294,23 @@ window.cmpHeader = {
     },
 
 
-    // Инверсная тема для dropdown и tooltips (реактивно обновляется)
+    // Тема для dropdown и tooltips (всегда темная)
     inverseTheme() {
-      const currentTheme = this.getCurrentTheme();
-      return currentTheme === 'light' ? 'dark' : 'light';
+      // Хедер всегда в темной теме, не реагирует на переключение темы приложения
+      return 'dark';
+    },
+    
+    // Текст для пункта меню переключения темы
+    themeMenuLabel() {
+      const root = this.$root || window.appRoot;
+      const theme = root && root.theme ? root.theme : (localStorage.getItem('theme') || 'light');
+      // Используем неразрывные пробелы (\u00A0) вокруг вертикальной черты
+      return theme === 'light' ? 'Dark\u00A0|\u00A0Light' : 'Light\u00A0|\u00A0Dark';
     }
   },
 
-  // Отслеживаем изменения темы для обновления computed свойств
+  // Отслеживаем изменения активной вкладки
   watch: {
-    '$root.theme'() {
-      // Принудительно обновляем computed свойства при изменении темы
-      this.$forceUpdate();
-    },
     '$root.activeTab'() {
       // Обновляем computed свойства при изменении активной вкладки
       this.$forceUpdate();
@@ -281,34 +327,13 @@ window.cmpHeader = {
   },
 
   mounted() {
-    // Подписываемся на изменения темы через watch корневого компонента
-    if (this.$root && this.$root.$watch) {
-      this.$root.$watch('theme', () => {
-        this.$forceUpdate();
-        // Обновляем tooltips при изменении темы
-        this.$nextTick(() => {
-          this.initTooltips();
-        });
-      });
-    }
-    
     // Устанавливаем точную ширину селектов на основе выбранного значения
     this.$nextTick(() => {
       this.adjustSelectWidths();
-      // Инициализируем tooltips
-      this.initTooltips();
     });
   },
 
   beforeUnmount() {
-    // Уничтожаем все tooltips при размонтировании компонента
-    if (this.tooltipInstances && this.tooltipInstances.length > 0) {
-      this.tooltipInstances.forEach(instance => {
-        if (instance && typeof instance.dispose === 'function') {
-          instance.dispose();
-        }
-      });
-      this.tooltipInstances = [];
-    }
+    // Компонент размонтирован
   }
 };

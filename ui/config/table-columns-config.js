@@ -41,7 +41,7 @@ const tableColumns = [
   {
     id: 'percent-1h',
     type: 'numeric',
-    label: '1h %',
+    label: '1h%',
     field: 'price_change_percentage_1h_in_currency',
     cssClass: 'col-percent-1h',
     sortable: true,
@@ -64,7 +64,7 @@ const tableColumns = [
   {
     id: 'percent-24h',
     type: 'numeric',
-    label: '24h %',
+    label: '24h%',
     field: 'price_change_percentage_24h_in_currency',
     cssClass: 'col-percent-24h',
     sortable: true,
@@ -87,7 +87,7 @@ const tableColumns = [
   {
     id: 'percent-7d',
     type: 'numeric',
-    label: '7d %',
+    label: '7d%',
     field: 'price_change_percentage_7d_in_currency',
     cssClass: 'col-percent-7d',
     sortable: true,
@@ -110,7 +110,7 @@ const tableColumns = [
   {
     id: 'percent-14d',
     type: 'numeric',
-    label: '14d %',
+    label: '14d%',
     field: 'price_change_percentage_14d_in_currency',
     cssClass: 'col-percent-14d',
     sortable: true,
@@ -133,7 +133,7 @@ const tableColumns = [
   {
     id: 'percent-30d',
     type: 'numeric',
-    label: '30d %',
+    label: '30d%',
     field: 'price_change_percentage_30d_in_currency',
     cssClass: 'col-percent-30d',
     sortable: true,
@@ -156,7 +156,7 @@ const tableColumns = [
   {
     id: 'percent-200d',
     type: 'numeric',
-    label: '200d %',
+    label: '200d%',
     field: 'price_change_percentage_200d_in_currency',
     cssClass: 'col-percent-200d',
     sortable: true,

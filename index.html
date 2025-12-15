@@ -145,14 +145,13 @@
 
     <!-- X-Template для компонента хедера (должен быть ДО загрузки Vue и компонентов) -->
     <script type="text/x-template" id="header-template">
-        <header class="position-fixed top-0 start-0 w-100 app-header avto-vn6jdk3M">
+        <header class="position-fixed top-0 start-0 w-100 app-header avto-vn6jdk3M" data-bs-theme="dark">
             <div class="container-fluid app-header-container-fluid">
                 <div class="d-flex align-items-center app-header-container">
                     <!-- Секция 1: Гамбургер (тап зона во всю секцию) -->
                     <div 
                         @click="toggleMenu"
                         class="d-flex align-items-center justify-content-center app-header-hamburger"
-                        title="Меню"
                     >
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <rect x="2" y="5" width="16" height="2" fill="currentColor" rx="0.5"/>
@@ -201,7 +200,6 @@
                             <ul 
                                 class="dropdown-menu app-header-dropdown-menu"
                                 :aria-labelledby="modelDropdownId"
-                                :data-bs-theme="inverseTheme"
                             >
                                 <li v-for="model in mathModels" :key="model.id">
                                     <a 
@@ -230,9 +228,9 @@
                                 position="absolute"
                                 placement="bottom-start"
                                 offset-x="0"
-                                offset-y="4px"
+                                offset-y="0"
                                 theme="inverse"
-                                :border-radius="'default'"
+                                :border-radius="'none'"
                                 instance-id="header-tab-dropdown"
                                 trigger-selector=".header-select-tab"
                                 @close="showTabDropdown = false"
@@ -277,24 +275,50 @@
                         </div>
                     </div>
 
-                    <!-- Секция 3: Кнопки рефреша и смены темы (сдвоенная секция) -->
-                    <div class="d-flex align-items-center">
-                        <!-- Кнопка рефреша -->
+                    <!-- Секция 3: Кнопка настроек с выпадающим меню -->
+                    <div class="d-flex align-items-center position-relative">
+                        <!-- Кнопка настроек -->
                         <div
-                            @click="refreshPage"
+                            @click="toggleSettingsDropdown"
                             class="d-flex align-items-center justify-content-center app-header-control-btn"
-                            title="Обновить страницу"
                         >
-                            <i class="fas fa-sync-alt"></i>
+                            <i class="fas fa-cog"></i>
                         </div>
-                        <!-- Кнопка смены темы -->
-                        <div
-                            @click="toggleTheme"
-                            class="d-flex align-items-center justify-content-center app-header-control-btn"
-                            :title="themeTitle"
+                        <!-- Выпадающее меню настроек -->
+                        <dropdown-menu
+                            :show="showSettingsDropdown"
+                            position="absolute"
+                            placement="bottom-end"
+                            offset-x="0"
+                            offset-y="0"
+                            :min-width="'180px'"
+                            theme="inverse"
+                            :border-radius="'none'"
+                            instance-id="settings-dropdown"
+                            trigger-selector=".app-header-control-btn"
+                            @close="closeSettingsDropdown"
                         >
-                            <i :class="themeIcon"></i>
-                        </div>
+                            <menu-item
+                                :label="themeMenuLabel"
+                                item-id="settings-theme"
+                                @click.stop="handleThemeMenuClick"
+                            ></menu-item>
+                            <menu-item
+                                label="Обновить страницу"
+                                item-id="settings-refresh"
+                                @click.stop="handleRefreshMenuClick"
+                            ></menu-item>
+                            <menu-item
+                                label="Экспорт в JSON"
+                                item-id="settings-export"
+                                @click.stop="handleExportMenuClick"
+                            ></menu-item>
+                            <menu-item
+                                label="Импорт из JSON"
+                                item-id="settings-import"
+                                @click.stop="handleImportMenuClick"
+                            ></menu-item>
+                        </dropdown-menu>
                     </div>
                 </div>
             </div>
@@ -356,28 +380,8 @@
                         </div>
                     </div>
 
-                    <!-- Экспорт/Импорт настроек -->
-                    <div class="mb-3 border-top pt-3">
-                        <label class="form-label">
-                            <i class="fas fa-database me-2"></i>Управление настройками
-                        </label>
-                        <div class="d-grid gap-2">
-                            <button
-                                class="btn btn-outline-primary"
-                                @click="exportSettings"
-                                title="Экспортировать настройки в data-app.json"
-                            >
-                                <i class="fas fa-download me-2"></i>Экспорт в JSON
-                            </button>
-                            <button
-                                class="btn btn-outline-success"
-                                @click="triggerImport"
-                                title="Импортировать настройки из data-app.json"
-                            >
-                                <i class="fas fa-upload me-2"></i>Импорт из JSON
-                            </button>
-                        </div>
-                        <div v-if="importStatus" class="mt-2">
+                    <!-- Статус импорта (если есть) -->
+                    <div v-if="importStatus" class="mt-2">
                             <div v-if="importStatus.type === 'success'" class="alert alert-success alert-dismissible fade show mb-0" role="alert">
                                 <small><i class="fas fa-check-circle me-1"></i>{{ importStatus.message }}</small>
                                 <button type="button" class="btn-close btn-close-sm" @click="closeImportStatus"></button>
@@ -420,6 +424,7 @@
                     @close-counter-dropdown="closeCounterDropdown"
                     @select-all-coins="selectAllCoins"
                     @select-favorites="selectFavorites"
+                    @select-stablecoins="selectStablecoins"
                     @deselect-all-coins="deselectAllCoins"
                     @delete-selected-coins="deleteSelectedCoins"
                     @search-input="handleSearchInput"
@@ -547,7 +552,6 @@
                 @blur="handleBlur"
                 :class="['form-control', sizeClass]"
                 style="width: 60px;"
-                title="Горизонт прогноза в днях (1-90)"
             >
         </div>
     </script>
@@ -605,7 +609,15 @@
                                 icon-category="actions"
                                 icon-command="favorite"
                                 item-id="counter-favorite"
+                                label="Выбрать избранное"
                                 @click="handleSelectFavorites"
+                            ></menu-item>
+                            <menu-item
+                                icon-category="actions"
+                                icon-command="stablecoins"
+                                item-id="counter-stablecoins"
+                                label="Стейблкоины"
+                                @click="handleSelectStablecoins"
                             ></menu-item>
                             <div class="dropdown-divider"></div>
                             <menu-item
@@ -642,7 +654,6 @@
                                 <button 
                                     class="btn btn-sm btn-outline-danger" 
                             @click="handleStopAddingTickers"
-                                    title="Остановить процесс добавления"
                                 >
                                     <i class="fas fa-stop me-1"></i>Остановить
                                 </button>
@@ -660,7 +671,6 @@
                                         'bg-secondary': ticker !== currentAddingTicker && !failedTickers.includes(ticker),
                                         'bg-warning-dark': failedTickers.includes(ticker)
                                     }"
-                                    :title="failedTickers.includes(ticker) ? `Попытка ${tickerAttempts[ticker] || 0} из 5` : ''"
                                 >
                                     {{ ticker }}
                                     <span v-if="failedTickers.includes(ticker) && (tickerAttempts[ticker] || 0) > 0" class="ms-1">
@@ -696,7 +706,6 @@
                                 :subtitle="result.type ? null : result.name"
                                 :indicator="!result.type && cgSelectedCoins.includes(result.id) ? { type: 'status', value: 'selected' } : null"
                                 :item-id="'search-' + result.id"
-                                :tooltip="result.name"
                                 @click="handleAddCoin(result.id)"
                             ></menu-item>
                         </dropdown-menu>
@@ -735,9 +744,7 @@
                                 :icon-state-map="isFailedFavoriteCoin(favoriteCoin) ? { 'failed': 'fas fa-sync-alt opacity-25' } : null"
                                 :icon-state="isFailedFavoriteCoin(favoriteCoin) ? 'failed' : null"
                                 :label="getFavoriteCoinSymbol(favoriteCoin)"
-                                :tooltip="'Добавить в таблицу'"
                                 :indicator="!isFailedFavoriteCoin(favoriteCoin) ? (isCoinInTable(getFavoriteCoinId(favoriteCoin)) ? { type: 'status', value: 'selected' } : { type: 'status', value: 'not-in-table' }) : null"
-                                :indicator-tooltip="'Удалить из Избранного'"
                                 :indicator-hover-icon="'icon-cross'"
                                 :item-id="'favorite-' + getFavoriteCoinId(favoriteCoin)"
                                 @click="handleAddFavoriteToTable(getFavoriteCoinId(favoriteCoin))"

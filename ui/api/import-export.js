@@ -120,7 +120,6 @@ window.cmpImportExport = function () {
        */
       restoreAllSettings(settings) {
         const version = settings._version || (settings._obfuscated ? '2.0' : '1.0');
-        console.log(`Importing settings format: v${version}`);
 
         // Обратная совместимость: старый формат v1.0 (открытые данные)
         if (version === '1.0' || (!settings._obfuscated && !settings.regularSettings)) {
@@ -154,7 +153,6 @@ window.cmpImportExport = function () {
 
         // Обратная совместимость: формат v2.0 (обфусцированные данные, но без regularSettings)
         if (version === '2.0' && !settings.regularSettings) {
-          console.log('Importing format (v2.0) - converting to v3.0');
 
           // Обработка темы
           if (settings.theme !== undefined) {
@@ -264,6 +262,22 @@ window.cmpImportExport = function () {
 
             // Восстанавливаем все настройки
             this.restoreAllSettings(settings);
+
+            // Проверяем, были ли импортированы данные монет
+            const hasCoinsData = !!(settings.regularSettings && (
+              settings.regularSettings.cgCoins || 
+              settings.regularSettings.cgSelectedCoins
+            ));
+            
+            // Если были импортированы данные монет - обновляем компонент coins-manager
+            if (hasCoinsData) {
+              // Используем $nextTick для гарантии, что все компоненты обновлены
+              this.$nextTick(() => {
+                // ВАЖНО: Компонент coins-manager может быть не смонтирован, если открыты настройки (v-if скрывает его)
+                // Поэтому всегда используем событие для надежности - компонент подпишется на него при монтировании
+                window.dispatchEvent(new CustomEvent('coins-data-imported'));
+              });
+            }
 
             const version = settings._version || (settings._obfuscated ? '2.0' : '1.0');
             this.importStatus = {

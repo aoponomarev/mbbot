@@ -88,7 +88,7 @@ window.cmpDropdownMenu = {
     borderRadius: {
       type: String,
       default: 'small',
-      validator: (value) => ['default', 'small'].includes(value)
+      validator: (value) => ['default', 'small', 'none'].includes(value)
     },
     
     // Z-index
@@ -164,17 +164,22 @@ window.cmpDropdownMenu = {
         if (this.fixedY !== null) styles.top = `${this.fixedY}px`;
       } else {
         // absolute позиционирование
+        // Обработка offsetY: если "0" или "0px", то просто 100% без отступа
+        const offsetYValue = (this.offsetY === '0' || this.offsetY === '0px') ? '100%' : 
+                            (this.offsetY === '100%' ? '100%' : 
+                            (this.offsetY.includes('px') ? `calc(100% + ${this.offsetY})` : `calc(100% + ${this.offsetY})`));
+        
         if (this.placement === 'bottom-start') {
-          styles.top = this.offsetY === '100%' ? '100%' : (this.offsetY.includes('px') ? `calc(100% + ${this.offsetY})` : `calc(100% + ${this.offsetY})`);
+          styles.top = offsetYValue;
           styles.left = this.offsetX;
         } else if (this.placement === 'bottom-end') {
-          styles.top = this.offsetY === '100%' ? '100%' : (this.offsetY.includes('px') ? `calc(100% + ${this.offsetY})` : `calc(100% + ${this.offsetY})`);
+          styles.top = offsetYValue;
           styles.right = this.offsetX === '0' ? '0' : this.offsetX;
         } else if (this.placement === 'top-start') {
-          styles.bottom = this.offsetY === '100%' ? '100%' : (this.offsetY.includes('px') ? `calc(100% + ${this.offsetY})` : `calc(100% + ${this.offsetY})`);
+          styles.bottom = offsetYValue;
           styles.left = this.offsetX;
         } else if (this.placement === 'top-end') {
-          styles.bottom = this.offsetY === '100%' ? '100%' : (this.offsetY.includes('px') ? `calc(100% + ${this.offsetY})` : `calc(100% + ${this.offsetY})`);
+          styles.bottom = offsetYValue;
           styles.right = this.offsetX === '0' ? '0' : this.offsetX;
         }
       }
@@ -209,7 +214,13 @@ window.cmpDropdownMenu = {
     // Атрибут data-bs-theme для инверсной темы
     themeAttribute() {
       if (this.theme === 'inverse') {
-        // Определяем инверсную тему на основе текущей темы приложения
+        // Проверяем, находится ли dropdown в хедере по instanceId
+        // Если instanceId содержит "header" или "settings" - это dropdown в хедере
+        // Хедер всегда в темной теме, поэтому dropdown тоже должен быть темным
+        if (this.instanceId && (this.instanceId.includes('header') || this.instanceId.includes('settings'))) {
+          return 'dark';
+        }
+        // Иначе определяем инверсную тему на основе текущей темы приложения
         const currentTheme = document.documentElement.getAttribute('data-bs-theme') || 'light';
         return currentTheme === 'light' ? 'dark' : 'light';
       }

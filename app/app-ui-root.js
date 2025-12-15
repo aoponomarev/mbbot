@@ -85,14 +85,8 @@
     },
     // Сохраняем горизонт прогноза в localStorage при изменении
     horizonDays(newValue, oldValue) {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/e7733f3e-f060-46bf-8fe8-79b2bd25ac6d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:87',message:'root watch horizonDays',data:{newValue,oldValue},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-      // #endregion
       if (newValue !== oldValue && newValue >= 1 && newValue <= 90) {
         localStorage.setItem('horizonDays', newValue.toString());
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/e7733f3e-f060-46bf-8fe8-79b2bd25ac6d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app-ui-root.js:91',message:'root saved horizonDays to localStorage',data:{newValue},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-        // #endregion
       }
     }
   }, ...parts.map(p => p.watch || {}));
@@ -117,9 +111,6 @@
       // Устанавливаем глобальный обработчик клика для закрытия всех выпадающих списков
       document.addEventListener('click', this.closeAllDropdowns);
       
-      console.log('Vue.js загружен:', this.vueVersion);
-      console.log('Bootstrap загружен');
-      console.log('Font Awesome загружен');
     },
     
     beforeUnmount() {
@@ -132,204 +123,153 @@
   if (window.cmpSplash) {
     try {
       app.component('splash-screen', window.cmpSplash);
-      console.log('Splash screen component registered');
     } catch (error) {
       console.error('Ошибка при регистрации компонента сплэша:', error);
     }
-  } else {
-    console.warn('window.cmpSplash not found');
   }
 
   // Регистрация компонента хэдера
   if (window.cmpHeader) {
     try {
       app.component('app-header', window.cmpHeader);
-      console.log('Header component registered');
     } catch (error) {
       console.error('Ошибка при регистрации компонента хэдера:', error);
     }
-  } else {
-    console.warn('window.cmpHeader not found');
   }
 
   // Регистрация компонента футера
   if (window.cmpFooter) {
     try {
       app.component('app-footer', window.cmpFooter);
-      console.log('Footer component registered');
     } catch (error) {
       console.error('Ошибка при регистрации компонента футера:', error);
     }
-  } else {
-    console.warn('window.cmpFooter not found');
   }
 
   // Регистрация компонента общих настроек проекта
   if (window.cmpSettings) {
     try {
       app.component('app-settings', window.cmpSettings);
-      console.log('Settings component registered');
     } catch (error) {
       console.error('Ошибка при регистрации компонента настроек:', error);
     }
-  } else {
-    console.warn('window.cmpSettings not found');
   }
 
   // Регистрация компонента менеджера монет
   if (window.cmpCoinsManager) {
     try {
       app.component('app-coins-manager', window.cmpCoinsManager);
-      console.log('Coins Manager component registered');
     } catch (error) {
       console.error('Ошибка при регистрации компонента Coins Manager:', error);
     }
-  } else {
-    console.warn('window.cmpCoinsManager not found');
   }
 
   // Регистрация компонента хедера индикатора монет
   if (window.cmpHeaderCoins) {
     try {
       app.component('header-coins', window.cmpHeaderCoins);
-      console.log('Header coins component registered');
     } catch (error) {
       console.error('Ошибка при регистрации компонента хедера индикатора:', error);
     }
-  } else {
-    console.warn('window.cmpHeaderCoins not found');
   }
 
   // Регистрация компонента сортируемого заголовка
   if (window.cmpSortableHeader) {
     try {
       app.component('sortable-header', window.cmpSortableHeader);
-      console.log('Sortable header component registered');
     } catch (error) {
       console.error('Ошибка при регистрации компонента сортируемого заголовка:', error);
     }
-  } else {
-    console.warn('window.cmpSortableHeader not found');
   }
 
   // Регистрация компонента заголовка колонки
   if (window.cmpHeaderCell) {
     try {
       app.component('header-cell', window.cmpHeaderCell);
-      console.log('Header cell component registered');
     } catch (error) {
       console.error('Ошибка при регистрации компонента заголовка колонки:', error);
     }
-  } else {
-    console.warn('window.cmpHeaderCell not found');
   }
 
   // Регистрация компонента заголовка колонки с чекбоксом
   if (window.cmpHeaderCellCheck) {
     try {
       app.component('header-cell-check', window.cmpHeaderCellCheck);
-      console.log('Header cell check component registered');
     } catch (error) {
       console.error('Ошибка при регистрации компонента заголовка колонки с чекбоксом:', error);
     }
-  } else {
-    console.warn('window.cmpHeaderCellCheck not found');
   }
 
   // Регистрация компонента ячейки выбора строки
   if (window.cmpCellRowSelect) {
     try {
       app.component('cell-row-select', window.cmpCellRowSelect);
-      console.log('Cell row select component registered');
     } catch (error) {
       console.error('Ошибка при регистрации компонента ячейки выбора строки:', error);
     }
-  } else {
-    console.warn('window.cmpCellRowSelect not found');
   }
 
   // Регистрация компонента числовой ячейки
   if (window.cmpCellNum) {
     try {
       app.component('cell-num', window.cmpCellNum);
-      console.log('Cell num component registered');
     } catch (error) {
       console.error('Ошибка при регистрации компонента числовой ячейки:', error);
     }
-  } else {
-    console.warn('window.cmpCellNum not found');
   }
 
   // Регистрация компонента ячейки монеты
   if (window.cmpCellCoin) {
     try {
       app.component('cell-coin', window.cmpCellCoin);
-      console.log('Cell coin component registered');
     } catch (error) {
       console.error('Ошибка при регистрации компонента ячейки монеты:', error);
     }
-  } else {
-    console.warn('window.cmpCellCoin not found');
   }
 
   // Регистрация компонента таблицы данных
   if (window.cmpTableData) {
     try {
       app.component('table-data', window.cmpTableData);
-      console.log('Table data component registered');
     } catch (error) {
       console.error('Ошибка при регистрации компонента таблицы данных:', error);
     }
-  } else {
-    console.warn('window.cmpTableData not found');
   }
 
   // Регистрация компонента кнопки
   if (window.cmpButton) {
     try {
       app.component('cmp-button', window.cmpButton);
-      console.log('Button component registered');
     } catch (error) {
       console.error('Ошибка при регистрации компонента кнопки:', error);
     }
-  } else {
-    console.warn('window.cmpButton not found');
   }
 
   // Регистрация компонента пункта меню
   if (window.cmpMenuItem) {
     try {
       app.component('menu-item', window.cmpMenuItem);
-      console.log('Menu item component registered');
     } catch (error) {
       console.error('Ошибка при регистрации компонента пункта меню:', error);
     }
-  } else {
-    console.warn('window.cmpMenuItem not found');
   }
 
   // Регистрация компонента выпадающего меню
   if (window.cmpDropdownMenu) {
     try {
       app.component('dropdown-menu', window.cmpDropdownMenu);
-      console.log('Dropdown Menu component registered');
     } catch (error) {
       console.error('Ошибка при регистрации компонента выпадающего меню:', error);
     }
-  } else {
-    console.warn('window.cmpDropdownMenu not found');
   }
 
   // Регистрация компонента поля ввода горизонта прогноза
   if (window.cmpHorizonInput) {
     try {
       app.component('horizon-input', window.cmpHorizonInput);
-      console.log('Horizon input component registered');
     } catch (error) {
       console.error('Ошибка при регистрации компонента поля ввода горизонта прогноза:', error);
     }
-  } else {
-    console.warn('window.cmpHorizonInput not found');
   }
 
   // Сохраняем ссылку на приложение в window для доступа из компонентов

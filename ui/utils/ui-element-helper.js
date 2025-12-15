@@ -175,6 +175,17 @@ const uiElementMapping = {
       "defaultCommand": "delete",
       "baseIcon": "fas fa-trash"
     },
+    "fas fa-coins": {
+      "commands": {
+        "stablecoins": {
+          "category": "actions",
+          "label": "Стейблкоины",
+          "tooltip": "Выбрать стейблкоины"
+        }
+      },
+      "defaultCommand": "stablecoins",
+      "baseIcon": "fas fa-coins"
+    },
     "icon-cross": {
       "commands": {
         "close": {

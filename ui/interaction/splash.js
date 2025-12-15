@@ -320,7 +320,6 @@ Example structure: "For in the pursuit of understanding, we often discover that 
         this.showSplash = false;
         window.appUnlocked = true;
         sessionStorage.removeItem('skipSplash'); // Удаляем флаг после использования
-        console.log('Splash screen skipped (refresh flag)');
         return;
       }
       
@@ -330,7 +329,6 @@ Example structure: "For in the pursuit of understanding, we often discover that 
       this.initDefaultPin();
       this.loadApiKey();
       this.focusInput();
-      console.log('Splash screen mounted, showSplash:', this.showSplash);
     } catch (error) {
       console.error('Ошибка при монтировании сплэша:', error);
       // Гарантируем, что сплэш показывается даже при ошибке

@@ -90,6 +90,7 @@ window.cmpHeaderCoins = {
     'select-all-coins',
     'deselect-all-coins',
     'select-favorites',
+    'select-stablecoins',
     'delete-selected-coins',
     'search-input',
     'search-focus',
@@ -212,6 +213,10 @@ window.cmpHeaderCoins = {
     
     handleSelectFavorites() {
       this.$emit('select-favorites');
+    },
+    
+    handleSelectStablecoins() {
+      this.$emit('select-stablecoins');
     },
     
     handleDeleteSelectedCoins() {

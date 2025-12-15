@@ -265,6 +265,11 @@ window.cmpMenuItem = {
           this.iconClass = iconClass || '';
           this.iconLabel = commandData?.label || '';
           this.iconTooltip = commandData?.tooltip || '';
+        } else {
+          // Если iconCommand не указан, очищаем иконку
+          this.iconClass = '';
+          this.iconLabel = '';
+          this.iconTooltip = '';
         }
         
         // Загружаем данные indicator через uiElementHelper
@@ -272,6 +277,11 @@ window.cmpMenuItem = {
           this.indicatorIcon = window.uiElementHelper.getIndicatorIcon(this.indicator.type, this.indicator.value);
           this.indicatorLabel = window.uiElementHelper.getIndicatorLabel(this.indicator.type, this.indicator.value);
           this.indicatorTooltipFromMapping = window.uiElementHelper.getIndicatorTooltip(this.indicator.type, this.indicator.value);
+        } else {
+          // Если indicator не указан, очищаем данные индикатора
+          this.indicatorIcon = '';
+          this.indicatorLabel = '';
+          this.indicatorTooltipFromMapping = '';
         }
       } catch (error) {
         console.error('Error loading icon:', error);
@@ -300,6 +310,8 @@ window.cmpMenuItem = {
       }
       
       // Клик на основной части
+      // Останавливаем всплытие события, чтобы предотвратить двойную обработку
+      event.stopPropagation();
       this.$emit('click', {
         itemId: this.itemId,
         iconCommand: this.iconCommand,
@@ -330,13 +342,23 @@ window.cmpMenuItem = {
     }
   },
   
-  // Отслеживаем изменения indicator для перезагрузки данных
+  // Отслеживаем изменения indicator, iconCommand и iconCategory для перезагрузки данных
   watch: {
     indicator: {
       handler() {
         this.loadIcon();
       },
       deep: true
+    },
+    iconCommand: {
+      handler() {
+        this.loadIcon();
+      }
+    },
+    iconCategory: {
+      handler() {
+        this.loadIcon();
+      }
     }
   }
 };

@@ -24,6 +24,11 @@
     border-radius: var(--bs-border-radius);
 }
 
+/* Без скруглений (для хедера) */
+.dropdown-menu-container.border-radius-none {
+    border-radius: 0;
+}
+
 /* Пункты меню внутри - убираем скругления у первого и последнего */
 .dropdown-menu-container .menu-item:first-child {
     border-top-left-radius: 0;

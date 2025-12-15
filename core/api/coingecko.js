@@ -312,7 +312,6 @@ try {
     getTopCoinsByMarketCap,
     getTopCoinsByVolume
   };
-  console.log('✅ coinGeckoAPI module loaded successfully');
 } catch (error) {
   console.error('❌ coinGeckoAPI module failed to load:', error);
 }

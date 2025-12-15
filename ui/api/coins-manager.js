@@ -769,7 +769,6 @@ window.cmpCoinsManager = {
      */
     recalculateCDHOnly() {
       if (!this.cgCoins || this.cgCoins.length === 0) {
-        console.log('ℹ️ Нет монет для пересчета взвешенных CD');
         return;
       }
       
@@ -784,8 +783,6 @@ window.cmpCoinsManager = {
         console.warn('mmMedianPRCWeights.computePRCWeights не доступна. Взвешенные CD не будут пересчитаны.');
         return;
       }
-      
-      console.log(`🔄 Пересчет взвешенных CD для горизонта ${this.horizonDays} дней`);
       
       // Рассчитываем новые PRC-веса для текущего горизонта
       const prcWeights = window.mmMedianPRCWeights.computePRCWeights(this.horizonDays);
@@ -843,8 +840,6 @@ window.cmpCoinsManager = {
       // Сохраняем обновленные данные
       localStorage.setItem('cgCoins', JSON.stringify(this.cgCoins));
       
-      console.log(`✅ Взвешенные CD пересчитаны для ${this.cgCoins.length} монет`);
-      
       // Принудительное обновление для гарантии перерисовки таблицы
       this.$nextTick(() => {
         this.$forceUpdate();
@@ -857,11 +852,8 @@ window.cmpCoinsManager = {
      */
     recalculateAllMetrics() {
       if (!this.cgCoins || this.cgCoins.length === 0) {
-        console.log('ℹ️ Нет монет для пересчета метрик');
         return;
       }
-      
-      console.log(`🔄 Пересчет метрик для горизонта ${this.horizonDays} дней`);
       
       // Создаем новый массив для правильной реактивности Vue
       // Это важно: Vue должен видеть, что массив изменился
@@ -877,8 +869,6 @@ window.cmpCoinsManager = {
       // Сохраняем обновленные данные
       localStorage.setItem('cgCoins', JSON.stringify(this.cgCoins));
       
-      console.log(`✅ Метрики пересчитаны для ${this.cgCoins.length} монет`);
-      
       // Принудительное обновление для гарантии перерисовки таблицы
       this.$nextTick(() => {
         this.$forceUpdate();
@@ -891,7 +881,6 @@ window.cmpCoinsManager = {
      */
     checkCDCalculation() {
       if (!this.cgCoins || this.cgCoins.length === 0) {
-        console.log('ℹ️ Нет монет для проверки CD');
         return;
       }
       
@@ -906,11 +895,6 @@ window.cmpCoinsManager = {
       );
       
       if (coinWithCD) {
-        console.log('✅ CD рассчитан для монет:');
-        console.log(`   - Пример монеты: ${coinWithCD.symbol || coinWithCD.id}`);
-        console.log(`   - CD1: ${coinWithCD.cd1}, CD1w: ${coinWithCD.cd1w}`);
-        console.log(`   - CD6: ${coinWithCD.cd6}, CD6w: ${coinWithCD.cd6w}`);
-        console.log(`   - CDH: ${coinWithCD.cdh}, CDHw: ${coinWithCD.cdhw}`);
       } else {
         console.warn('⚠️ CD не рассчитан ни для одной монеты. Возможно, требуется пересчет.');
       }
@@ -1307,7 +1291,6 @@ window.cmpCoinsManager = {
     increaseAdaptiveTimeout() {
       // Удваиваем таймаут, но не превышаем максимальное значение
       this.adaptiveTimeout = Math.min(this.adaptiveTimeout * 2, this.adaptiveTimeoutMax);
-      console.log(`Rate limit detected. Increasing timeout to ${this.adaptiveTimeout}ms`);
     },
     
     // Уменьшение таймаута при успешных запросах (постепенное восстановление)
@@ -1720,16 +1703,40 @@ window.cmpCoinsManager = {
       this.closeCounterDropdown();
     },
     
-    // Выбрать все избранные монеты
+    // Выбрать все избранные монеты (режим радиокнопок - только избранные)
     selectFavorites() {
-      // Выбираем все избранные монеты, которые есть в таблице
+      // Выбираем только избранные монеты, которые есть в таблице (режим радиокнопок)
       const favoriteIds = this.cgFavoriteCoins
         .map(fav => typeof fav === 'object' ? fav.id : fav)
         .filter(favId => this.cgCoins.some(coin => coin.id === favId));
       
-      // Добавляем избранные к уже выбранным (без дубликатов)
-      const newSelectedIds = [...new Set([...this.selectedCoinIds, ...favoriteIds])];
-      this.selectedCoinIds = newSelectedIds;
+      // Заменяем выбранные монеты на избранные (режим радиокнопок)
+      this.selectedCoinIds = favoriteIds;
+      // Сохраняем состояние чекнутости монет
+      localStorage.setItem('cgSelectedCoinIds', JSON.stringify(this.selectedCoinIds));
+      this.closeCounterDropdown();
+    },
+    
+    // Выбрать стейблкоины (режим радиокнопок - только стейблкоины)
+    selectStablecoins() {
+      // Список символов популярных стейблкоинов (уникальные значения)
+      const stablecoinSymbols = [
+        'usdt', 'usdc', 'dai', 'busd', 'tusd', 'usdp', 'usdd', 'frax', 
+        'lusd', 'gusd', 'susd', 'ousd', 'mim', 'usdn', 'usdk', 'usdx',
+        'usds', 'usde', 'usdr', 'usdo', 'usdm', 'usdl', 'usdj', 'usdi',
+        'usdh', 'usdg', 'usdf', 'usda', 'usdb'
+      ];
+      
+      // Выбираем только стейблкоины, которые есть в таблице (режим радиокнопок)
+      const stablecoinIds = this.cgCoins
+        .filter(coin => {
+          const symbol = (coin.symbol || '').toLowerCase();
+          return stablecoinSymbols.includes(symbol);
+        })
+        .map(coin => coin.id);
+      
+      // Заменяем выбранные монеты на стейблкоины (режим радиокнопок)
+      this.selectedCoinIds = stablecoinIds;
       // Сохраняем состояние чекнутости монет
       localStorage.setItem('cgSelectedCoinIds', JSON.stringify(this.selectedCoinIds));
       this.closeCounterDropdown();
@@ -1741,6 +1748,73 @@ window.cmpCoinsManager = {
       // Сохраняем состояние чекнутости монет
       localStorage.setItem('cgSelectedCoinIds', JSON.stringify(this.selectedCoinIds));
       this.closeCounterDropdown();
+    },
+    
+    // Перезагрузить данные из localStorage (используется после импорта настроек)
+    reloadFromLocalStorage() {
+      // Загружаем сохраненные данные монет из localStorage
+      const savedCoins = localStorage.getItem('cgCoins');
+      const savedLastUpdated = localStorage.getItem('cgLastUpdated');
+      const savedSelectedCoins = localStorage.getItem('cgSelectedCoins');
+      const savedFavoriteCoins = localStorage.getItem('cgFavoriteCoins');
+      const savedSelectedCoinIds = localStorage.getItem('cgSelectedCoinIds');
+      const iconsCache = JSON.parse(localStorage.getItem('cgIconsCache') || '{}');
+      
+      // Загружаем и трансформируем данные из localStorage
+      let loadedCoins = savedCoins ? JSON.parse(savedCoins) : [];
+      // Проверяем, нужно ли трансформировать данные
+      if (loadedCoins.length > 0 && !loadedCoins[0].pvs) {
+        if (window.coinGeckoAPI && window.coinGeckoAPI.transformCoinGeckoToPV) {
+          loadedCoins = loadedCoins.map(coin => window.coinGeckoAPI.transformCoinGeckoToPV(coin));
+        }
+      }
+      
+      // Рассчитываем CPT для загруженных монет (если еще не рассчитан)
+      if (loadedCoins.length > 0 && window.mmMedianCPT && window.mmMedianCPT.computeEnhancedCPT) {
+        loadedCoins = loadedCoins.map(coin => {
+          if (coin.enhancedCpt !== undefined && coin.enhancedCptFormatted !== undefined) {
+            return coin;
+          }
+          if (!coin.pvs || !Array.isArray(coin.pvs) || coin.pvs.length !== 6) {
+            return coin;
+          }
+          const cptValue = window.mmMedianCPT.computeEnhancedCPT(coin.pvs, this.horizonDays);
+          const cptFormatted = window.mmMedianCPT.formatEnhancedCPT(cptValue);
+          return {
+            ...coin,
+            enhancedCpt: cptValue,
+            enhancedCptFormatted: cptFormatted
+          };
+        });
+      }
+      
+      // Обновляем реактивные данные
+      this.cgCoins = loadedCoins;
+      this.cgLastUpdated = savedLastUpdated || null;
+      this.cgSelectedCoins = savedSelectedCoins ? JSON.parse(savedSelectedCoins) : [];
+      this.cgIconsCache = iconsCache;
+      this.selectedCoinIds = savedSelectedCoinIds ? JSON.parse(savedSelectedCoinIds) : [];
+      
+      // Загружаем избранные монеты
+      if (savedFavoriteCoins) {
+        const parsed = JSON.parse(savedFavoriteCoins);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          if (typeof parsed[0] === 'string') {
+            this.cgFavoriteCoins = parsed.map(id => ({ id, symbol: id.toUpperCase(), name: id }));
+          } else {
+            this.cgFavoriteCoins = parsed;
+          }
+        } else {
+          this.cgFavoriteCoins = [];
+        }
+      } else {
+        this.cgFavoriteCoins = [];
+      }
+      
+      // Принудительное обновление для гарантии перерисовки
+      this.$nextTick(() => {
+        this.$forceUpdate();
+      });
     },
     
     // Удалить отмеченные монеты
@@ -2130,7 +2204,6 @@ window.cmpCoinsManager = {
   mounted() {
     // Инициализируем предыдущее значение horizonDays для отслеживания изменений в updated hook
     this._previousHorizonDays = this.horizonDays;
-    console.log('🔍 Coins Manager component mounted');
     // Проверяем и очищаем дубликаты между таблицей и избранным при загрузке
     this.syncAllCoinsWithFavorites();
     
@@ -2139,11 +2212,6 @@ window.cmpCoinsManager = {
     // ВАЖНО: Выполняем в mounted(), чтобы гарантировать загрузку всех модулей
     // Используем setTimeout для гарантии, что все модули загружены
     setTimeout(() => {
-      console.log('🔍 Проверка расчета CPT в mounted():');
-      console.log('  - Монет в cgCoins:', this.cgCoins?.length || 0);
-      console.log('  - mmMedianCPT доступен:', !!window.mmMedianCPT);
-      console.log('  - computeEnhancedCPT доступен:', !!window.mmMedianCPT?.computeEnhancedCPT);
-      
       if (this.cgCoins && this.cgCoins.length > 0) {
         if (!window.mmMedianCPT || !window.mmMedianCPT.computeEnhancedCPT) {
           console.warn('⚠️ mmMedianCPT не доступен. CPT не будет рассчитан.');
@@ -2152,7 +2220,6 @@ window.cmpCoinsManager = {
         
         // Используем горизонт прогноза из props
         let needsUpdate = false;
-        let calculatedCount = 0;
         const updatedCoins = this.cgCoins.map(coin => {
           // Если CPT уже рассчитан - не пересчитываем
           if (coin.enhancedCpt !== undefined && coin.enhancedCptFormatted !== undefined) {
@@ -2160,14 +2227,12 @@ window.cmpCoinsManager = {
           }
           // Проверяем наличие массива pvs
           if (!coin.pvs || !Array.isArray(coin.pvs) || coin.pvs.length !== 6) {
-            console.warn(`⚠️ Монета ${coin.symbol || coin.id} не содержит корректный массив pvs. CPT не будет рассчитан.`);
             return coin;
           }
           // Рассчитываем CPT
           const cptValue = window.mmMedianCPT.computeEnhancedCPT(coin.pvs, this.horizonDays);
           const cptFormatted = window.mmMedianCPT.formatEnhancedCPT(cptValue);
           needsUpdate = true;
-          calculatedCount++;
           return {
             ...coin,
             enhancedCpt: cptValue,
@@ -2181,26 +2246,15 @@ window.cmpCoinsManager = {
         // Сохраняем обновленные данные в localStorage, если были изменения
         if (needsUpdate) {
           localStorage.setItem('cgCoins', JSON.stringify(this.cgCoins));
-          console.log(`✅ CPT рассчитан для ${calculatedCount} монет из ${updatedCoins.length}`);
-        } else {
-          console.log('ℹ️ CPT уже рассчитан для всех монет или нет монет для расчета');
         }
         
         // Рассчитываем CD для монет, которые имеют CPT, но не имеют CD
-        console.log('🔍 Проверка расчета CD в mounted():');
-        console.log('  - mmMedianCD доступен:', !!window.mmMedianCD);
-        console.log('  - calculateCDsWeighted доступен:', !!window.mmMedianCD?.calculateCDsWeighted);
-        console.log('  - approximateCDHFromSeries доступен:', !!window.mmMedianCD?.approximateCDHFromSeries);
-        console.log('  - mmMedianPRCWeights доступен:', !!window.mmMedianPRCWeights);
-        console.log('  - computePRCWeights доступен:', !!window.mmMedianPRCWeights?.computePRCWeights);
-        
         if (!window.mmMedianCD || !window.mmMedianCD.calculateCDsWeighted || !window.mmMedianCD.approximateCDHFromSeries) {
           console.warn('⚠️ mmMedianCD не доступен. CD не будет рассчитан.');
         } else if (!window.mmMedianPRCWeights || !window.mmMedianPRCWeights.computePRCWeights) {
           console.warn('⚠️ mmMedianPRCWeights не доступен. CD не будет рассчитан.');
         } else {
           let needsCDUpdate = false;
-          let calculatedCDCount = 0;
           const updatedCoinsWithCD = this.cgCoins.map(coin => {
             // Если CD уже рассчитан - не пересчитываем
             if (coin.cdhw !== undefined && coin.cd1w !== undefined) {
@@ -2212,7 +2266,6 @@ window.cmpCoinsManager = {
             }
             // Рассчитываем CD
             needsCDUpdate = true;
-            calculatedCDCount++;
             return this.calculateCD(coin, this.horizonDays);
           });
           
@@ -2222,26 +2275,8 @@ window.cmpCoinsManager = {
           // Сохраняем обновленные данные в localStorage, если были изменения
           if (needsCDUpdate) {
             localStorage.setItem('cgCoins', JSON.stringify(this.cgCoins));
-            console.log(`✅ CD рассчитан для ${calculatedCDCount} монет из ${updatedCoinsWithCD.length}`);
-          } else {
-            console.log('ℹ️ CD уже рассчитан для всех монет');
-          }
-          
-          // Проверяем первую монету с рассчитанным CD для отладки
-          const coinWithCD = this.cgCoins.find(coin => 
-            coin.cd1 !== undefined && coin.cdhw !== undefined
-          );
-          
-          if (coinWithCD) {
-            console.log('✅ Пример монеты с CD:');
-            console.log(`   - Символ: ${coinWithCD.symbol || coinWithCD.id}`);
-            console.log(`   - CD1: ${coinWithCD.cd1?.toFixed(2)}, CD1w: ${coinWithCD.cd1w?.toFixed(2)}`);
-            console.log(`   - CD6: ${coinWithCD.cd6?.toFixed(2)}, CD6w: ${coinWithCD.cd6w?.toFixed(2)}`);
-            console.log(`   - CDH: ${coinWithCD.cdh?.toFixed(2)}, CDHw: ${coinWithCD.cdhw?.toFixed(2)}`);
           }
         }
-      } else {
-        console.log('ℹ️ Нет монет для расчета CPT');
       }
     }, 100); // Небольшая задержка для гарантии загрузки всех модулей
     
@@ -2259,6 +2294,12 @@ window.cmpCoinsManager = {
     // Подписываемся на глобальное событие закрытия всех выпадающих списков
     this.handleCloseAllDropdownsBound = this.handleCloseAllDropdowns.bind(this);
     document.addEventListener('close-all-dropdowns', this.handleCloseAllDropdownsBound);
+    
+    // Подписываемся на событие импорта данных монет
+    this.handleCoinsDataImported = () => {
+      this.reloadFromLocalStorage();
+    };
+    window.addEventListener('coins-data-imported', this.handleCoinsDataImported);
   },
 
   updated() {
@@ -2279,6 +2320,11 @@ window.cmpCoinsManager = {
   beforeUnmount() {
     if (this.handleUnlock) {
       window.removeEventListener('app-unlocked', this.handleUnlock);
+    }
+    
+    // Отписываемся от события импорта данных монет
+    if (this.handleCoinsDataImported) {
+      window.removeEventListener('coins-data-imported', this.handleCoinsDataImported);
     }
     
     // Отписываемся от глобального события
