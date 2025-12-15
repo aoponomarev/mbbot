@@ -6,9 +6,9 @@
     <title>Каталог цветов проекта</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Единые стили для всех review -->
-    <link rel="stylesheet" href="../review-styles.css">
+    <link rel="stylesheet" href="../../ui/review-styles.css">
     <!-- Единый менеджер для всех review (хедер с вкладками) - загружаем в head для ранней инициализации -->
-    <script src="../review-manager.js"></script>
+    <script src="../../ui/review-manager.js"></script>
 </head>
 <body>
     <!-- Хедер с вкладками будет вставлен здесь через review-manager.js -->
@@ -43,13 +43,13 @@
     </div>
 
     <!-- Подключаем CSS файлы для получения переменных -->
-    <link rel="stylesheet" href="theme-colors.css">
-    <link rel="stylesheet" href="layout.css">
-    <link rel="stylesheet" href="dropdown.css">
-    <link rel="stylesheet" href="icons.css">
-    <link rel="stylesheet" href="header.css">
-    <link rel="stylesheet" href="splash.css">
-    <link rel="stylesheet" href="z-index.css">
+    <link rel="stylesheet" href="../../ui/styles/theme-colors.css">
+    <link rel="stylesheet" href="../../ui/styles/layout.css">
+    <link rel="stylesheet" href="../../ui/styles/dropdown.css">
+    <link rel="stylesheet" href="../../ui/styles/icons.css">
+    <link rel="stylesheet" href="../../ui/styles/header.css">
+    <link rel="stylesheet" href="../../ui/styles/splash.css">
+    <link rel="stylesheet" href="../../ui/styles/z-index.css">
     
     <script>
         // Данные о цветах (парсим из CSS)
@@ -818,6 +818,9 @@
 
             renderTables(filtered);
         }
+
+        // Экспортируем colorData в window для использования в других страницах
+        window.colorData = colorData;
 
         // Инициализация
         document.addEventListener('DOMContentLoaded', function() {

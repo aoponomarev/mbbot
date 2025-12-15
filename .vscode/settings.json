@@ -62,5 +62,14 @@
   // Автоматическое открытие файла при старте workspace
   "openFileOnStartup.files": [
     "docs/TODO.TXT"
-  ]
+  ],
+  
+  // Настройки редактора - без разделения на группы
+  "workbench.editor.enablePreview": false,
+  "workbench.editor.openPositioning": "last",
+  "workbench.editor.splitOnDragAndDrop": false,
+  "workbench.editor.revealIfOpen": true,
+  "workbench.editor.showTabs": "multiple",
+  "workbench.editor.tabActionLocation": "right",
+  "workbench.editor.splitInGroupLayout": "default"
 }

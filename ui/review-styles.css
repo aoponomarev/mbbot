@@ -34,45 +34,150 @@ body {
     display: block;
     padding: 12px 24px;
     text-decoration: none;
-    color: #495057;
+    color: #0d6efd;
     font-weight: 500;
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
-    border: 1px solid transparent;
-    border-bottom: none;
-    background: linear-gradient(to bottom, #ffffff 0%, #f8f9fa 100%);
+    border: none;
+    background: transparent;
     transition: all 0.2s ease;
     position: relative;
     margin-right: 2px;
-    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .review-tabs a:hover {
-    background: linear-gradient(to bottom, #ffffff 0%, #e9ecef 100%);
-    color: #212529;
-    box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.1);
+    color: #0a58ca;
 }
 
 .review-tabs a.active {
-    background: linear-gradient(to bottom, #ffffff 0%, #ffffff 100%);
-    color: #0d6efd;
-    border-color: #dee2e6;
-    border-bottom-color: white;
-    box-shadow: 0 -3px 8px rgba(0, 0, 0, 0.15);
+    background: linear-gradient(to bottom, #e9ecef 0%, #dee2e6 100%);
+    color: #212529;
+    border: none;
+    border-bottom: 2px solid #ced4da;
     z-index: 10;
     position: relative;
-    transform: translateY(-2px);
     font-weight: 600;
 }
 
-.review-tabs a.active::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    right: 0;
-    height: 2px;
+
+/* Стили для статистики */
+.stats-overview {
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.stat-card:hover {
+    border-color: #c0c0c0;
+}
+
+.stat-icon {
+    font-size: 2.5rem;
+    color: #0d6efd;
+    margin-bottom: 0.5rem;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #212529;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.chart-card {
     background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.chart-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.chart-container canvas {
+    max-width: 100%;
+    height: auto;
+}
+
+.ranking-section {
+    margin-top: 2rem;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 3px solid #0d6efd;
+}
+
+.stats-card {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.stats-card-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.stat-item:last-child {
+    border-bottom: none;
+}
+
+.stat-item-label {
+    color: #495057;
+    font-size: 0.95rem;
+}
+
+.stat-item-value {
+    font-weight: 600;
+    color: #0d6efd;
+    font-size: 1.1rem;
 }
 
 /* Фильтры */
@@ -99,21 +204,20 @@ body {
 .review-table th,
 .table-icons th,
 .table-colors th {
-    background: white;
-    font-weight: normal;
+    background: linear-gradient(to bottom, #e9ecef 0%, #dee2e6 100%);
+    font-weight: 600;
     cursor: pointer;
     user-select: none;
     font-size: 0.85rem;
-    opacity: 0.6;
     padding: 0.75rem;
-    border-bottom: 1px solid #dee2e6;
+    border-bottom: 2px solid #ced4da;
+    color: #495057;
 }
 
 .review-table th:hover,
 .table-icons th:hover,
 .table-colors th:hover {
-    background: #f8f9fa;
-    opacity: 0.8;
+    background: linear-gradient(to bottom, #dee2e6 0%, #ced4da 100%);
 }
 
 .review-table th.sort-asc::after,
@@ -348,6 +452,35 @@ body {
     padding: 0;
     border-radius: 0;
     color: #000;
+}
+
+/* Popover для статистики */
+.popover {
+    max-width: 400px;
+}
+
+.popover-body {
+    padding: 1rem;
+}
+
+.popover-body .stat-item {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.popover-body .stat-item:last-child {
+    border-bottom: none;
+}
+
+.popover-body .stat-item-label {
+    color: #495057;
+    font-size: 0.9rem;
+}
+
+.popover-body .stat-item-value {
+    font-weight: 600;
+    color: #0d6efd;
+    font-size: 1rem;
 }
 
 /* Адаптивность */
