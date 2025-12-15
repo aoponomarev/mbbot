@@ -245,6 +245,15 @@
     }
   }
 
+  // Регистрация компонента alert-сообщения
+  if (window.cmpAlertMessage) {
+    try {
+      app.component('alert-message', window.cmpAlertMessage);
+    } catch (error) {
+      console.error('Ошибка при регистрации компонента alert-сообщения:', error);
+    }
+  }
+
   // Регистрация компонента пункта меню
   if (window.cmpMenuItem) {
     try {

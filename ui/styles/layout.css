@@ -508,7 +508,6 @@ th.col-checkbox .form-check-input:focus {
 .card-header {
     /* Стальной серый оттенок для светлой темы - темнее и с легким синеватым оттенком */
     background-color: var(--color-card-header);
-    border-bottom-color: var(--color-card-header-border);
     /* Увеличенные вертикальные паддинги */
     padding-top: 0.75rem;
     padding-bottom: 0.75rem;
@@ -517,7 +516,6 @@ th.col-checkbox .form-check-input:focus {
 [data-bs-theme="dark"] .card-header {
     /* Стальной серый оттенок для темной темы - темнее и с легким синеватым оттенком */
     background-color: var(--color-card-header);
-    border-bottom-color: var(--color-card-header-border);
 }
 
 /* Глобально для всех выпадающих списков: одинаковый цвет текста и иконок во всех состояниях */
@@ -692,5 +690,146 @@ main .cg-coin-sort-dropdown {
     /* Значение скорректировано: уменьшаем подъем ещё на ~5px для точного выравнивания */
     margin-top: calc(-2.2rem + 0.45ex) !important;
     top: 100% !important;
+}
+
+/* =========================
+   ПЕРЕОПРЕДЕЛЕНИЕ КНОПКИ ЗАКРЫТИЯ BOOTSTRAP (.btn-close)
+   Более тонкий крестик для alert-сообщений
+   ========================= */
+
+/* Стили для кастомной кнопки закрытия в alert-сообщениях */
+/* Обертка для alert-сообщения с кнопкой закрытия */
+/* Контейнер для сообщений с flex-раскладкой (только для контейнеров с alert-message) */
+.card-body:has(.alert-message-wrapper) {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.alert-message-wrapper {
+    position: relative;
+    width: 100%;
+    margin-bottom: 0 !important;
+}
+
+/* Убираем нижний отступ у Bootstrap alert внутри обертки */
+.alert-message-wrapper .alert {
+    margin-bottom: 0;
+}
+
+/* Alert внутри обертки */
+.alert-message-wrapper .alert {
+    position: relative;
+}
+
+/* Обертка для кнопки закрытия */
+.alert-close-button-wrapper {
+    position: absolute;
+    height: 0;
+    z-index: 1;
+    width: 100%;
+}
+
+/* Кастомная кнопка закрытия для alert с использованием компонента button */
+.alert-close-button-wrapper .btn-close-custom {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    z-index: 1;
+    padding: 0.5rem 0.75rem;
+    margin: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 0.375rem;
+    opacity: 1;
+    transition: opacity 0.15s ease-in-out;
+    pointer-events: auto;
+}
+
+/* Для alert-dismissible добавляем padding справа для места под кнопку */
+.alert-message-wrapper .alert-dismissible {
+    padding-right: 3rem;
+}
+
+.alert .btn-close-custom:hover {
+    opacity: 0.75;
+}
+
+.alert .btn-close-custom:focus {
+    opacity: 0.75;
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Скрываем текст в кнопке закрытия, оставляем только иконку */
+.alert .btn-close-custom .button-label {
+    display: none !important;
+}
+
+/* Убираем стандартный background-image и mask-image Bootstrap */
+.btn-close,
+.alert .btn-close,
+.alert-dismissible .btn-close {
+    background-image: none !important;
+    background: transparent !important;
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
+    -webkit-mask: none !important;
+    mask: none !important;
+}
+
+/* Создаем тонкий крестик через ::before */
+.btn-close::before,
+.alert .btn-close::before,
+.alert-dismissible .btn-close::before {
+    content: '' !important;
+    display: block !important;
+    width: 1em !important;
+    height: 1em !important;
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 2 L14 14 M14 2 L2 14' stroke='%23000' stroke-width='0.5' stroke-linecap='round' fill='none'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    background-size: 100% 100% !important;
+    opacity: 0.5 !important;
+}
+
+.btn-close:hover::before,
+.alert .btn-close:hover::before,
+.alert-dismissible .btn-close:hover::before {
+    opacity: 0.75 !important;
+}
+
+/* Для маленькой версии кнопки (.btn-close-sm) */
+.btn-close-sm::before,
+.alert .btn-close-sm::before,
+.alert-dismissible .btn-close-sm::before {
+    width: 0.75em !important;
+    height: 0.75em !important;
+}
+
+/* Приглушенные цвета для alert-info и alert-warning в светлой теме */
+/* Применяем только когда не находимся в темной теме */
+:not([data-bs-theme="dark"]) .alert-info {
+    --bs-alert-bg: hsla(199, 89%, 32%, 0.14);
+    --bs-alert-border-color: hsla(199, 89%, 35%, 0.3);
+    background-color: var(--bs-alert-bg);
+    border-color: var(--bs-alert-border-color);
+}
+
+:not([data-bs-theme="dark"]) .alert-warning {
+    --bs-alert-bg: hsla(50, 100%, 32%, 0.18);
+    --bs-alert-border-color: hsla(60, 100%, 35%, 0.4);
+    background-color: var(--bs-alert-bg);
+    border-color: var(--bs-alert-border-color);
+}
+
+/* Цвет крестика (наследуется от темы ближайшего родителя через Bootstrap переменные) */
+.alert-close-button-wrapper .btn-close-custom {
+    color: var(--bs-body-color);
+    opacity: 0.8;
+}
+
+.alert-close-button-wrapper .btn-close-custom:hover {
+    opacity: 1;
 }
 

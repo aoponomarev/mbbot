@@ -115,7 +115,7 @@ window.cmpHeader = {
       // Закрываем выпадающее меню после переключения темы
       this.showSettingsDropdown = false;
     },
-    
+
     // Переключение выпадающего меню настроек
     toggleSettingsDropdown() {
       this.showSettingsDropdown = !this.showSettingsDropdown;

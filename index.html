@@ -439,9 +439,14 @@
                     @fetch-coins="fetchCoinGecko"
                 ></header-coins>
                 <div class="card-body">
-                    <div v-if="cgError" class="alert alert-danger" role="alert">
-                        <small><i class="fas fa-exclamation-circle me-1"></i>{{ cgError }}</small>
-                    </div>
+                    <alert-message 
+                        v-if="cgError"
+                        type="danger" 
+                        :dismissible="false"
+                        :small="true"
+                    >
+                        <i class="fas fa-exclamation-circle me-1"></i>{{ cgError }}
+                    </alert-message>
 
 <!--                     <code class="info-box" id="infoBox">
                       Медианы<br>
@@ -1028,6 +1033,37 @@
         </button>
     </script>
 
+    <!-- X-Template для компонента alert-сообщения (должен быть ДО загрузки Vue и компонентов) -->
+    <script type="text/x-template" id="alert-message-template">
+        <div v-if="isVisible" class="alert-message-wrapper" ref="alertElement">
+            <!-- #region agent log -->
+            <!-- Log будет добавлен в mounted hook компонента -->
+            <!-- #endregion -->
+            <div class="alert-close-button-wrapper">
+                <button 
+                    v-if="dismissible"
+                    ref="closeButton"
+                    type="button"
+                    class="btn btn-link btn-close-custom"
+                    :class="{'btn-sm': small}"
+                    @click="handleClose"
+                    aria-label="Закрыть"
+                >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M2 2 L14 14 M14 2 L2 14" 
+                              stroke="currentColor" 
+                              stroke-width="0.25" 
+                              stroke-linecap="round" 
+                              fill="none"/>
+                    </svg>
+                </button>
+            </div>
+            <div :class="alertClasses" role="alert">
+                <slot></slot>
+            </div>
+        </div>
+    </script>
+
     <script type="text/x-template" id="menu-item-template">
         <a 
             :href="href || '#'"
@@ -1335,6 +1371,7 @@
     <script src="./ui/components/button.js"></script>
     <script src="./ui/components/menu-item.js"></script>
     <script src="./ui/components/horizon-input.js"></script>
+    <script src="./ui/components/alert-message.js"></script>
     <script src="./ui/components/dropdown-menu.js"></script>
     <script src="./ui/utils/column-visibility-mixin.js"></script>
     <script src="./ui/api/coins-manager.js"></script>

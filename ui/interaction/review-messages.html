@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Каталог сообщений проекта</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Единые стили для всех review -->
+    <link rel="stylesheet" href="../review-styles.css">
+    <!-- Стили layout (включая стили для alert-close-button-wrapper) -->
+    <link rel="stylesheet" href="../styles/layout.css">
+    <!-- Единый менеджер для всех review (хедер с вкладками) - загружаем в head для ранней инициализации -->
+    <script src="../review-manager.js"></script>
+</head>
+<body>
+    <!-- Хедер с вкладками будет вставлен здесь через review-manager.js -->
+    
+    <div id="app" class="container-fluid">
+        <div class="messages-container mt-4">
+            <!-- Light Theme -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Light Theme</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Info сообщение -->
+                    <alert-message 
+                        type="info" 
+                        :dismissible="true"
+                        :small="false"
+                    >
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Информация о прогнозе:</strong> Математическая модель завершила расчет метрик для выбранного горизонта прогноза. 
+                        Обновлены значения медианных индикаторов, коэффициентов динамики и скорректированных весов активов. 
+                        Рекомендуется проверить распределение портфеля и при необходимости выполнить ребалансировку согласно текущей стратегии.
+                    </alert-message>
+                    
+                    <!-- Success сообщение -->
+                    <alert-message 
+                        v-if="showAlert"
+                        type="success" 
+                        :dismissible="true"
+                        :small="false"
+                        @close="closeAlert"
+                    >
+                        <i class="fas fa-check-circle me-2"></i>
+                        <strong>Портфель сохранен:</strong> Все изменения в составе портфеля, весах активов и настройках стратегии успешно сохранены в локальное хранилище. 
+                        Данные синхронизированы с IndexedDB, временные ряды обновлены. 
+                        Вы можете продолжить работу с портфелем или экспортировать текущую конфигурацию для резервного копирования.
+                    </alert-message>
+                    
+                    <!-- Warning сообщение -->
+                    <alert-message 
+                        type="warning" 
+                        :dismissible="true"
+                        :small="false"
+                    >
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Внимание: недостаточно данных:</strong> Для расчета корреляций и построения индексов доступно менее 30 дней исторических данных по некоторым активам. 
+                        Это может повлиять на точность прогнозных метрик и рекомендаций по ребалансировке. 
+                        Рекомендуется дождаться накопления достаточного объема данных или использовать альтернативные источники информации.
+                    </alert-message>
+                    
+                    <!-- Danger сообщение -->
+                    <alert-message 
+                        type="danger" 
+                        :dismissible="true"
+                        :small="false"
+                    >
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <strong>Ошибка загрузки данных:</strong> Не удалось получить актуальные котировки из CoinGecko API из-за превышения лимита запросов или проблем с сетевым соединением. 
+                        Приложение продолжит работу с кэшированными данными, но они могут быть устаревшими. 
+                        Пожалуйста, проверьте подключение к интернету и повторите попытку обновления через несколько минут.
+                    </alert-message>
+                </div>
+            </div>
+            
+            <!-- Dark Theme -->
+            <div class="card mb-4" data-bs-theme="dark">
+                <div class="card-header">
+                    <h5 class="mb-0">Dark Theme</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Info сообщение -->
+                    <alert-message 
+                        type="info" 
+                        :dismissible="true"
+                        :small="false"
+                    >
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Информация о прогнозе:</strong> Математическая модель завершила расчет метрик для выбранного горизонта прогноза. 
+                        Обновлены значения медианных индикаторов, коэффициентов динамики и скорректированных весов активов. 
+                        Рекомендуется проверить распределение портфеля и при необходимости выполнить ребалансировку согласно текущей стратегии.
+                    </alert-message>
+                    
+                    <!-- Success сообщение -->
+                    <alert-message 
+                        v-if="showAlert"
+                        type="success" 
+                        :dismissible="true"
+                        :small="false"
+                        @close="closeAlert"
+                    >
+                        <i class="fas fa-check-circle me-2"></i>
+                        <strong>Портфель сохранен:</strong> Все изменения в составе портфеля, весах активов и настройках стратегии успешно сохранены в локальное хранилище. 
+                        Данные синхронизированы с IndexedDB, временные ряды обновлены. 
+                        Вы можете продолжить работу с портфелем или экспортировать текущую конфигурацию для резервного копирования.
+                    </alert-message>
+                    
+                    <!-- Warning сообщение -->
+                    <alert-message 
+                        type="warning" 
+                        :dismissible="true"
+                        :small="false"
+                    >
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Внимание: недостаточно данных:</strong> Для расчета корреляций и построения индексов доступно менее 30 дней исторических данных по некоторым активам. 
+                        Это может повлиять на точность прогнозных метрик и рекомендаций по ребалансировке. 
+                        Рекомендуется дождаться накопления достаточного объема данных или использовать альтернативные источники информации.
+                    </alert-message>
+                    
+                    <!-- Danger сообщение -->
+                    <alert-message 
+                        type="danger" 
+                        :dismissible="true"
+                        :small="false"
+                    >
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <strong>Ошибка загрузки данных:</strong> Не удалось получить актуальные котировки из CoinGecko API из-за превышения лимита запросов или проблем с сетевым соединением. 
+                        Приложение продолжит работу с кэшированными данными, но они могут быть устаревшими. 
+                        Пожалуйста, проверьте подключение к интернету и повторите попытку обновления через несколько минут.
+                    </alert-message>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS для работы alert-dismissible -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Vue.js 3 -->
+    <script src="https://unpkg.com/vue@3.5.25/dist/vue.global.prod.js"></script>
+    
+    <!-- Глобальные утилиты -->
+    <script src="../../ui/utils/ui-element-helper.js"></script>
+    <script src="../../ui/utils/hash-generator.js"></script>
+    
+    <!-- X-Template для компонента button (ДОЛЖЕН БЫТЬ ДО компонентов) -->
+    <script type="text/x-template" id="button-template">
+        <button
+            :type="type"
+            :class="buttonClasses"
+            :disabled="disabled"
+            @click="handleClick"
+        >
+            <!-- Основная часть (иконка + текст) с tooltip -->
+            <span 
+                class="button-main"
+                :class="{'button-icon-only': isIconOnly}"
+                :title="mainTooltip"
+            >
+                <!-- Спиннер загрузки (показывается только если нет loadingText) -->
+                <span v-if="loading && !loadingText" class="spinner-border spinner-border-sm" role="status"></span>
+                
+                <!-- Динамический текст загрузки (показывается вместо спиннера) -->
+                <span v-if="loading && loadingText" class="button-label">{{ loadingText }}</span>
+                
+                <!-- Иконка (скрывается при loading) -->
+                <span v-if="!loading && (effectiveIconClass || hasIconImage)" class="button-icon">
+                    <!-- SVG-иконка из файла (используется object для поддержки currentColor и CSS переменных) -->
+                    <object v-if="isSVGIcon" 
+                            :data="svgIconPath" 
+                            type="image/svg+xml"
+                            :class="effectiveIconClass"
+                            style="width: 1em; height: 1em; vertical-align: middle; pointer-events: none;">
+                        <!-- Fallback на img если object не поддерживается -->
+                        <img :src="svgIconPath" 
+                             :alt="displayLabel"
+                             :class="effectiveIconClass"
+                             style="width: 1em; height: 1em; vertical-align: middle;">
+                    </object>
+                    <!-- Font Awesome иконки (используется i) -->
+                    <i v-else-if="effectiveIconClass" :class="effectiveIconClass"></i>
+                    <img v-if="hasIconImage" :src="iconImage" :alt="displayLabel" width="16" height="16">
+                </span>
+                
+                <!-- Текст (всегда рендерится, но скрывается визуально при loading для сохранения высоты, если нет loadingText) -->
+                <span 
+                    v-if="displayLabel && !(loading && loadingText)" 
+                    class="button-label"
+                    :style="{ visibility: (loading && !loadingText) ? 'hidden' : 'visible' }"
+                >{{ displayLabel }}</span>
+            </span>
+            
+            <!-- Индикатор с отдельным tooltip -->
+            <span 
+                v-if="indicator"
+                class="button-indicator"
+                :title="indicatorTooltipText"
+            >
+                <i v-if="effectiveIndicatorIcon" :class="effectiveIndicatorIcon"></i>
+            </span>
+        </button>
+    </script>
+    
+    <!-- X-Template для компонента alert-сообщения (ДОЛЖЕН БЫТЬ ДО компонентов) -->
+    <script type="text/x-template" id="alert-message-template-review">
+        <div v-if="isVisible" class="alert-message-wrapper" ref="alertElement">
+            <div class="alert-close-button-wrapper">
+                <button 
+                    v-if="dismissible"
+                    ref="closeButton"
+                    type="button"
+                    class="btn btn-link btn-close-custom"
+                    :class="{'btn-sm': small}"
+                    @click="handleClose"
+                    aria-label="Закрыть"
+                >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M2 2 L14 14 M14 2 L2 14" 
+                              stroke="currentColor" 
+                              stroke-width="0.25" 
+                              stroke-linecap="round" 
+                              fill="none"/>
+                    </svg>
+                </button>
+            </div>
+            <div :class="alertClasses" role="alert">
+                <slot></slot>
+            </div>
+        </div>
+    </script>
+    
+    <!-- Компоненты -->
+    <script src="../../ui/components/button.js"></script>
+    <script src="../../ui/components/alert-message.js"></script>
+    
+    <!-- Локальная копия компонента alert-message с правильным шаблоном -->
+    <script>
+        // Переопределяем компонент для использования правильного шаблона
+        if (window.cmpAlertMessage) {
+            window.cmpAlertMessageReview = {
+                ...window.cmpAlertMessage,
+                template: '#alert-message-template-review'
+            };
+        }
+    </script>
+    
+    <script>
+        // Инициализация review-хедера
+        document.addEventListener('DOMContentLoaded', function() {
+            // Определяем текущий review из URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const currentReview = urlParams.get('review') || 'messages';
+            
+            // Создаем хедер с вкладками
+            if (typeof createReviewHeader === 'function') {
+                const header = createReviewHeader(currentReview);
+                if (header && header instanceof Node && document.body.firstChild) {
+                    document.body.insertBefore(header, document.body.firstChild);
+                } else if (header && header instanceof Node) {
+                    // Если firstChild отсутствует, просто добавляем в начало body
+                    document.body.insertBefore(header, document.body.firstChild || null);
+                }
+            }
+            
+            // Инициализация Vue приложения для компонента alert-message
+            if (typeof Vue !== 'undefined' && window.cmpButton && window.cmpAlertMessage) {
+                const { createApp } = Vue;
+                
+                const app = createApp({
+                    data() {
+                        return {
+                            showAlert: true
+                        };
+                    },
+                    methods: {
+                        closeAlert() {
+                            this.showAlert = false;
+                        }
+                    }
+                });
+                
+                // Регистрация компонентов
+                app.component('cmp-button', window.cmpButton);
+                // Используем локальную копию компонента с правильным шаблоном
+                const alertComponent = window.cmpAlertMessageReview || window.cmpAlertMessage;
+                app.component('alert-message', alertComponent);
+                
+                // Монтирование приложения
+                app.mount('#app');
+            }
+        });
+    </script>
+</body>
+</html>
+

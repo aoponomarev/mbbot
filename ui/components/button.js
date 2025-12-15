@@ -122,14 +122,30 @@ window.cmpButton = {
     
     // Проверка, является ли иконка SVG
     isSVGIcon() {
-      if (!this.effectiveIconClass || !this.uiElementHelper) return false;
-      return this.uiElementHelper.isSVGIcon(this.effectiveIconClass);
+      const result = !this.effectiveIconClass || !this.uiElementHelper ? false : this.uiElementHelper.isSVGIcon(this.effectiveIconClass);
+      return result;
     },
     
     // Путь к SVG иконке
     svgIconPath() {
       if (!this.effectiveIconClass || !this.uiElementHelper) return '';
-      return this.uiElementHelper.getSVGIconPath(this.effectiveIconClass);
+      const basePath = this.uiElementHelper.getSVGIconPath(this.effectiveIconClass);
+      // Если путь начинается с 'ui/', делаем его относительным от корня проекта
+      // Для файлов в ui/interaction/ нужно использовать '../../'
+      let result = basePath;
+      if (basePath.startsWith('ui/')) {
+        // Определяем текущее местоположение по window.location
+        const currentPath = window.location.pathname;
+        if (currentPath.includes('/ui/interaction/')) {
+          result = '../../' + basePath;
+        } else if (currentPath.includes('/ui/')) {
+          result = '../' + basePath;
+        } else {
+          // Для корня проекта используем путь как есть
+          result = basePath;
+        }
+      }
+      return result;
     },
     
     // Детерминированный хэш экземпляра
@@ -156,8 +172,13 @@ window.cmpButton = {
     },
     
     // Текст кнопки - приоритет: label > indicatorLabel > iconLabel из mapping
+    // Если label явно передан как пустая строка, игнорируем iconLabel
     displayLabel() {
-      return this.label || this.indicatorLabel || this.iconLabel || '';
+      // Если label явно передан (даже как пустая строка), используем его
+      if (this.label !== null && this.label !== undefined) {
+        return this.label;
+      }
+      return this.indicatorLabel || this.iconLabel || '';
     },
     
     // Tooltip для основной части (иконка + текст) - приоритет: tooltip > iconTooltip > iconLabel > displayLabel
@@ -173,10 +194,8 @@ window.cmpButton = {
     
     // Эффективная иконка слева
     effectiveIconClass() {
-      if (this.iconImage) {
-        return null;
-      }
-      return this.iconClass;
+      const result = this.iconImage ? null : this.iconClass;
+      return result;
     },
     
     // Есть ли изображение для иконки
@@ -198,6 +217,7 @@ window.cmpButton = {
   methods: {
     // Загрузка иконки через систему uiElementHelper
     loadIcon() {
+      
       if (!window.uiElementHelper) {
         return;
       }
@@ -207,6 +227,7 @@ window.cmpButton = {
         if (this.iconCommand) {
           const iconClass = window.uiElementHelper.getIconForCommand(this.iconCategory, this.iconCommand);
           const commandData = window.uiElementHelper.getCommandData(this.iconCommand);
+          
           
           this.iconClass = iconClass || '';
           this.iconLabel = commandData?.label || '';
@@ -258,6 +279,7 @@ window.cmpButton = {
   
   // Загружаем иконку при монтировании компонента
   mounted() {
+    
     // Если uiElementHelper еще не загружен, ждем немного и пробуем снова
     if (!window.uiElementHelper) {
       console.warn('[button] uiElementHelper не доступен, повторная попытка через 100ms');

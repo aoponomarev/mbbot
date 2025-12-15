@@ -62,6 +62,30 @@
   * Обновлен `lastCommitMessage` в `core/cfg-app.js` на "Start of day: 12-15"
 - **Функциональность**: Зафиксировано начало рабочего дня в истории репозитория, обеспечена преемственность документации и правил работы ИИ-агента
 
+### Коммит: Add alert-message component and review-messages page, fix close button for dark theme
+- **Что сделано**:
+  * Создан компонент `alert-message.js` - Vue-обертка над Bootstrap alert с кастомной кнопкой закрытия
+  * Создана страница `review-messages.html` с примерами сообщений в светлой и темной теме
+  * Исправлен крестик закрытия: заменен `cmp-button` на inline SVG (как у гамбургера) для корректной работы в темной теме
+  * Удалены старые карточки из review-messages (Info, Success, Warning, Danger с Bootstrap alert)
+  * Обновлены стили для alert-info и alert-warning: приглушенные цвета фона и рамок в светлой теме
+  * Заменено сообщение об ошибке в карточке с монетами на новый компонент `alert-message`
+  * Удалены все логи из консоли (console.log, fetch запросы) из компонентов
+  * Добавлено ограничение максимальной ширины для review-вкладок (1024px)
+  * Обновлена документация
+- **Как сделано**:
+  * Создан `ui/components/alert-message.js` с props: type, dismissible, small, show, customClass
+  * Компонент управляет своей видимостью через внутреннее состояние `showAlert` при `dismissible=true`
+  * Создан `ui/interaction/review-messages.html` с двумя карточками: Light Theme и Dark Theme
+  * В шаблонах `alert-message-template` и `alert-message-template-review` заменен `cmp-button` на обычную кнопку с inline SVG крестиком
+  * SVG использует `stroke="currentColor"` для наследования цвета от родителя
+  * Добавлены стили в `layout.css`: приглушенные цвета для alert-info и alert-warning, flex-раскладка с gap для контейнера сообщений
+  * Цвет крестика использует `var(--bs-body-color)` для автоматической адаптации к теме ближайшего родителя
+  * Удалены все блоки `#region agent log` и fetch запросы из `button.js` и `alert-message.js`
+  * Добавлено ограничение `max-width: 1024px` для `.container-fluid` в `review-styles.css`
+  * Обновлена документация в `architect.md` и `ui/guide-ii.md`
+- **Функциональность**: Создан универсальный компонент для отображения alert-сообщений с поддержкой темной темы. Крестик закрытия корректно работает в обеих темах, автоматически адаптируясь к цвету родителя. Улучшена визуальная консистентность сообщений через приглушенные цвета. Review-система дополнена страницей с примерами сообщений для демонстрации всех типов alert.
+
 ### Коммит: Review system: statistics page and UI improvements
 - **Что сделано**:
   * Создана страница статистики проекта `review-app.html` с рейтингом файлов, диаграммами и метриками

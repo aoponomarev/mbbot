@@ -19,6 +19,11 @@ const REVIEW_CONFIG = {
         title: 'Цвета',
         file: 'ui/styles/review-colors.html',
         description: 'Каталог всех цветовых переменных проекта'
+    },
+    'messages': {
+        title: 'Сообщения',
+        file: 'ui/interaction/review-messages.html',
+        description: 'Шаблоны сообщений Bootstrap: info, success, warning, danger'
     }
     // Здесь можно добавлять новые review в будущем
 };
@@ -52,6 +57,8 @@ function createReviewHeader(currentReview) {
             basePath = '../../'; // Из ui/assets/ в корень проекта
         } else if (currentPath.includes('/ui/styles/')) {
             basePath = '../../'; // Из ui/styles/ в корень проекта
+        } else if (currentPath.includes('/ui/interaction/')) {
+            basePath = '../../'; // Из ui/interaction/ в корень проекта
         } else if (currentPath.includes('/ui/')) {
             basePath = '../'; // Из ui/ в корень проекта
         } else if (currentPath.includes('/docs/')) {
@@ -74,7 +81,7 @@ function createReviewHeader(currentReview) {
     
     // Проверяем, не вставлен ли уже хедер
     if (document.querySelector('.review-header')) {
-        return; // Хедер уже существует
+        return null; // Хедер уже существует
     }
     
     // Вставляем хедер перед блоком фильтрации или контейнером

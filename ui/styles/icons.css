@@ -23,7 +23,7 @@
   --icon-action-disabled-color: var(--bs-secondary);
   
   /* SVG-иконка крестика */
-  --icon-cross-stroke-width: 0.5px; /* Толщина линий крестика (минимальная, регулируется через CSS) */
+  --icon-cross-stroke-width: 0.25px; /* Толщина линий крестика (минимальная, регулируется через CSS) */
   --icon-cross-color: var(--bs-body-color); /* Цвет крестика */
 }
 

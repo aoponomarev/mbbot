@@ -7,6 +7,18 @@ body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
+/* Ограничение максимальной ширины для всех review-вкладок (для ультравайд мониторов) */
+.container-fluid {
+    max-width: 1024px;
+    margin: 0 auto;
+}
+
+.messages-container,
+#colors-container,
+#icons-container {
+    max-width: 100%;
+}
+
 /* Хедер с вкладками (стиль 2010-х) */
 .review-header {
     background: linear-gradient(to bottom, #f8f9fa 0%, #e9ecef 100%);
