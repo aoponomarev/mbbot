@@ -123,6 +123,22 @@ table td.col-hidden {
         padding-left: 10px;
         padding-right: 10px;
     }
+    
+    /* Контейнер основного контента: уменьшаем вертикальные отступы на мобильных */
+    .container-fluid.app-main-container {
+        padding-top: 50px;
+        padding-bottom: 50px;
+    }
+    
+    /* Карточка с числовой таблицей: убираем внешнюю рамку на мобильных */
+    .card.for-coinsindicator {
+        border: 0;
+    }
+    
+    /* Убираем скругление углов у хедера карточки на мобильных */
+    .card.for-coinsindicator > .card-header {
+        border-radius: 0px;
+    }
 }
 
 /* Стили для выпадающего списка поиска монет CoinGecko */
@@ -177,10 +193,9 @@ table td.col-hidden {
 
 /* Кнопка счетчика монет */
 .cg-coins-counter {
-    /* Фиксированная ширина 3em */
-    width: 3em;
-    min-width: 3em;
-    height: 3em;
+    width: 2.3rem;
+    min-width: 2.3rem;
+    height: 2.3rem;
     padding: 0;
     text-align: center;
     display: flex;
@@ -245,13 +260,6 @@ table td.col-hidden {
     /* Для выравнивания: padding-left хедера = (1rem + 20px) - 1.8em */
     /* Учитываем, что у хедера уже есть стандартный паддинг Bootstrap, поэтому переопределяем его */
     padding-left: calc(1rem + 20px - 1.8em) !important;
-}
-
-/* Регулировка ширины кнопки для точного выравнивания */
-.card.avto-B7fN2kT.for-coinsindicator .cg-coins-counter {
-    /* Ширина 3em для выравнивания центра кнопки с центром чекбокса */
-    width: 3em;
-    min-width: 3em;
 }
 
 /* Кнопка обновления CoinGecko: фиксированная ширина для предотвращения "прыжков" интерфейса */
@@ -583,6 +591,28 @@ main .cg-coin-sort-dropdown {
 .cg-coins-table thead th {
     background-color: transparent !important;
     white-space: nowrap;
+}
+
+/* Колонка с монетами: фиксированная ширина в rem */
+.cg-coins-table .col-coin {
+    width: 7rem;
+    min-width: 7rem;
+    max-width: 7rem;
+}
+
+/* Ячейки колонки с монетами: запрет переносов и правильный overflow */
+.cg-coins-table td.col-coin,
+.cg-coins-table th.col-coin {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Внутренний контейнер ячейки монеты: правильный overflow */
+.cg-coins-table .col-coin .cg-coin-block {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
 }
 
 /* Подсветка выбранных строк таблицы с монетами - слабо-слабо прозрачная нейтрально-серовая подсветка */
