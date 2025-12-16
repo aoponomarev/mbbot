@@ -64,6 +64,21 @@ window.cmpAlertMessage = {
   
   mounted() {
     // Компонент смонтирован
+    // Устанавливаем CSS переменную --bs-alert-color на уровне alert-message-wrapper
+    // для передачи цвета крестику из родительского alert элемента
+    this.$nextTick(() => {
+      const alertElement = this.$refs.alertElement;
+      if (alertElement) {
+        const alertDiv = alertElement.querySelector('.alert');
+        if (alertDiv) {
+          // Получаем --bs-alert-color из alert элемента и устанавливаем на wrapper
+          const alertColor = getComputedStyle(alertDiv).getPropertyValue('--bs-alert-color').trim();
+          if (alertColor) {
+            alertElement.style.setProperty('--alert-close-color', alertColor);
+          }
+        }
+      }
+    });
   },
   
   computed: {

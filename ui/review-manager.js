@@ -110,14 +110,20 @@ function initReviewHeader() {
     const currentFile = currentPath.split('/').pop();
     let currentReview = null;
     
-    Object.entries(REVIEW_CONFIG).forEach(([id, config]) => {
-        // Проверяем как по полному пути, так и по имени файла
-        const configFileName = config.file.split('/').pop();
-        if (currentPath.includes(config.file) || config.file.endsWith(currentFile) || 
-            currentFile === configFileName || currentFile === 'review-app.html') {
-            currentReview = id;
-        }
-    });
+    // Специальная проверка для review-app.html (должен быть 'stats')
+    if (currentFile === 'review-app.html') {
+        currentReview = 'stats';
+    } else {
+        // Для остальных файлов проверяем по конфигурации
+        Object.entries(REVIEW_CONFIG).forEach(([id, config]) => {
+            // Проверяем как по полному пути, так и по имени файла
+            const configFileName = config.file.split('/').pop();
+            if (currentPath.includes(config.file) || config.file.endsWith(currentFile) || 
+                currentFile === configFileName) {
+                currentReview = id;
+            }
+        });
+    }
     
     createReviewHeader(currentReview);
 }

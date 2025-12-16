@@ -752,11 +752,11 @@ main .cg-coin-sort-dropdown {
 }
 
 .alert .btn-close-custom:hover {
-    opacity: 0.75;
+    opacity: 1; /* Полная непрозрачность при наведении */
 }
 
 .alert .btn-close-custom:focus {
-    opacity: 0.75;
+    opacity: 1; /* Полная непрозрачность при фокусе */
     outline: 0;
     box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
 }
@@ -823,13 +823,25 @@ main .cg-coin-sort-dropdown {
     border-color: var(--bs-alert-border-color);
 }
 
-/* Цвет крестика (наследуется от темы ближайшего родителя через Bootstrap переменные) */
-.alert-close-button-wrapper .btn-close-custom {
-    color: var(--bs-body-color);
-    opacity: 0.8;
+/* Цвет крестика соответствует цвету текста сообщения (--bs-alert-color) с полупрозрачностью */
+/* Цвет передается из родительского компонента через CSS переменную --alert-close-color */
+.alert-message-wrapper .alert-close-button-wrapper .btn-close-custom {
+    color: var(--alert-close-color, var(--bs-alert-color, currentColor));
+    opacity: 0.6; /* Полупрозрачность */
 }
 
 .alert-close-button-wrapper .btn-close-custom:hover {
-    opacity: 1;
+    opacity: 0.9; /* Менее прозрачный при наведении */
+}
+
+/* Адаптивный размер шрифта для alert-сообщений: нормальный на десктопе, уменьшенный на мобильных */
+.alert-message-wrapper .alert {
+    font-size: 1rem; /* Нормальный размер на десктопе */
+}
+
+@media (max-width: 576px) {
+    .alert-message-wrapper .alert {
+        font-size: 0.875rem; /* Уменьшенный размер на мобильных */
+    }
 }
 

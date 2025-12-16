@@ -18,119 +18,201 @@
     
     <div id="app" class="container-fluid">
         <div class="messages-container mt-4">
-            <!-- Light Theme -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">Light Theme</h5>
+            <div class="row g-4">
+                <!-- Левая колонка: Шаблоны используемых сообщений -->
+                <div class="col-md-6">
+                    <div class="d-flex flex-column gap-3">
+                        <!-- cgError - Ошибка загрузки данных CoinGecko -->
+                        <alert-message 
+                            type="danger" 
+                            :dismissible="true"
+                            :small="false"
+                        >
+                            <i class="fas fa-exclamation-circle me-1"></i>Не удалось загрузить данные
+                        </alert-message>
+                        
+                        <!-- quoteError - Ошибка загрузки цитаты -->
+                        <alert-message 
+                            type="warning" 
+                            :dismissible="true"
+                            :small="false"
+                        >
+                            <i class="fas fa-exclamation-triangle me-1"></i>Не удалось загрузить цитату
+                        </alert-message>
+                        
+                        <!-- passwordError - Неверный код доступа -->
+                        <alert-message 
+                            type="danger" 
+                            :dismissible="true"
+                            :small="false"
+                        >
+                            <i class="fas fa-exclamation-circle me-1"></i>Неверный код
+                        </alert-message>
+                        
+                        <!-- importStatus success - Успешный импорт/экспорт -->
+                        <alert-message 
+                            type="success" 
+                            :dismissible="true"
+                            :small="false"
+                        >
+                            <i class="fas fa-check-circle me-1"></i>Настройки проекта успешно экспортированы (чувствительные данные обфусцированы)
+                        </alert-message>
+                        
+                        <!-- importStatus error - Ошибка импорта/экспорта -->
+                        <alert-message 
+                            type="danger" 
+                            :dismissible="true"
+                            :small="false"
+                        >
+                            <i class="fas fa-exclamation-circle me-1"></i>Ошибка при экспорте настроек: [текст ошибки]
+                        </alert-message>
+                        
+                        <!-- perplexityApiKey warning - Предупреждение об отсутствии API ключа -->
+                        <alert-message 
+                            type="warning" 
+                            :dismissible="true"
+                            :small="false"
+                        >
+                            <i class="fas fa-exclamation-triangle me-1"></i>Для работы необходимо указать API ключ
+                        </alert-message>
+                        
+                        <!-- perplexityApiKey success - API ключ настроен -->
+                        <alert-message 
+                            type="success" 
+                            :dismissible="true"
+                            :small="false"
+                        >
+                            <i class="fas fa-check-circle me-1"></i>API ключ настроен
+                        </alert-message>
+                        
+                        <!-- failedTickers - Предупреждение о неудачных тикерах -->
+                        <alert-message 
+                            type="warning" 
+                            :dismissible="true"
+                            :small="false"
+                        >
+                            <i class="fas fa-exclamation-triangle me-1"></i>Некоторые монеты не удалось добавить. Повторите попытку позже.
+                        </alert-message>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <!-- Info сообщение -->
-                    <alert-message 
-                        type="info" 
-                        :dismissible="true"
-                        :small="false"
-                    >
-                        <i class="fas fa-info-circle me-2"></i>
-                        <strong>Информация о прогнозе:</strong> Математическая модель завершила расчет метрик для выбранного горизонта прогноза. 
-                        Обновлены значения медианных индикаторов, коэффициентов динамики и скорректированных весов активов. 
-                        Рекомендуется проверить распределение портфеля и при необходимости выполнить ребалансировку согласно текущей стратегии.
-                    </alert-message>
+                
+                <!-- Правая колонка: Образцы сообщений -->
+                <div class="col-md-6">
+                    <!-- Light Theme -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Light Theme</h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- Info сообщение -->
+                            <alert-message 
+                                type="info" 
+                                :dismissible="true"
+                                :small="false"
+                            >
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Информация о прогнозе:</strong> Математическая модель завершила расчет метрик для выбранного горизонта прогноза. 
+                                Обновлены значения медианных индикаторов, коэффициентов динамики и скорректированных весов активов. 
+                                Рекомендуется проверить распределение портфеля и при необходимости выполнить ребалансировку согласно текущей стратегии.
+                            </alert-message>
+                            
+                            <!-- Success сообщение -->
+                            <alert-message 
+                                v-if="showAlert"
+                                type="success" 
+                                :dismissible="true"
+                                :small="false"
+                                @close="closeAlert"
+                            >
+                                <i class="fas fa-check-circle me-2"></i>
+                                <strong>Портфель сохранен:</strong> Все изменения в составе портфеля, весах активов и настройках стратегии успешно сохранены в локальное хранилище. 
+                                Данные синхронизированы с IndexedDB, временные ряды обновлены. 
+                                Вы можете продолжить работу с портфелем или экспортировать текущую конфигурацию для резервного копирования.
+                            </alert-message>
+                            
+                            <!-- Warning сообщение -->
+                            <alert-message 
+                                type="warning" 
+                                :dismissible="true"
+                                :small="false"
+                            >
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Внимание: недостаточно данных:</strong> Для расчета корреляций и построения индексов доступно менее 30 дней исторических данных по некоторым активам. 
+                                Это может повлиять на точность прогнозных метрик и рекомендаций по ребалансировке. 
+                                Рекомендуется дождаться накопления достаточного объема данных или использовать альтернативные источники информации.
+                            </alert-message>
+                            
+                            <!-- Danger сообщение -->
+                            <alert-message 
+                                type="danger" 
+                                :dismissible="true"
+                                :small="false"
+                            >
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                <strong>Ошибка загрузки данных:</strong> Не удалось получить актуальные котировки из CoinGecko API из-за превышения лимита запросов или проблем с сетевым соединением. 
+                                Приложение продолжит работу с кэшированными данными, но они могут быть устаревшими. 
+                                Пожалуйста, проверьте подключение к интернету и повторите попытку обновления через несколько минут.
+                            </alert-message>
+                        </div>
+                    </div>
                     
-                    <!-- Success сообщение -->
-                    <alert-message 
-                        v-if="showAlert"
-                        type="success" 
-                        :dismissible="true"
-                        :small="false"
-                        @close="closeAlert"
-                    >
-                        <i class="fas fa-check-circle me-2"></i>
-                        <strong>Портфель сохранен:</strong> Все изменения в составе портфеля, весах активов и настройках стратегии успешно сохранены в локальное хранилище. 
-                        Данные синхронизированы с IndexedDB, временные ряды обновлены. 
-                        Вы можете продолжить работу с портфелем или экспортировать текущую конфигурацию для резервного копирования.
-                    </alert-message>
-                    
-                    <!-- Warning сообщение -->
-                    <alert-message 
-                        type="warning" 
-                        :dismissible="true"
-                        :small="false"
-                    >
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        <strong>Внимание: недостаточно данных:</strong> Для расчета корреляций и построения индексов доступно менее 30 дней исторических данных по некоторым активам. 
-                        Это может повлиять на точность прогнозных метрик и рекомендаций по ребалансировке. 
-                        Рекомендуется дождаться накопления достаточного объема данных или использовать альтернативные источники информации.
-                    </alert-message>
-                    
-                    <!-- Danger сообщение -->
-                    <alert-message 
-                        type="danger" 
-                        :dismissible="true"
-                        :small="false"
-                    >
-                        <i class="fas fa-exclamation-circle me-2"></i>
-                        <strong>Ошибка загрузки данных:</strong> Не удалось получить актуальные котировки из CoinGecko API из-за превышения лимита запросов или проблем с сетевым соединением. 
-                        Приложение продолжит работу с кэшированными данными, но они могут быть устаревшими. 
-                        Пожалуйста, проверьте подключение к интернету и повторите попытку обновления через несколько минут.
-                    </alert-message>
-                </div>
-            </div>
-            
-            <!-- Dark Theme -->
-            <div class="card mb-4" data-bs-theme="dark">
-                <div class="card-header">
-                    <h5 class="mb-0">Dark Theme</h5>
-                </div>
-                <div class="card-body">
-                    <!-- Info сообщение -->
-                    <alert-message 
-                        type="info" 
-                        :dismissible="true"
-                        :small="false"
-                    >
-                        <i class="fas fa-info-circle me-2"></i>
-                        <strong>Информация о прогнозе:</strong> Математическая модель завершила расчет метрик для выбранного горизонта прогноза. 
-                        Обновлены значения медианных индикаторов, коэффициентов динамики и скорректированных весов активов. 
-                        Рекомендуется проверить распределение портфеля и при необходимости выполнить ребалансировку согласно текущей стратегии.
-                    </alert-message>
-                    
-                    <!-- Success сообщение -->
-                    <alert-message 
-                        v-if="showAlert"
-                        type="success" 
-                        :dismissible="true"
-                        :small="false"
-                        @close="closeAlert"
-                    >
-                        <i class="fas fa-check-circle me-2"></i>
-                        <strong>Портфель сохранен:</strong> Все изменения в составе портфеля, весах активов и настройках стратегии успешно сохранены в локальное хранилище. 
-                        Данные синхронизированы с IndexedDB, временные ряды обновлены. 
-                        Вы можете продолжить работу с портфелем или экспортировать текущую конфигурацию для резервного копирования.
-                    </alert-message>
-                    
-                    <!-- Warning сообщение -->
-                    <alert-message 
-                        type="warning" 
-                        :dismissible="true"
-                        :small="false"
-                    >
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        <strong>Внимание: недостаточно данных:</strong> Для расчета корреляций и построения индексов доступно менее 30 дней исторических данных по некоторым активам. 
-                        Это может повлиять на точность прогнозных метрик и рекомендаций по ребалансировке. 
-                        Рекомендуется дождаться накопления достаточного объема данных или использовать альтернативные источники информации.
-                    </alert-message>
-                    
-                    <!-- Danger сообщение -->
-                    <alert-message 
-                        type="danger" 
-                        :dismissible="true"
-                        :small="false"
-                    >
-                        <i class="fas fa-exclamation-circle me-2"></i>
-                        <strong>Ошибка загрузки данных:</strong> Не удалось получить актуальные котировки из CoinGecko API из-за превышения лимита запросов или проблем с сетевым соединением. 
-                        Приложение продолжит работу с кэшированными данными, но они могут быть устаревшими. 
-                        Пожалуйста, проверьте подключение к интернету и повторите попытку обновления через несколько минут.
-                    </alert-message>
+                    <!-- Dark Theme -->
+                    <div class="card mb-4" data-bs-theme="dark">
+                        <div class="card-header">
+                            <h5 class="mb-0">Dark Theme</h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- Info сообщение -->
+                            <alert-message 
+                                type="info" 
+                                :dismissible="true"
+                                :small="false"
+                            >
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Информация о прогнозе:</strong> Математическая модель завершила расчет метрик для выбранного горизонта прогноза. 
+                                Обновлены значения медианных индикаторов, коэффициентов динамики и скорректированных весов активов. 
+                                Рекомендуется проверить распределение портфеля и при необходимости выполнить ребалансировку согласно текущей стратегии.
+                            </alert-message>
+                            
+                            <!-- Success сообщение -->
+                            <alert-message 
+                                v-if="showAlert"
+                                type="success" 
+                                :dismissible="true"
+                                :small="false"
+                                @close="closeAlert"
+                            >
+                                <i class="fas fa-check-circle me-2"></i>
+                                <strong>Портфель сохранен:</strong> Все изменения в составе портфеля, весах активов и настройках стратегии успешно сохранены в локальное хранилище. 
+                                Данные синхронизированы с IndexedDB, временные ряды обновлены. 
+                                Вы можете продолжить работу с портфелем или экспортировать текущую конфигурацию для резервного копирования.
+                            </alert-message>
+                            
+                            <!-- Warning сообщение -->
+                            <alert-message 
+                                type="warning" 
+                                :dismissible="true"
+                                :small="false"
+                            >
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Внимание: недостаточно данных:</strong> Для расчета корреляций и построения индексов доступно менее 30 дней исторических данных по некоторым активам. 
+                                Это может повлиять на точность прогнозных метрик и рекомендаций по ребалансировке. 
+                                Рекомендуется дождаться накопления достаточного объема данных или использовать альтернативные источники информации.
+                            </alert-message>
+                            
+                            <!-- Danger сообщение -->
+                            <alert-message 
+                                type="danger" 
+                                :dismissible="true"
+                                :small="false"
+                            >
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                <strong>Ошибка загрузки данных:</strong> Не удалось получить актуальные котировки из CoinGecko API из-за превышения лимита запросов или проблем с сетевым соединением. 
+                                Приложение продолжит работу с кэшированными данными, но они могут быть устаревшими. 
+                                Пожалуйста, проверьте подключение к интернету и повторите попытку обновления через несколько минут.
+                            </alert-message>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -295,4 +377,3 @@
     </script>
 </body>
 </html>
-
