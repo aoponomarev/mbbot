@@ -28,14 +28,36 @@ body {
 }
 
 .review-system-messages {
-    background: #fff;
-    border-top: 1px solid #dee2e6;
+    background: transparent;
+    border-top: none;
     padding: 0.75rem 1rem;
     margin: 0;
 }
 
-/* Не показываем область системных сообщений, пока внутри нет реальных alert */
-.review-system-messages:not(:has(.alert)):not(:has(.alert-message-wrapper)) {
+/* UTF-иконка для collapse (вместо material-symbols) */
+.review-collapse-icon {
+    display: inline-block;
+    line-height: 1;
+    font-size: 2.1rem !important; /* x2 */
+    margin-top: -0.15rem;
+}
+
+/* Кнопка раскрытия — без рамки и фона */
+.review-collapse-btn {
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0.15rem 0.35rem !important;
+}
+.review-collapse-btn:hover,
+.review-collapse-btn:focus {
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+/* Не показываем секцию системных сообщений, пока внутри нет контента */
+.review-system-messages-section:not(:has(.alert)):not(:has(.alert-message-wrapper)):not(:has(.review-progress-text)) {
     display: none;
 }
 
@@ -83,6 +105,32 @@ body {
 .review-system-messages .review-msg-actions .btn {
     padding: 0.15rem 0.5rem;
     font-size: 0.8rem;
+}
+
+/* Плоский прогресс-индикатор для review-app (без Bootstrap alert) */
+.review-progress-text {
+    font-size: 0.9rem;
+    color: var(--bs-body-color, #212529);
+    padding: 0;
+}
+
+.review-progress-dots {
+    display: inline-flex;
+    gap: 0.1rem;
+    margin-left: 0.1rem;
+}
+
+.review-progress-dots span {
+    opacity: 0.2;
+    animation: reviewDotsPulse 1.2s infinite;
+}
+
+.review-progress-dots span:nth-child(2) { animation-delay: 0.15s; }
+.review-progress-dots span:nth-child(3) { animation-delay: 0.30s; }
+
+@keyframes reviewDotsPulse {
+    0%, 60%, 100% { opacity: 0.2; }
+    30% { opacity: 1; }
 }
 
 .review-tabs {
@@ -183,6 +231,43 @@ body {
     margin-bottom: 1rem;
     padding-bottom: 0.75rem;
     border-bottom: 2px solid #e9ecef;
+}
+
+.review-app-summary-row .chart-title {
+    /* 1) Убираем подчёркивание под названием диаграммы (только на review-app). */
+    border-bottom: 0;
+    padding-bottom: 0;
+}
+
+/* 1) Мелкие карточки выше: увеличиваем вертикальный padding на 1rem */
+.review-app-summary-row .stat-card {
+    padding-top: calc(1.5rem + 1rem);
+    padding-bottom: calc(1.5rem + 1rem);
+}
+
+/* 2) Убираем нижний маргин у контейнера мелких карточек (вне mb-4 ряда) */
+.review-app-summary-row .stats-overview {
+    margin-bottom: 0 !important;
+}
+
+/* 3) Вытягиваем правую колонку по высоте левой */
+.review-app-summary-row {
+    align-items: stretch;
+}
+.review-app-summary-row > .col-md-6:last-child {
+    display: flex; /* чтобы .chart-card мог растянуться по высоте колонки */
+}
+
+/* 4) В правой колонке .chart-card тянется по высоте родителя */
+.review-app-summary-row > .col-md-6:last-child > .chart-card {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+}
+.review-app-summary-row > .col-md-6:last-child > .chart-card > .chart-container {
+    flex: 1 1 auto;
+    height: auto; /* перебиваем глобальные 300px */
+    min-height: 160px;
 }
 
 .chart-container {

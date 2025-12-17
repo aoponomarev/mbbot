@@ -724,6 +724,13 @@ main .cg-coin-sort-dropdown {
     position: relative;
 }
 
+/* Иконка типа системного сообщения (слева от текста) */
+.system-message-type-icon {
+    line-height: 1;
+    margin-top: 0.05rem;
+    opacity: 0.9;
+}
+
 /* Обертка для кнопки закрытия */
 .alert-close-button-wrapper {
     position: absolute;

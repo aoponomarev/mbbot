@@ -208,7 +208,6 @@ try {
   window.tableColumnsConfig = {
     tableColumns
   };
-  console.log('✅ tableColumnsConfig module loaded successfully');
 } catch (error) {
   console.error('❌ tableColumnsConfig module failed to load:', error);
 }

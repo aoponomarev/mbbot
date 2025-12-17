@@ -2259,7 +2259,7 @@ window.cmpCoinsManager = {
       return this.pendingTickers.length + this.failedTickers.length + (this.currentAddingTicker ? 1 : 0);
     }
   },
-  
+
   mounted() {
     // Инициализируем предыдущее значение horizonDays для отслеживания изменений в updated hook
     this._previousHorizonDays = this.horizonDays;

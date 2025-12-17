@@ -278,7 +278,6 @@ try {
     isFailedFavoriteCoin,
     archiveFailedTicker
   };
-  console.log('✅ coinsFavoritesHelpers module loaded successfully');
 } catch (error) {
   console.error('❌ coinsFavoritesHelpers module failed to load:', error);
 }

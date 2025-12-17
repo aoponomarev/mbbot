@@ -191,7 +191,6 @@ try {
     formatCD,
     getCDField
   };
-  console.log('✅ coinsCDHelpers module loaded successfully');
 } catch (error) {
   console.error('❌ coinsCDHelpers module failed to load:', error);
 }

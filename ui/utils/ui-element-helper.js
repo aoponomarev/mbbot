@@ -120,50 +120,6 @@ const uiElementMapping = {
       "defaultCommand": "settings",
       "baseIcon": "fas fa-cog"
     },
-    "fas fa-download": {
-      "commands": {
-        "export": {
-          "category": "actions",
-          "label": "Экспорт",
-          "tooltip": "Экспорт настроек в JSON"
-        }
-      },
-      "defaultCommand": "export",
-      "baseIcon": "fas fa-download"
-    },
-    "fas fa-upload": {
-      "commands": {
-        "import": {
-          "category": "actions",
-          "label": "Импорт",
-          "tooltip": "Импорт настроек из JSON"
-        }
-      },
-      "defaultCommand": "import",
-      "baseIcon": "fas fa-upload"
-    },
-    "fas fa-check-square": {
-      "commands": {
-        "select-all": {
-          "category": "actions",
-          "label": "Выбрать все",
-          "tooltip": "Выбрать все элементы"
-        }
-      },
-      "defaultCommand": "select-all",
-      "baseIcon": "fas fa-check-square"
-    },
-    "fas fa-square": {
-      "commands": {
-        "deselect-all": {
-          "category": "actions",
-          "label": "Отменить все",
-          "tooltip": "Отменить выбор всех элементов"
-        }
-      },
-      "defaultCommand": "deselect-all",
-      "baseIcon": "fas fa-square"
-    },
     "fas fa-trash": {
       "commands": {
         "delete": {
@@ -212,17 +168,6 @@ const uiElementMapping = {
       "defaultCommand": "close",
       "baseIcon": "icon-cross"
     },
-    "fas fa-archive": {
-      "commands": {
-        "archive": {
-          "category": "actions",
-          "label": "Архив",
-          "tooltip": "Архивировать элемент или элементы (будущая функциональность)"
-        }
-      },
-      "defaultCommand": "archive",
-      "baseIcon": "fas fa-archive"
-    },
     "fas fa-save": {
       "commands": {
         "save": {
@@ -267,7 +212,7 @@ const uiElementMapping = {
       "defaultCommand": "stop",
       "baseIcon": "fas fa-stop"
     },
-    "fas fa-sort": {
+    "ms:sort": {
       "commands": {
         "sort": {
           "category": "navigation",
@@ -276,9 +221,9 @@ const uiElementMapping = {
         }
       },
       "defaultCommand": "sort",
-      "baseIcon": "fas fa-sort"
+      "baseIcon": "ms:sort"
     },
-    "fas fa-sort-up": {
+    "ms:north": {
       "commands": {
         "sort-up": {
           "category": "navigation",
@@ -287,9 +232,9 @@ const uiElementMapping = {
         }
       },
       "defaultCommand": "sort-up",
-      "baseIcon": "fas fa-sort-up"
+      "baseIcon": "ms:north"
     },
-    "fas fa-sort-down": {
+    "ms:south": {
       "commands": {
         "sort-down": {
           "category": "navigation",
@@ -298,43 +243,7 @@ const uiElementMapping = {
         }
       },
       "defaultCommand": "sort-down",
-      "baseIcon": "fas fa-sort-down"
-    },
-    "fas fa-exclamation-triangle": {
-      "commands": {
-        "warning": {
-          "category": "status",
-          "label": "Предупреждение",
-          "tooltip": "Иконка предупреждения"
-        },
-        "warning-indicator": {
-          "category": "indicators",
-          "type": "status",
-          "value": "warning",
-          "label": "Предупреждение",
-          "tooltip": "Требуется внимание"
-        }
-      },
-      "defaultCommand": "warning",
-      "baseIcon": "fas fa-exclamation-triangle"
-    },
-    "fas fa-exclamation-circle": {
-      "commands": {
-        "error": {
-          "category": "status",
-          "label": "Ошибка",
-          "tooltip": "Иконка ошибки"
-        },
-        "error-indicator": {
-          "category": "indicators",
-          "type": "status",
-          "value": "error",
-          "label": "Ошибка",
-          "tooltip": "Произошла ошибка"
-        }
-      },
-      "defaultCommand": "error",
-      "baseIcon": "fas fa-exclamation-circle"
+      "baseIcon": "ms:south"
     },
     "fas fa-check-circle": {
       "commands": {
@@ -346,6 +255,39 @@ const uiElementMapping = {
       },
       "defaultCommand": "success",
       "baseIcon": "fas fa-check-circle"
+    },
+    "fas fa-circle-info": {
+      "commands": {
+        "msg-info": {
+          "category": "status",
+          "label": "Сообщение: Info",
+          "tooltip": "Иконка типа системного сообщения (info)"
+        }
+      },
+      "defaultCommand": "msg-info",
+      "baseIcon": "fas fa-circle-info"
+    },
+    "fas fa-triangle-exclamation": {
+      "commands": {
+        "msg-warning": {
+          "category": "status",
+          "label": "Сообщение: Warning",
+          "tooltip": "Иконка типа системного сообщения (warning)"
+        }
+      },
+      "defaultCommand": "msg-warning",
+      "baseIcon": "fas fa-triangle-exclamation"
+    },
+    "fas fa-circle-exclamation": {
+      "commands": {
+        "msg-danger": {
+          "category": "status",
+          "label": "Сообщение: Danger",
+          "tooltip": "Иконка типа системного сообщения (danger/error)"
+        }
+      },
+      "defaultCommand": "msg-danger",
+      "baseIcon": "fas fa-circle-exclamation"
     },
     "fas fa-spinner": {
       "commands": {
@@ -373,43 +315,24 @@ const uiElementMapping = {
           "value": "disabled",
           "label": "Отключено",
           "tooltip": "Элемент недоступен для взаимодействия"
+        },
+        "not-in-table-indicator": {
+          "category": "indicators",
+          "type": "status",
+          "value": "not-in-table",
+          "label": "Не в таблице",
+          "tooltip": "Монета не находится в открытой таблице"
         }
       },
       "defaultCommand": "disabled-indicator",
       "baseIcon": "fas fa-ban"
     },
-    "fas fa-chevron-right": {
-      "commands": {
-        "submenu": {
-          "category": "indicators",
-          "type": "navigation",
-          "value": "submenu",
-          "label": "Подменю",
-          "tooltip": "Нажмите, чтобы открыть вложенное меню"
-        }
-      },
-      "defaultCommand": "submenu",
-      "baseIcon": "fas fa-chevron-right"
-    },
-    "fas fa-window-maximize": {
-      "commands": {
-        "modal": {
-          "category": "indicators",
-          "type": "navigation",
-          "value": "modal",
-          "label": "Модальное окно",
-          "tooltip": "Нажмите, чтобы открыть модальное окно"
-        }
-      },
-      "defaultCommand": "modal",
-      "baseIcon": "fas fa-window-maximize"
-    },
     "fab fa-bitcoin": {
       "commands": {
         "bitcoin": {
-          "category": "metrics",
-          "label": "Bitcoin Dominance",
-          "tooltip": "Иконка доминирования Bitcoin"
+          "category": "frameworks",
+          "label": "Bitcoin",
+          "tooltip": "Brand icon (Bitcoin)"
         }
       },
       "defaultCommand": "bitcoin",
@@ -493,39 +416,6 @@ const uiElementMapping = {
       },
       "defaultCommand": "bootstrap",
       "baseIcon": "fab fa-bootstrap"
-    },
-    "fas fa-robot": {
-      "commands": {
-        "robot": {
-          "category": "other",
-          "label": "AI",
-          "tooltip": "Иконка искусственного интеллекта"
-        }
-      },
-      "defaultCommand": "robot",
-      "baseIcon": "fas fa-robot"
-    },
-    "fas fa-database": {
-      "commands": {
-        "database": {
-          "category": "other",
-          "label": "База данных",
-          "tooltip": "Иконка управления данными"
-        }
-      },
-      "defaultCommand": "database",
-      "baseIcon": "fas fa-database"
-    },
-    "fas fa-bars": {
-      "commands": {
-        "hamburger": {
-          "category": "other",
-          "label": "Меню",
-          "tooltip": "Иконка гамбургер-меню"
-        }
-      },
-      "defaultCommand": "hamburger",
-      "baseIcon": "fas fa-bars"
     }
   }
 };
@@ -596,7 +486,7 @@ function getIconForCommand(category, command) {
 
 /**
  * Получает иконку для действия
- * @param {string} action - Название действия (например, 'refresh', 'delete', 'archive')
+ * @param {string} action - Название действия (например, 'refresh', 'delete', 'favorite')
  * @returns {string} CSS класс иконки (например, 'fas fa-sync-alt')
  */
 function getActionIcon(action) {
@@ -641,7 +531,7 @@ function getFrameworkIcon(framework) {
 
 /**
  * Получает иконку для другого элемента
- * @param {string} other - Название элемента (например, 'robot', 'database', 'hamburger')
+ * @param {string} other - Название элемента (например, 'help')
  * @returns {string} CSS класс иконки
  */
 function getOtherIcon(other) {

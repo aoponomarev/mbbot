@@ -51,10 +51,21 @@ window.cmpSortableHeader = {
     
     // Иконка сортировки в зависимости от состояния
     sortIcon() {
+      const helper = (typeof window !== 'undefined') ? window.uiElementHelper : null;
       if (!this.isActive) {
-        return 'fas fa-sort'; // Нейтральная иконка
+        return helper?.getNavigationIcon?.('sort') || 'ms:sort';
       }
-      return this.sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down';
+      return this.sortOrder === 'asc'
+        ? (helper?.getNavigationIcon?.('sort-up') || 'ms:north')
+        : (helper?.getNavigationIcon?.('sort-down') || 'ms:south');
+    }
+  },
+  
+  mounted() {
+  },
+  
+  watch: {
+    sortOrder(newVal, oldVal) {
     }
   },
   

@@ -78,21 +78,6 @@ function createReviewHeader(currentReview) {
     });
     
     header.appendChild(tabs);
-
-    // Контейнер системных сообщений (под вкладками).
-    // Используется всеми review-страницами для информирования о статусе/проблемах сбора данных.
-    const systemMessages = document.createElement('div');
-    systemMessages.className = 'review-system-messages';
-    systemMessages.setAttribute('role', 'status');
-    systemMessages.setAttribute('aria-live', 'polite');
-
-    // Mount-point для Vue-host системных сообщений (Level 2 migration, Step 1).
-    // Внутри него будет смонтирован <system-messages scope="review" />.
-    const vueMessagesMount = document.createElement('div');
-    vueMessagesMount.id = 'review-system-messages-vue';
-    systemMessages.appendChild(vueMessagesMount);
-
-    header.appendChild(systemMessages);
     
     // Проверяем, не вставлен ли уже хедер
     if (document.querySelector('.review-header')) {
@@ -116,6 +101,131 @@ function createReviewHeader(currentReview) {
     }
 
     return header;
+}
+
+/**
+ * Гарантирует, что на странице есть "карточка" для шины системных сообщений
+ * и mount-point для <system-messages scope="review">.
+ *
+ * Вставляется сразу ПОСЛЕ .review-header, чтобы быть первой секцией контента.
+ */
+function ensureReviewSystemMessagesSection() {
+    const header = document.querySelector('.review-header');
+    if (!header) return null;
+
+    const existing = document.querySelector('.review-system-messages-section');
+    if (existing) return existing;
+
+    // Вставляем внутрь page root, чтобы совпадали края/ширина со всеми карточками страницы.
+    const root = document.getElementById('app') || document.querySelector('.container-fluid');
+    if (!root) return null;
+
+    const collapseId = 'review-system-messages-collapse';
+    const headerInsideRoot = header.parentNode === root;
+
+    const section = document.createElement('div');
+    section.className = 'review-system-messages-section mt-4 mb-3';
+
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    const cardHeader = document.createElement('div');
+    // Убираем "серый" фон card-header, чтобы выглядело одинаково на всех вкладках.
+    cardHeader.className = 'card-header d-flex justify-content-between align-items-center bg-transparent';
+
+    const left = document.createElement('div');
+    left.className = 'd-flex align-items-center gap-2';
+    left.innerHTML = `
+        <button
+            type="button"
+            class="btn btn-sm review-collapse-btn"
+            data-bs-toggle="collapse"
+            data-bs-target="#${collapseId}"
+            aria-expanded="false"
+            aria-controls="${collapseId}"
+            title="Развернуть/свернуть"
+        >
+            <span class="review-collapse-icon" aria-hidden="true">▾</span>
+        </button>
+        <h5 class="mb-0">Системные сообщения</h5>
+    `;
+
+    const summary = document.createElement('small');
+    summary.className = 'text-muted review-system-messages-summary';
+
+    cardHeader.appendChild(left);
+    cardHeader.appendChild(summary);
+
+    const collapse = document.createElement('div');
+    collapse.id = collapseId;
+    collapse.className = 'collapse';
+
+    const systemMessages = document.createElement('div');
+    systemMessages.className = 'card-body review-system-messages';
+    systemMessages.setAttribute('role', 'status');
+    systemMessages.setAttribute('aria-live', 'polite');
+
+    const vueMessagesMount = document.createElement('div');
+    vueMessagesMount.id = 'review-system-messages-vue';
+    systemMessages.appendChild(vueMessagesMount);
+
+    collapse.appendChild(systemMessages);
+    card.appendChild(cardHeader);
+    card.appendChild(collapse);
+    section.appendChild(card);
+
+    // Вставка секции:
+    // - если .review-header уже находится внутри root (например, страницы с .filter-controls внутри #app),
+    //   вставляем ПОСЛЕ табов, чтобы секция не оказалась "над вкладками".
+    // - иначе — первой секцией внутри root (ниже tab-header, который тогда находится вне root).
+    if (headerInsideRoot) {
+        root.insertBefore(section, header.nextSibling);
+    } else {
+        root.insertBefore(section, root.firstChild);
+    }
+
+    // Summary: обновляем по событиям store.
+    try {
+        if (!window.__reviewSystemMessagesSummaryBound) {
+            window.__reviewSystemMessagesSummaryBound = true;
+            document.addEventListener('app-messages:changed', () => {
+                try {
+                    const s = document.querySelector('.review-system-messages-summary');
+                    if (!s) return;
+                    // Если сейчас показываем прогресс — не затираем.
+                    if (s.dataset && s.dataset.progress === '1') return;
+
+                    const msgs = window.AppMessages?.state?.messages || [];
+                    const list = Array.isArray(msgs) ? msgs.filter(m => m && m.scope === 'review') : [];
+                    if (list.length === 0) {
+                        s.textContent = '';
+                        return;
+                    }
+
+                    const byType = { danger: 0, warning: 0, success: 0, info: 0 };
+                    for (const m of list) {
+                        const t = String(m?.type || 'info').toLowerCase();
+                        if (t in byType) byType[t]++;
+                        else byType.info++;
+                    }
+
+                    const parts = [];
+                    if (byType.danger) parts.push(`danger: ${byType.danger}`);
+                    if (byType.warning) parts.push(`warning: ${byType.warning}`);
+                    if (byType.success) parts.push(`success: ${byType.success}`);
+                    if (byType.info) parts.push(`info: ${byType.info}`);
+
+                    s.textContent = `${list.length} сообщений` + (parts.length ? ` • ${parts.join(' • ')}` : '');
+                } catch (_) {
+                    // ignore
+                }
+            });
+        }
+    } catch (_) {
+        // ignore
+    }
+
+    return section;
 }
 
 /**
@@ -143,6 +253,8 @@ function initReviewHeader() {
     }
     
     createReviewHeader(currentReview);
+    // Шина сообщений — отдельной карточкой сразу после хедера
+    ensureReviewSystemMessagesSection();
 }
 
 /**
@@ -668,6 +780,92 @@ const ReviewDataPipeline = (() => {
         );
     }
 
+    /**
+     * Минимальный (best-effort) gitignore matcher для root .gitignore.
+     * Не претендует на 100% совместимость, но покрывает типовые кейсы:
+     * - *.ext
+     * - dir/
+     * - dir/*
+     * - !exceptions
+     */
+    async function buildGitignorePredicate(idx) {
+        let raw = '';
+        try {
+            raw = await idx.readText('.gitignore');
+        } catch {
+            raw = '';
+        }
+
+        const lines = String(raw || '').split(/\r?\n/);
+        const rules = [];
+
+        const escapeRe = (s) => String(s).replace(/[.+^${}()|[\]\\]/g, '\\$&');
+        const globToRe = (glob) => {
+            // order matters: ** first
+            let g = escapeRe(glob);
+            g = g.replace(/\\\*\\\*/g, '.*');
+            g = g.replace(/\\\*/g, '[^/]*');
+            g = g.replace(/\\\?/g, '[^/]');
+            return g;
+        };
+
+        for (let line of lines) {
+            line = String(line || '').trim();
+            if (!line || line.startsWith('#')) continue;
+
+            let negate = false;
+            if (line.startsWith('!')) {
+                negate = true;
+                line = line.slice(1).trim();
+            }
+            if (!line) continue;
+
+            const dirOnly = line.endsWith('/');
+            if (dirOnly) line = line.replace(/\/+$/, '');
+
+            const hasSlash = line.includes('/');
+            const anchored = line.startsWith('/');
+            if (anchored) line = line.replace(/^\/+/, '');
+
+            // Базовый матчинг:
+            // - если нет слэшей: матчим basename в любом месте
+            // - если есть слэш: матчим от корня (для root .gitignore)
+            let reSrc;
+            if (!hasSlash) {
+                reSrc = `(^|/)${globToRe(line)}$`;
+            } else {
+                reSrc = `^${globToRe(line)}$`;
+                if (!anchored) {
+                    // для простоты считаем такие паттерны тоже "root-relative"
+                    reSrc = `^${globToRe(line)}$`;
+                }
+            }
+
+            // dirOnly: игнорим саму папку и всё внутри
+            if (dirOnly) {
+                reSrc = `^${globToRe(line)}(?:/|$)`;
+            }
+
+            try {
+                rules.push({ negate, re: new RegExp(reSrc, 'i') });
+            } catch {
+                // ignore invalid rule
+            }
+        }
+
+        return (p) => {
+            const path = String(p || '').replace(/\\/g, '/').replace(/^\/+/, '');
+            if (!path) return false;
+            let ignored = false;
+            for (const r of rules) {
+                if (r.re.test(path)) {
+                    ignored = !r.negate;
+                }
+            }
+            return ignored;
+        };
+    }
+
     async function buildGitHubIndex() {
         const repoCfg = parseRepoConfig();
         if (!repoCfg) {
@@ -707,6 +905,7 @@ const ReviewDataPipeline = (() => {
         const visited = new Set();
         const queue = [...entrypoints];
         const collected = new Set();
+        const contentDigests = []; // path:sha256(text) — для устойчивого fingerprint при изменении содержимого
 
         const addLocal = (ref) => {
             if (!ref) return;
@@ -733,6 +932,12 @@ const ReviewDataPipeline = (() => {
                 if (!resp.ok) continue;
                 const text = await resp.text();
                 collected.add(p);
+                try {
+                    const h = await sha256(text);
+                    if (h) contentDigests.push(`${p}:${h}`);
+                } catch {
+                    // ignore digest failure
+                }
                 if (p.endsWith('.html')) {
                     // Примитивный парсинг: script src / link href
                     const srcRe = /<script[^>]+src=["']([^"']+)["']/gi;
@@ -747,8 +952,9 @@ const ReviewDataPipeline = (() => {
             }
         }
 
-        // Fingerprint: хэш entrypoint'ов (достаточно для кэша DepGraph)
-        const fp = await sha256(Array.from(collected).sort().join('\n'));
+        // Fingerprint: хэш списка + хэш контента (иначе кэш DepGraph не инвалидируется при изменениях в файлах)
+        const fpBasis = `${Array.from(collected).sort().join('\n')}\n--\n${contentDigests.sort().join('\n')}`;
+        const fp = await sha256(fpBasis);
         return new DepGraphFileIndex(base, collected, fp);
     }
 
@@ -884,9 +1090,37 @@ const ReviewDataPipeline = (() => {
      * Исключает docs/, old_app_not_write/, node_modules/, .git/ и history/ (дневники).
      */
     async function scanStats() {
-        return await runScannerWithCache('stats', async (idx) => {
-            const paths = (await idx.listFiles()).filter(p => !shouldExcludePath(p) && !p.startsWith('history/'));
-            const allowedExt = new Set(['js', 'css', 'html', 'json', 'md']);
+        // v3: учитываем .gitignore + добавляем DOCS (txt и др.) + best-effort docs в DepGraph
+        return await runScannerWithCache('stats_v3', async (idx) => {
+            const isGitIgnored = await buildGitignorePredicate(idx);
+            const basePaths = (await idx.listFiles())
+                .map(p => String(p || '').replace(/\\/g, '/'))
+                .filter(p => !p.startsWith('history/'))
+                .filter(p => !shouldExcludePath(p))
+                .filter(p => !isGitIgnored(p));
+
+            // DepGraph источник не даёт полный список файлов. Чтобы сектор DOCS не был "нулевым",
+            // добавляем некоторые известные markdown-документы проекта (если доступны по fetch).
+            // Полный список файлов по-прежнему доступен через выбор папки (FS) или GitHub tree.
+            const docCandidates = [
+                'architect.md',
+                'migration-plan.md',
+                'ui/guide-ii.md',
+                'mm/median.md'
+            ];
+
+            const pathsSet = new Set(basePaths);
+            for (const p of docCandidates) {
+                const norm = String(p || '').replace(/\\/g, '/').replace(/^\/+/, '');
+                if (!norm) continue;
+                if (norm.startsWith('history/')) continue;
+                if (shouldExcludePath(norm)) continue;
+                if (isGitIgnored(norm)) continue;
+                pathsSet.add(norm);
+            }
+
+            const paths = Array.from(pathsSet);
+            const allowedExt = new Set(['js', 'css', 'html', 'json', 'md', 'txt', 'rst', 'adoc']);
             const reviewFiles = new Set([
                 'review-app.html',
                 'ui/assets/review-icons.html',
@@ -969,9 +1203,21 @@ const ReviewDataPipeline = (() => {
      * - self-describing scan по кодовой базе (Font Awesome, icon-*, etc.)
      */
     async function scanIcons() {
-        return await runScannerWithCache('icons', async (idx) => {
+        // Bump cache version: фильтрация icon-* по реальным svg-ассетам + чистка Font Awesome "модификаторов"
+        return await runScannerWithCache('icons_v5', async (idx) => {
             const paths = (await idx.listFiles())
                 .filter(p => !shouldExcludePath(p) && !p.startsWith('history/'));
+
+            // Реальные SVG-иконки (важно: не считаем "icon-*" иконкой, если svg-файла нет).
+            // Это фильтрует шум от CSS-переменных/классов вида icon-action-color, icon-preview, etc.
+            const svgAssetRe = /^ui\/assets\/icons\/icon-([a-z0-9-]+)\.svg$/i;
+            const existingSvgIcons = new Set();
+            for (const p of paths) {
+                const norm = String(p || '').replace(/\\/g, '/');
+                const m = norm.match(svgAssetRe);
+                if (!m) continue;
+                existingSvgIcons.add(`icon-${String(m[1] || '').toLowerCase()}`);
+            }
 
             const textExt = new Set(['js', 'css', 'html', 'json', 'md']);
             const scanPaths = paths.filter(p => {
@@ -996,6 +1242,39 @@ const ReviewDataPipeline = (() => {
             const faSingleRe = /\bfa-[a-z0-9-]+\b/gi;
             const iconClassRe = /\bicon-[a-z0-9-]+\b/gi;
 
+            // Font Awesome: игнорируем модификаторы/утилиты (они НЕ являются иконками).
+            // Примеры ложных срабатываний: fa-spin, fa-fw, fa-2x, fa-rotate-90, etc.
+            const ignoredFaNames = new Set([
+                // animation
+                'fa-spin', 'fa-pulse', 'fa-spin-pulse', 'fa-spin-reverse',
+                'fa-beat', 'fa-beat-fade', 'fa-bounce', 'fa-fade', 'fa-flip', 'fa-shake',
+                // sizing / fixed width / list
+                'fa-fw', 'fa-xs', 'fa-sm', 'fa-lg',
+                'fa-1x', 'fa-2x', 'fa-3x', 'fa-4x', 'fa-5x', 'fa-6x', 'fa-7x', 'fa-8x', 'fa-9x', 'fa-10x',
+                'fa-ul', 'fa-li',
+                // rotate / flip
+                'fa-rotate-90', 'fa-rotate-180', 'fa-rotate-270',
+                'fa-flip-horizontal', 'fa-flip-vertical', 'fa-flip-both',
+                // stacks / misc
+                'fa-stack', 'fa-stack-1x', 'fa-stack-2x', 'fa-inverse', 'fa-border',
+                // placeholder we use in comments/examples
+                'fa-xxx'
+            ]);
+
+            // Если в коде встречается "fa-..." без стиля (fas/fab/...), пытаемся восстановить стиль по mapping.
+            // Это предотвращает "перечёркнутые квадраты" для brand-иконок типа bitcoin/vuejs/bootstrap.
+            const mappingByFaName = new Map(); // 'fa-…' -> 'fab|fas …'
+            if (mapping?.icons) {
+                Object.keys(mapping.icons).forEach(iconClass => {
+                    const mm = String(iconClass).toLowerCase().match(/^(fas|far|fab|fal|fad|fak)\s+(fa-[a-z0-9-]+)$/);
+                    if (!mm) return;
+                    const faName = mm[2];
+                    if (ignoredFaNames.has(faName)) return;
+                    // если уже есть — оставляем первое (как "источник правды")
+                    if (!mappingByFaName.has(faName)) mappingByFaName.set(faName, `${mm[1]} ${faName}`);
+                });
+            }
+
             for (const p of scanPaths) {
                 let content = '';
                 try {
@@ -1003,26 +1282,36 @@ const ReviewDataPipeline = (() => {
                 } catch {
                     continue;
                 }
-
                 // icon-*
                 let m;
                 while ((m = iconClassRe.exec(content))) {
                     const cls = m[0];
+                    // Отбрасываем несуществующие icon-*, чтобы не засорять каталог "иконок".
+                    if (!existingSvgIcons.has(String(cls).toLowerCase())) continue;
                     if (!iconOcc.has(cls)) iconOcc.set(cls, new Set());
                     iconOcc.get(cls).add(p);
                 }
 
                 // fontawesome combos: "fas fa-..."
                 while ((m = faComboRe.exec(content))) {
-                    const combo = `${m[1].toLowerCase()} ${m[2].toLowerCase()}`;
+                    const faName = String(m[2] || '').toLowerCase();
+                    if (ignoredFaNames.has(faName)) continue;
+                    const combo = `${m[1].toLowerCase()} ${faName}`;
                     if (!faOcc.has(combo)) faOcc.set(combo, new Set());
                     faOcc.get(combo).add(p);
                 }
 
                 // fontawesome singles: "fa-..." (без стиля) → считаем fas
                 while ((m = faSingleRe.exec(content))) {
-                    const name = m[0].toLowerCase();
-                    const combo = `fas ${name}`;
+                    const name = String(m[0] || '').toLowerCase();
+                    if (ignoredFaNames.has(name)) continue;
+
+                    // Если fa-... уже идёт после явного стиля (fab/fas/...), это часть combo — пропускаем,
+                    // иначе получаем дубли стилей (brand vs solid) при авто-детекте.
+                    const before = content.slice(Math.max(0, m.index - 6), m.index);
+                    if (/\b(fas|far|fab|fal|fad|fak)\s+$/i.test(before)) continue;
+
+                    const combo = mappingByFaName.get(name) || `fas ${name}`;
                     if (!faOcc.has(combo)) faOcc.set(combo, new Set());
                     faOcc.get(combo).add(p);
                 }
@@ -1052,12 +1341,21 @@ const ReviewDataPipeline = (() => {
                 }
 
                 const category = commands[0]?.category || 'other';
-                const type = iconClass.startsWith('icon-') ? 'svg-file' : 'fontawesome';
+                const type = iconClass.startsWith('icon-')
+                    ? 'svg-file'
+                    : (iconClass.startsWith('ms:') ? 'material' : 'fontawesome');
+                if (type === 'svg-file' && !existingSvgIcons.has(String(iconClass).toLowerCase())) {
+                    // Если mapping содержит icon-*, но соответствующего svg-файла нет — пропускаем,
+                    // чтобы не показывать "пустые" иконки в review.
+                    return;
+                }
                 // Помечаем как уже учтённую, чтобы auto-detected не дублировал mapping-иконки.
                 if (type === 'fontawesome') {
                     seen.add(`fa:${String(iconClass).toLowerCase()}`);
                 } else if (type === 'svg-file') {
                     seen.add(`svg:${String(iconClass)}`);
+                } else if (type === 'material') {
+                    seen.add(`ms:${String(iconClass).toLowerCase()}`);
                 }
                 const usageFiles = iconOcc.get(iconClass) || faOcc.get(iconClass) || new Set();
 
@@ -1609,7 +1907,7 @@ const ProjectStats = {
     // Загрузка данных о файлах
     async loadFilesData() {
         try {
-            ReviewSystemMessages.post?.('stats.loading', { id: 'stats-loading' });
+            this.showStatsProgress?.();
 
             const stats = await ReviewDataPipeline.scanStats();
             this.filesData = stats.files || [];
@@ -1619,16 +1917,48 @@ const ProjectStats = {
                 files: stats.files || []
             };
 
-            ReviewSystemMessages.post?.('stats.done', {
-                id: 'stats-loading',
-                details: `Файлов: ${this.codeStats.totalFiles}, строк кода: ${this.codeStats.totalLines.toLocaleString()}`
-            });
+            // Успех: прогресс скрываем полностью (без "done" сообщения).
+            this.hideStatsProgress?.();
+            try {
+                // На всякий случай убираем store-сообщение, если оно было создано ранее.
+                window.AppMessages?.dismiss?.('review_stats-loading');
+            } catch (_) {
+                // ignore
+            }
         } catch (e) {
             ReviewSystemMessages.post?.('stats.error', {
                 id: 'stats-loading',
                 details: String(e?.message || e)
             });
             throw e;
+        }
+    },
+
+    // Плоский индикатор прогресса (без alert-оформления), живёт в .review-system-messages.
+    showStatsProgress() {
+        const currentFile = window.location.pathname.split('/').pop();
+        if (currentFile !== 'review-app.html') return;
+
+        // Прогресс теперь показываем в правом углу хедера карточки (как Auto-scan summary).
+        const summary = document.querySelector('.review-system-messages-summary');
+        if (!summary) return;
+        summary.dataset.progress = '1';
+        summary.innerHTML = `
+            <span class="review-progress-text">
+                <span class="review-progress-label">Сбор статистики: читаю файлы проекта</span>
+                <span class="review-progress-dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span>
+            </span>
+        `;
+    },
+
+    hideStatsProgress() {
+        const currentFile = window.location.pathname.split('/').pop();
+        if (currentFile !== 'review-app.html') return;
+
+        const summary = document.querySelector('.review-system-messages-summary');
+        if (summary && summary.dataset) {
+            delete summary.dataset.progress;
+            summary.textContent = '';
         }
     },
 
@@ -1684,15 +2014,8 @@ const ProjectStats = {
         this.filesData.forEach((file, index) => {
             const tr = document.createElement('tr');
             
-            // Медаль для топ-3
-            let medal = '';
-            if (index === 0) medal = '<i class="fas fa-medal text-warning"></i>';
-            else if (index === 1) medal = '<i class="fas fa-medal text-secondary"></i>';
-            else if (index === 2) medal = '<i class="fas fa-medal" style="color: #cd7f32;"></i>';
-            
             tr.innerHTML = `
-                <td>${medal} ${index + 1}</td>
-                <td><strong>${file.lines.toLocaleString()}</strong></td>
+                <td class="text-end"><strong>${file.lines.toLocaleString()}</strong></td>
                 <td><code>${file.path}</code></td>
                 <td><span class="badge bg-secondary">${file.type.toUpperCase()}</span></td>
                 <td>${this.formatFileSize(file.size)}</td>
@@ -1756,57 +2079,169 @@ const ProjectStats = {
     // Отображение диаграмм
     async renderCharts() {
         this.renderFileTypesChart();
-        await this.renderContentDistributionChart();
     },
 
     renderFileTypesChart() {
         const canvas = document.getElementById('file-types-chart');
         if (!canvas) return;
-        
-        // Устанавливаем размер canvas для четкого отображения
-        const size = 300;
-        canvas.width = size;
-        canvas.height = size;
-        
-        const ctx = canvas.getContext('2d');
-        const typeStats = {};
-        
-        this.filesData.forEach(file => {
-            typeStats[file.type] = (typeStats[file.type] || 0) + file.lines;
-        });
-        
-        // Сортируем от больших к меньшим
-        const sortedTypes = Object.entries(typeStats)
-            .sort((a, b) => b[1] - a[1])
-            .map(([type, lines]) => ({ type, lines }));
-        
-        // Переставляем: первый и последний - два наибольших
-        let arrangedTypes = [...sortedTypes];
-        if (arrangedTypes.length >= 2) {
-            const first = arrangedTypes[0];
-            const second = arrangedTypes[1];
-            const rest = arrangedTypes.slice(2);
-            arrangedTypes = [first, ...rest, second];
+
+        // Toggle: "Количество / Объём" (кол-во файлов vs суммарный размер)
+        if (!this._fileTypesModeBound) {
+            this._fileTypesModeBound = true;
+            try {
+                const inputs = document.querySelectorAll('input[name="file-types-mode"]');
+                inputs.forEach(inp => {
+                    inp.addEventListener('change', () => {
+                        try { this.renderFileTypesChart(); } catch (_) { /* ignore */ }
+                    });
+                });
+            } catch (_) {
+                // ignore
+            }
         }
-        
-        const types = arrangedTypes.map(item => item.type);
-        const values = arrangedTypes.map(item => item.lines);
-        const colors = ['#0d6efd', '#198754', '#dc3545', '#ffc107', '#6f42c1', '#fd7e14'];
-        
-        // Простая круговая диаграмма
+
+        const mode =
+            (document.querySelector('input[name="file-types-mode"]:checked')?.value === 'size')
+                ? 'size'
+                : 'count';
+
+        // Canvas подстраивается под размеры родительского контейнера.
+        const container = canvas.parentElement;
+        const cssWidth = Math.max(1, Math.floor(container?.clientWidth || 300));
+        const cssHeight = Math.max(1, Math.floor(container?.clientHeight || 300));
+        const dpr = window.devicePixelRatio || 1;
+
+        canvas.style.width = '100%';
+        canvas.style.height = `${cssHeight}px`;
+        canvas.width = Math.floor(cssWidth * dpr);
+        canvas.height = Math.floor(cssHeight * dpr);
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        // DOCS: md + txt + прочие документальные типы
+        const docsExt = new Set(['md', 'txt', 'rst', 'adoc']);
+        const typeStats = {};
+
+        this.filesData.forEach(file => {
+            const t = String(file?.type || '').toLowerCase();
+            const key = docsExt.has(t) ? 'docs' : (t || 'other');
+            if (!typeStats[key]) typeStats[key] = { count: 0, size: 0 };
+            typeStats[key].count += 1;
+            typeStats[key].size += (file?.size || 0);
+        });
+
+        // =========================================================================
+        // ФИКСИРОВАННЫЕ ТИПЫ (позиции + цвета) + вставка дополнительных
+        //
+        // Требования:
+        // 1) Порядок секторов по часовой стрелке от 12:00: CSS → DOCS → JS → HTML.
+        // 2) Эти 4 типа закреплены ЖЁСТКО и по позициям, и по базовым оттенкам (HSL ниже НЕ менять).
+        // 3) Любые дополнительные типы вставляются "между" этими якорями.
+        //    - Сектор вставляется в одну из 4 "щелей": CSS|DOCS, DOCS|JS, JS|HTML, HTML|CSS.
+        //    - Цвет сектора выбирается как интерполяция (по hue с учётом wrap-around, saturation/lightness линейно)
+        //      между цветами соседних якорей; при нескольких секторах в щели — равномерное распределение.
+        // =========================================================================
+        const ANCHORS = ['css', 'docs', 'js', 'html']; // from 12:00 clockwise
+        const BASE = {
+            cherry: { h: 343, s: 63, l: 36 }, // HTML
+            ochre:  { h: 42,  s: 80, l: 48 }, // JS
+            lime:   { h: 95,  s: 55, l: 35 }, // DOCS
+            blue:   { h: 210, s: 62, l: 36 }  // CSS
+        };
+        const fixedByType = {
+            css: BASE.blue,
+            docs: BASE.lime,
+            js: BASE.ochre,
+            html: BASE.cherry
+        };
+
+        // Ensure anchors exist in map (even if 0) so order stays stable.
+        for (const a of ANCHORS) {
+            if (!typeStats[a]) typeStats[a] = { count: 0, size: 0 };
+        }
+
+        const metric = (k) => {
+            const v = typeStats[k] || { count: 0, size: 0 };
+            return mode === 'size' ? v.size : v.count;
+        };
+
+        const extraTypes = Object.keys(typeStats)
+            .map(t => String(t || '').toLowerCase())
+            .filter(t => !ANCHORS.includes(t))
+            .filter(t => metric(t) > 0);
+
+        // slot: 0=CSS|DOCS, 1=DOCS|JS, 2=JS|HTML, 3=HTML|CSS
+        const pickSlot = (t) => {
+            // минимальный "семантический" хинт для наиболее частого доп. типа в проекте
+            if (t === 'json') return 2;
+            if (t === 'other') return 3;
+            return 2;
+        };
+
+        const extrasBySlot = [[], [], [], []];
+        for (const t of extraTypes) extrasBySlot[pickSlot(t)].push(t);
+        for (let i = 0; i < extrasBySlot.length; i++) {
+            // стабильно: по убыванию метрики, затем по имени
+            extrasBySlot[i].sort((a, b) => (metric(b) - metric(a)) || a.localeCompare(b));
+        }
+
+        const lerp = (a, b, t) => a + (b - a) * t;
+        const lerpHue = (h1, h2, t) => {
+            // shortest direction on circle
+            let d = ((h2 - h1 + 540) % 360) - 180;
+            return (h1 + d * t + 360) % 360;
+        };
+        const hsl = (c) => `hsl(${c.h} ${c.s}% ${c.l}%)`;
+
+        const types = [];
+        const colors = [];
+        const values = [];
+
+        for (let i = 0; i < ANCHORS.length; i++) {
+            const a = ANCHORS[i];
+            const b = ANCHORS[(i + 1) % ANCHORS.length];
+
+            // anchor A
+            types.push(a);
+            colors.push(hsl(fixedByType[a]));
+            values.push(metric(a));
+
+            // extras between A and B
+            const gap = extrasBySlot[i];
+            const A = fixedByType[a];
+            const B = fixedByType[b];
+            const k = gap.length;
+            for (let j = 0; j < k; j++) {
+                const tName = gap[j];
+                const frac = (j + 1) / (k + 1);
+                const c = {
+                    h: lerpHue(A.h, B.h, frac),
+                    s: lerp(A.s, B.s, frac),
+                    l: lerp(A.l, B.l, frac)
+                };
+                types.push(tName);
+                colors.push(hsl(c));
+                values.push(metric(tName));
+            }
+        }
+
         const total = values.reduce((a, b) => a + b, 0);
         if (total === 0) return;
-        
-        const centerX = size / 2;
-        const centerY = size / 2;
-        const radius = size / 3;
+
+        const w = cssWidth;
+        const h = cssHeight;
+        const centerX = w / 2;
+        const centerY = h / 2;
+        const radius = Math.min(w, h) / 3;
         let currentAngle = -Math.PI / 2;
-        
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
+
+        ctx.clearRect(0, 0, w, h);
+
         types.forEach((type, index) => {
             const sliceAngle = (values[index] / total) * 2 * Math.PI;
-            
+
             ctx.beginPath();
             ctx.moveTo(centerX, centerY);
             ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
@@ -1816,291 +2251,34 @@ const ProjectStats = {
             ctx.strokeStyle = '#fff';
             ctx.lineWidth = 2;
             ctx.stroke();
-            
+
             // Подпись
             const labelAngle = currentAngle + sliceAngle / 2;
             const labelX = centerX + Math.cos(labelAngle) * (radius + 30);
             const labelY = centerY + Math.sin(labelAngle) * (radius + 30);
-            
+
             ctx.fillStyle = '#333';
             ctx.font = 'bold 12px Arial';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText(type.toUpperCase(), labelX, labelY);
-            
+            const label = (type === 'docs') ? 'DOCS' : String(type || '').toUpperCase();
+            ctx.fillText(label, labelX, labelY);
+
             // Процент
             const percent = ((values[index] / total) * 100).toFixed(1);
             ctx.font = '10px Arial';
             ctx.fillText(`${percent}%`, labelX, labelY + 15);
-            
+
             currentAngle += sliceAngle;
         });
-    },
 
-    // Определение корневой папки файла
-    getRootFolder(filePath) {
-        // Если путь не содержит слэш - файл в корне
-        if (!filePath.includes('/')) {
-            return 'root';
+        // Перерисовка при изменении размеров окна (bind once)
+        if (!this._fileTypesResizeHandler) {
+            this._fileTypesResizeHandler = () => {
+                try { this.renderFileTypesChart(); } catch (_) { /* ignore */ }
+            };
+            window.addEventListener('resize', this._fileTypesResizeHandler, { passive: true });
         }
-        
-        // Берем первую часть пути (корневая папка)
-        const parts = filePath.split('/');
-        return parts[0];
-    },
-    
-    // Определение подпапки UI (для разбиения сектора UI)
-    getUISubfolder(filePath) {
-        // Если файл не в UI - возвращаем null
-        if (!filePath.startsWith('ui/')) {
-            return null;
-        }
-        
-        const parts = filePath.split('/');
-        // Если файл прямо в ui/ (например, ui/review-manager.js)
-        if (parts.length === 2) {
-            return 'ui-root';
-        }
-        
-        // Возвращаем подпапку (например, ui/api/ -> api, ui/components/ -> components)
-        return parts[1];
-    },
-    
-    // Загрузка данных о review-файлах
-    async loadReviewFilesData() {
-        const reviewFiles = [
-            { path: 'review-app.html', type: 'html' },
-            { path: 'ui/assets/review-icons.html', type: 'html' },
-            { path: 'ui/styles/review-colors.html', type: 'html' }
-        ];
-        
-        const reviewFilesData = [];
-        
-        for (const file of reviewFiles) {
-            try {
-                const response = await fetch(file.path);
-                if (response.ok) {
-                    const content = await response.text();
-                    const lines = this.countCodeLines(content, file.type);
-                    
-                    reviewFilesData.push({
-                        path: file.path,
-                        type: file.type,
-                        lines: lines,
-                        size: content.length
-                    });
-                }
-            } catch (e) {
-                console.warn(`Не удалось загрузить ${file.path}:`, e);
-            }
-        }
-        
-        return reviewFilesData;
-    },
-
-    // Отображение диаграммы распределения контента
-    async renderContentDistributionChart() {
-        const canvas = document.getElementById('content-distribution-chart');
-        if (!canvas) return;
-        
-        // Устанавливаем размер canvas
-        const size = 300;
-        canvas.width = size;
-        canvas.height = size;
-        
-        const ctx = canvas.getContext('2d');
-        
-        // Загружаем review-файлы
-        const reviewFilesData = await this.loadReviewFilesData();
-        
-        // Подсчитываем размеры по корневым папкам (UI разбиваем на подпапки)
-        const folderStats = {};
-        const uiSubfolderStats = {};
-        
-        // Обрабатываем основные файлы
-        this.filesData.forEach(file => {
-            const uiSubfolder = this.getUISubfolder(file.path);
-            
-            if (uiSubfolder !== null) {
-                // Файл в UI - группируем по подпапкам
-                if (!uiSubfolderStats[uiSubfolder]) {
-                    uiSubfolderStats[uiSubfolder] = { lines: 0, files: [] };
-                }
-                uiSubfolderStats[uiSubfolder].lines += file.lines;
-                if (!uiSubfolderStats[uiSubfolder].files.includes(file.path)) {
-                    uiSubfolderStats[uiSubfolder].files.push(file.path);
-                }
-            } else {
-                // Файл не в UI - группируем по корневым папкам
-                const folder = this.getRootFolder(file.path);
-                if (!folderStats[folder]) {
-                    folderStats[folder] = { lines: 0, files: [] };
-                }
-                folderStats[folder].lines += file.lines;
-                if (!folderStats[folder].files.includes(file.path)) {
-                    folderStats[folder].files.push(file.path);
-                }
-            }
-        });
-        
-        // Обрабатываем review-файлы
-        reviewFilesData.forEach(file => {
-            const uiSubfolder = this.getUISubfolder(file.path);
-            
-            if (uiSubfolder !== null) {
-                // Review-файл в UI
-                if (!uiSubfolderStats[uiSubfolder]) {
-                    uiSubfolderStats[uiSubfolder] = { lines: 0, files: [] };
-                }
-                uiSubfolderStats[uiSubfolder].lines += file.lines;
-                if (!uiSubfolderStats[uiSubfolder].files.includes(file.path)) {
-                    uiSubfolderStats[uiSubfolder].files.push(file.path);
-                }
-            } else {
-                // Review-файл не в UI
-                const folder = this.getRootFolder(file.path);
-                if (!folderStats[folder]) {
-                    folderStats[folder] = { lines: 0, files: [] };
-                }
-                folderStats[folder].lines += file.lines;
-                if (!folderStats[folder].files.includes(file.path)) {
-                    folderStats[folder].files.push(file.path);
-                }
-            }
-        });
-        
-        // Объединяем статистику: UI подпапки + остальные папки
-        const allSections = [];
-        
-        // Добавляем UI подпапки (сортируем от больших к меньшим)
-        const sortedUISubfolders = Object.entries(uiSubfolderStats)
-            .filter(([subfolder, stats]) => stats.lines > 0)
-            .sort((a, b) => b[1].lines - a[1].lines);
-        
-        sortedUISubfolders.forEach(([subfolder, stats]) => {
-            allSections.push({
-                id: `ui-${subfolder}`,
-                name: subfolder === 'ui-root' ? 'UI (root)' : `UI/${subfolder}`,
-                lines: stats.lines,
-                isUI: true
-            });
-        });
-        
-        // Добавляем остальные папки (сортируем от больших к меньшим)
-        const sortedFolders = Object.entries(folderStats)
-            .filter(([folder, stats]) => stats.lines > 0)
-            .sort((a, b) => b[1].lines - a[1].lines);
-        
-        sortedFolders.forEach(([folder, stats]) => {
-            allSections.push({
-                id: folder,
-                name: folder,
-                lines: stats.lines,
-                isUI: false
-            });
-        });
-        
-        // Сортируем все секции от больших к меньшим
-        allSections.sort((a, b) => b.lines - a.lines);
-        
-        if (allSections.length === 0) return;
-        
-        // Переставляем: первый и последний - два наибольших
-        let sortedSections = [...allSections];
-        if (sortedSections.length >= 2) {
-            const first = sortedSections[0];
-            const second = sortedSections[1];
-            const rest = sortedSections.slice(2);
-            sortedSections = [first, ...rest, second];
-        }
-        
-        // Маппинг имен папок на отображаемые названия
-        const folderNames = {
-            'root': 'Root',
-            'core': 'Core',
-            'mm': 'MM',
-            'app': 'App',
-            'docs': 'Docs',
-            'api': 'API',
-            'components': 'Components',
-            'styles': 'Styles',
-            'interaction': 'Interaction',
-            'utils': 'Utils',
-            'config': 'Config',
-            'assets': 'Assets',
-            'ui-root': 'UI'
-        };
-        
-        // Базовые цвета для папок
-        const baseColors = {
-            'root': '#6c757d',
-            'core': '#6f42c1',
-            'mm': '#198754',
-            'app': '#0d6efd',
-            'docs': '#ffc107'
-        };
-        
-        // Разноцветные цвета для UI подпапок
-        const uiColors = {
-            'api': '#dc3545',
-            'components': '#fd7e14',
-            'styles': '#ffc107',
-            'interaction': '#198754',
-            'utils': '#0d6efd',
-            'config': '#6f42c1',
-            'assets': '#20c997',
-            'ui-root': '#e83e8c'
-        };
-        
-        const defaultColors = ['#0d6efd', '#198754', '#dc3545', '#ffc107', '#6f42c1', '#fd7e14', '#6c757d'];
-        
-        const values = sortedSections.map(section => section.lines);
-        const total = values.reduce((a, b) => a + b, 0);
-        
-        const centerX = size / 2;
-        const centerY = size / 2;
-        const radius = size / 3;
-        let currentAngle = -Math.PI / 2;
-        
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        sortedSections.forEach((section, index) => {
-            const sliceAngle = (values[index] / total) * 2 * Math.PI;
-            
-            ctx.beginPath();
-            ctx.moveTo(centerX, centerY);
-            ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
-            ctx.closePath();
-            
-            // Определяем цвет
-            let fillColor;
-            if (section.isUI) {
-                const subfolder = section.id.replace('ui-', '');
-                fillColor = uiColors[subfolder] || 'rgba(220, 53, 69, 0.5)';
-            } else {
-                fillColor = baseColors[section.id] || defaultColors[index % defaultColors.length];
-            }
-            
-            ctx.fillStyle = fillColor;
-            ctx.fill();
-            ctx.strokeStyle = '#fff';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-            
-            // Подпись
-            const labelAngle = currentAngle + sliceAngle / 2;
-            const labelX = centerX + Math.cos(labelAngle) * (radius + 30);
-            const labelY = centerY + Math.sin(labelAngle) * (radius + 30);
-            
-            ctx.fillStyle = '#333';
-            ctx.font = 'bold 12px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            const displayName = folderNames[section.name] || (section.isUI ? section.name.replace('ui-', '') : section.name.toUpperCase());
-            ctx.fillText(displayName, labelX, labelY);
-            
-            currentAngle += sliceAngle;
-        });
     },
 
     // Отображение статистики иконок (для popover)

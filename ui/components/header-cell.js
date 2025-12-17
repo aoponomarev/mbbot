@@ -98,7 +98,10 @@ window.cmpHeaderCell = {
     // Иконка сортировки
     sortIcon() {
       if (!this.isSortActive) return null;
-      return this.sortOrder === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down';
+      const helper = (typeof window !== 'undefined') ? window.uiElementHelper : null;
+      return this.sortOrder === 'asc'
+        ? (helper?.getNavigationIcon?.('sort-up') || 'ms:north')
+        : (helper?.getNavigationIcon?.('sort-down') || 'ms:south');
     },
     
     // Классы для контейнера заголовка
@@ -119,6 +122,9 @@ window.cmpHeaderCell = {
         zIndex: 'var(--z-index-dropdown)'
       };
     }
+  },
+  
+  mounted() {
   },
   
   methods: {

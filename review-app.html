@@ -6,66 +6,76 @@
     <title>Статистика проекта</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Material Symbols (Sharp): для иконок collapse в карточках -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Sharp:opsz,wght,FILL,GRAD@20..48,400,0,0" />
     <!-- Единые стили для всех review -->
     <link rel="stylesheet" href="ui/review-styles.css">
     <!-- Общие стили приложения (нужны для единого компонента сообщений) -->
     <link rel="stylesheet" href="ui/styles/layout.css">
+    <!-- Стили иконок (нужны для одинакового вида иконок сообщений) -->
+    <link rel="stylesheet" href="ui/styles/icons.css">
     <!-- Единый менеджер для всех review (хедер с вкладками) - загружаем в head для ранней инициализации -->
     <script src="ui/review-manager.js"></script>
 </head>
 <body>
     <!-- Хедер с вкладками будет вставлен здесь через review-manager.js -->
     
-    <div class="container-fluid">
-        <!-- Основная статистика -->
-        <div class="stats-overview mb-4 mt-4">
-            <div class="row g-3">
-                <div class="col-md-3">
-                    <div class="stat-card">
-                        <div class="stat-icon"><i class="fas fa-code"></i></div>
-                        <div class="stat-value" id="total-code-lines">-</div>
-                        <div class="stat-label">Строк кода</div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="stat-card">
-                        <div class="stat-icon"><i class="fas fa-file-code"></i></div>
-                        <div class="stat-value" id="total-files">-</div>
-                        <div class="stat-label">Файлов</div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="stat-card" id="icons-stat-card" data-bs-toggle="popover" data-bs-trigger="click" data-bs-placement="bottom" data-bs-html="true">
-                        <div class="stat-icon"><i class="fas fa-icons"></i></div>
-                        <div class="stat-value" id="total-icons">-</div>
-                        <div class="stat-label">Иконок</div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="stat-card" id="colors-stat-card" data-bs-toggle="popover" data-bs-trigger="click" data-bs-placement="bottom" data-bs-html="true">
-                        <div class="stat-icon"><i class="fas fa-palette"></i></div>
-                        <div class="stat-value" id="total-colors">-</div>
-                        <div class="stat-label">Цветов</div>
+    <div id="app" class="container-fluid">
+        <!-- Сводка + диаграмма (две колонки) -->
+        <div class="row g-4 mb-4 mt-4 review-app-summary-row">
+            <div class="col-md-6">
+                <div class="stats-overview">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="stat-card">
+                                <div class="stat-icon"><i class="fas fa-code"></i></div>
+                                <div class="stat-value" id="total-code-lines">-</div>
+                                <div class="stat-label">Строк кода</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="stat-card">
+                                <div class="stat-icon"><i class="fas fa-file-code"></i></div>
+                                <div class="stat-value" id="total-files">-</div>
+                                <div class="stat-label">Файлов</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="stat-card" id="icons-stat-card" data-bs-toggle="popover" data-bs-trigger="click" data-bs-placement="bottom" data-bs-html="true">
+                                <div class="stat-icon"><i class="fas fa-icons"></i></div>
+                                <div class="stat-value" id="total-icons">-</div>
+                                <div class="stat-label">Иконок</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="stat-card" id="colors-stat-card" data-bs-toggle="popover" data-bs-trigger="click" data-bs-placement="bottom" data-bs-html="true">
+                                <div class="stat-icon"><i class="fas fa-palette"></i></div>
+                                <div class="stat-value" id="total-colors">-</div>
+                                <div class="stat-label">Цветов</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Диаграммы -->
-        <div class="row g-4 mb-4">
             <div class="col-md-6">
                 <div class="chart-card">
-                    <h5 class="chart-title"><i class="fas fa-chart-pie me-2"></i>Типы файлов</h5>
+                    <div class="chart-title d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-chart-pie me-2"></i>
+                            <span>Типы файлов</span>
+                        </div>
+
+                        <div class="btn-group btn-group-sm" role="group" aria-label="Режим диаграммы типов файлов">
+                            <input type="radio" class="btn-check" name="file-types-mode" id="file-types-mode-count" value="count" autocomplete="off">
+                            <label class="btn btn-outline-secondary" for="file-types-mode-count" title="Количество файлов">Количество</label>
+
+                            <input type="radio" class="btn-check" name="file-types-mode" id="file-types-mode-size" value="size" autocomplete="off" checked>
+                            <label class="btn btn-outline-secondary" for="file-types-mode-size" title="Суммарный размер файлов">Объём</label>
+                        </div>
+                    </div>
                     <div class="chart-container">
                         <canvas id="file-types-chart"></canvas>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="chart-card">
-                    <h5 class="chart-title"><i class="fas fa-chart-pie me-2"></i>Распределение контента</h5>
-                    <div class="chart-container">
-                        <canvas id="content-distribution-chart"></canvas>
                     </div>
                 </div>
             </div>
@@ -77,8 +87,7 @@
                 <table class="table table-hover review-table" id="files-ranking-table">
                     <thead>
                         <tr>
-                            <th style="width: 60px;" data-column="rank">#</th>
-                            <th style="width: 100px;" data-column="lines">Строк</th>
+                            <th style="width: 110px;" class="text-end" data-column="lines">Строк</th>
                             <th data-column="path">Файл</th>
                             <th style="width: 100px;" data-column="type">Тип</th>
                             <th style="width: 150px;" data-column="size">Размер</th>

@@ -82,6 +82,17 @@ window.cmpSystemMessages = {
       if (!msg?.id) return;
       this.store?.dismiss?.(msg.id);
     },
+    typeIconClass(msg) {
+      const t = String(msg?.type || 'info').toLowerCase();
+      // Восстанавливаем "как было": Font Awesome иконка слева от текста.
+      // Используем FA6 имена (circle-info / triangle-exclamation / circle-check / circle-exclamation).
+      // Success: не дублируем — используем существующую иконку успеха (fa-check-circle).
+      if (t === 'success') return 'fas fa-check-circle';
+      if (t === 'warning' || t === 'warn') return 'fas fa-triangle-exclamation';
+      if (t === 'danger' || t === 'error') return 'fas fa-circle-exclamation';
+      if (t === 'info') return 'fas fa-circle-info';
+      return '';
+    },
     handleAction(action, msg) {
       if (!action) return;
       try {
@@ -115,8 +126,13 @@ window.cmpSystemMessages = {
         </div>
 
         <div class="alert" :class="'alert-' + (m.type || 'info')" role="alert">
-          <div>{{ m.text }}</div>
-          <div v-if="m.details" class="small" style="opacity:0.85; margin-top:0.25rem;">{{ m.details }}</div>
+          <div class="d-flex gap-2 align-items-start">
+            <i v-if="typeIconClass(m)" class="system-message-type-icon" :class="typeIconClass(m)" aria-hidden="true"></i>
+            <div class="flex-grow-1">
+              <div>{{ m.text }}</div>
+              <div v-if="m.details" class="small" style="opacity:0.85; margin-top:0.25rem;">{{ m.details }}</div>
+            </div>
+          </div>
 
           <div v-if="m.actions && m.actions.length" class="mt-2 d-flex gap-2 flex-wrap">
             <button
