@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- Единые стили для всех review -->
     <link rel="stylesheet" href="../../ui/review-styles.css">
+    <!-- Общие стили приложения (нужны для единого компонента сообщений) -->
+    <link rel="stylesheet" href="../../ui/styles/layout.css">
     <!-- Единый менеджер для всех review (хедер с вкладками) - загружаем в head для ранней инициализации -->
     <script src="../../ui/review-manager.js"></script>
 </head>
@@ -57,80 +59,10 @@
     <script src="../../ui/utils/ui-element-helper.js"></script>
     
     <script>
-        // Данные о дополнительных иконках (не из ui-element-mapping.json)
-        const additionalIcons = {
-            'hamburger-inline': {
-                type: 'inline-svg',
-                identifier: 'hamburger (inline)',
-                iconClass: 'hamburger-inline',
-                category: 'other',
-                commands: [{ name: 'hamburger', label: 'Меню', tooltip: 'Иконка гамбургер-меню' }],
-                usage: ['app-header'],
-                file: 'index.html (строка 149-153)',
-                svgCode: '<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="5" width="16" height="2" fill="currentColor" rx="0.5"/><rect x="2" y="9" width="16" height="2" fill="currentColor" rx="0.5"/><rect x="2" y="13" width="16" height="2" fill="currentColor" rx="0.5"/></svg>'
-            },
-            'counter-ring': {
-                type: 'inline-svg',
-                identifier: 'counter-ring',
-                iconClass: 'cg-counter-ring',
-                category: 'other',
-                commands: [],
-                usage: ['header-coins'],
-                file: 'index.html (строка 526+)',
-                svgCode: '<svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15.915" fill="none" stroke="currentColor" stroke-width="0.5" stroke-dasharray="25 75"/></svg>'
-            },
-            'dropdown-arrow': {
-                type: 'data-uri',
-                identifier: 'dropdown-arrow',
-                iconClass: 'app-header-select-model',
-                category: 'navigation',
-                commands: [],
-                usage: ['app-header (селект модели)'],
-                file: 'ui/styles/header.css (строка 87)',
-                dataUri: 'data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 16 16\'%3e%3cpath fill=\'none\' stroke=\'%23ffffff80\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M2 5l6 6 6-6\'/%3e%3c/svg%3e'
-            },
-            'checkbox-checked': {
-                type: 'data-uri',
-                identifier: 'checkbox-checked',
-                iconClass: 'form-check-input:checked',
-                category: 'status',
-                commands: [],
-                usage: ['Все чекбоксы'],
-                file: 'ui/styles/layout.css (строка 459)',
-                dataUri: 'data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 20 20\'%3e%3cpath fill=\'none\' stroke=\'%23fff\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'3\' d=\'M6 10l3 3l6-6\'/%3e%3c/svg%3e'
-            },
-            'checkbox-indeterminate': {
-                type: 'data-uri',
-                identifier: 'checkbox-indeterminate',
-                iconClass: 'form-check-input:indeterminate',
-                category: 'status',
-                commands: [],
-                usage: ['Все чекбоксы'],
-                file: 'ui/styles/layout.css (строка 465)',
-                dataUri: 'data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 20 20\'%3e%3cpath fill=\'none\' stroke=\'%23fff\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'3\' d=\'M6 10h8\'/%3e%3c/svg%3e'
-            },
-            'coin-icons': {
-                type: 'bitmap',
-                identifier: 'coin-icons',
-                iconClass: 'coin-icon',
-                category: 'other',
-                commands: [],
-                usage: ['cell-coin', 'table-coin-row'],
-                file: 'CoinGecko API (кэш localStorage.cgIconsCache)',
-                description: 'Иконки монет из CoinGecko API'
-            }
-        };
-
-        // Компоненты, использующие иконки
-        const componentUsage = {
-            'cmp-button': ['Все команды из ui-element-mapping.json'],
-            'menu-item': ['Все команды из ui-element-mapping.json', 'iconImage prop'],
-            'app-header': ['theme-light', 'theme-dark', 'hamburger (inline)', 'dropdown-arrow'],
-            'app-footer': ['bitcoin', 'fgi', 'vix', 'oi', 'fr', 'lsr', 'vuejs', 'bootstrap'],
-            'cell-coin': ['coin-icons (bitmap)', 'open-external'],
-            'sortable-header': ['sort', 'sort-up', 'sort-down'],
-            'header-coins': ['counter-ring', 'refresh', 'favorite']
-        };
+        // В текущей версии данные иконок собираются автоматически через ReviewDataPipeline.scanIcons().
+        // Статическая часть сведена к минимуму.
+        const additionalIcons = {};
+        const componentUsage = {};
 
         // Названия категорий
         const categoryNames = {
@@ -585,10 +517,6 @@
             table.appendChild(thead);
             table.appendChild(tbody);
             
-            // #region agent log
-            fetch('http://127.0.0.1:7242/ingest/e7733f3e-f060-46bf-8fe8-79b2bd25ac6d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'review-icons.html:585',message:'Table structure order check',data:{childrenOrder:Array.from(table.children).map((el,i)=>({index:i,tagName:el.tagName,className:el.className,textContent:el.textContent?.substring(0,50)})),theadChildren:Array.from(thead.children).map((el,i)=>({index:i,tagName:el.tagName,className:el.className,textContent:el.textContent?.substring(0,50)})),headerRowTag:headerRow.tagName,headerRowClass:headerRow.className,theadTag:thead.tagName,theadClass:thead.className},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-            // #endregion
-            
             // Обработчики сортировки
             headerTr.querySelectorAll('th[data-column]').forEach(th => {
                 let sortDirection = null;
@@ -674,19 +602,18 @@
             return icons;
         }
 
-        // Загружает все иконки
-        function loadAllIcons() {
-            const icons = [];
-            
-            // Иконки из ui-element-helper
-            const helperIcons = loadIconsFromHelper();
-            icons.push(...helperIcons);
-
-            // Дополнительные иконки
-            for (const [key, icon] of Object.entries(additionalIcons)) {
-                icons.push(icon);
+        // Загружает все иконки (через ReviewDataPipeline)
+        async function loadAllIcons() {
+            const pipeline = window.ReviewManager?.ReviewDataPipeline;
+            if (pipeline?.scanIcons) {
+                const res = await pipeline.scanIcons();
+                return res?.icons || [];
             }
 
+            // Fallback: старый режим (если pipeline недоступен)
+            const icons = [];
+            const helperIcons = loadIconsFromHelper();
+            icons.push(...helperIcons);
             return icons;
         }
 
@@ -775,9 +702,17 @@
         // Инициализация
         document.addEventListener('DOMContentLoaded', function() {
             // Ждем загрузки ui-element-helper
-            setTimeout(() => {
-                allIcons = loadAllIcons();
-                renderTables(allIcons);
+            setTimeout(async () => {
+                try {
+                    allIcons = await loadAllIcons();
+                    renderTables(allIcons);
+                } catch (e) {
+                    console.error(e);
+                    window.ReviewManager?.ReviewSystemMessages?.post?.('icons.error', {
+                        id: 'icons-load',
+                        details: String(e?.message || e)
+                    });
+                }
 
                 // Настройка фильтров
                 document.getElementById('filter-type').addEventListener('change', applyFilters);

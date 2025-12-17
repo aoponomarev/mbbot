@@ -7,6 +7,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Единые стили для всех review -->
     <link rel="stylesheet" href="../../ui/review-styles.css">
+    <!-- Общие стили приложения (нужны для единого компонента сообщений) -->
+    <link rel="stylesheet" href="../../ui/styles/layout.css">
     <!-- Единый менеджер для всех review (хедер с вкладками) - загружаем в head для ранней инициализации -->
     <script src="../../ui/review-manager.js"></script>
 </head>
@@ -52,359 +54,9 @@
     <link rel="stylesheet" href="../../ui/styles/z-index.css">
     
     <script>
-        // Данные о цветах (парсим из CSS)
-        const colorData = {
-            // Bootstrap цвета
-            '--bs-primary': {
-                category: 'bootstrap',
-                identifier: '--bs-primary',
-                hsl: 'hsl(217, 91%, 60%)',
-                rgb: '13, 110, 253',
-                hex: '#0d6efd',
-                usage: ['Фокус полей ввода и кнопок', 'Индикатор загрузки', 'Hover иконок', 'Кольцевой прогресс счетчика', 'Чекбоксы'],
-                file: 'ui/styles/theme-colors.css',
-                description: 'Нативный Bootstrap primary цвет (яркий синий)'
-            },
-            '--bs-primary-rgb': {
-                category: 'bootstrap',
-                identifier: '--bs-primary-rgb',
-                hsl: null,
-                rgb: '13, 110, 253',
-                hex: null,
-                usage: ['Фокус полей ввода и кнопок (box-shadow)'],
-                file: 'ui/styles/theme-colors.css',
-                description: 'RGB значения для --bs-primary'
-            },
-            '--bs-danger': {
-                category: 'bootstrap',
-                identifier: '--bs-danger',
-                hsl: 'hsl(340, 100%, 40%)',
-                rgb: '204, 0, 102',
-                hex: null,
-                usage: ['Цветизация отрицательных значений', 'Индикаторы ошибок'],
-                file: 'ui/styles/theme-colors.css',
-                description: 'Цвет ошибок (малиновый оттенок)'
-            },
-            '--bs-danger-rgb': {
-                category: 'bootstrap',
-                identifier: '--bs-danger-rgb',
-                hsl: null,
-                rgb: '204, 0, 102',
-                hex: null,
-                usage: ['Bootstrap совместимость'],
-                file: 'ui/styles/theme-colors.css',
-                description: 'RGB значения для --bs-danger'
-            },
-            '--bs-success': {
-                category: 'bootstrap',
-                identifier: '--bs-success',
-                hsl: 'hsl(90, 100%, 30%)',
-                rgb: '0, 153, 0',
-                hex: null,
-                usage: ['Цветизация положительных значений', 'Индикаторы успеха'],
-                file: 'ui/styles/theme-colors.css',
-                description: 'Цвет успеха (салатовый оттенок)'
-            },
-            '--bs-success-rgb': {
-                category: 'bootstrap',
-                identifier: '--bs-success-rgb',
-                hsl: null,
-                rgb: '0, 153, 0',
-                hex: null,
-                usage: ['Bootstrap совместимость'],
-                file: 'ui/styles/theme-colors.css',
-                description: 'RGB значения для --bs-success'
-            },
-            // Theme цвета
-            '--color-theme-h': {
-                category: 'theme',
-                identifier: '--color-theme-h',
-                hsl: null,
-                rgb: null,
-                hex: null,
-                usage: ['Базовый тон для производных цветов'],
-                file: 'ui/styles/theme-colors.css',
-                description: 'Основной тон темы (210 градусов)'
-            },
-            '--color-muted': {
-                category: 'theme',
-                identifier: '--color-muted',
-                hsl: 'hsl(0, 5%, 50%)',
-                rgb: null,
-                hex: null,
-                usage: ['Нейтральные элементы', 'Второстепенный текст'],
-                file: 'ui/styles/theme-colors.css',
-                description: 'Приглушенный серый цвет'
-            },
-            // UI элементы
-            '--color-border': {
-                category: 'ui',
-                identifier: '--color-border',
-                hsl: 'hsl(210, 10%, 70%)',
-                rgb: null,
-                hex: null,
-                usage: ['Рамки кнопок', 'Рамки полей ввода'],
-                file: 'ui/styles/theme-colors.css',
-                description: 'Цвет рамок (серый с синеватым оттенком)'
-            },
-            '--color-border-hover': {
-                category: 'ui',
-                identifier: '--color-border-hover',
-                hsl: 'hsl(210, 8%, 60%)',
-                rgb: null,
-                hex: null,
-                usage: ['Hover состояние рамок'],
-                file: 'ui/styles/theme-colors.css',
-                description: 'Цвет рамок при наведении'
-            },
-            '--color-button-hover': {
-                category: 'ui',
-                identifier: '--color-button-hover',
-                hsl: 'hsl(210, 5%, 82%)',
-                rgb: null,
-                hex: null,
-                usage: ['Hover состояние кнопок'],
-                file: 'ui/styles/theme-colors.css',
-                description: 'Фон кнопок при наведении'
-            },
-            '--color-button-disabled': {
-                category: 'ui',
-                identifier: '--color-button-disabled',
-                hsl: 'hsl(210, 8%, 75%)',
-                rgb: null,
-                hex: null,
-                usage: ['Disabled состояние кнопок'],
-                file: 'ui/styles/theme-colors.css',
-                description: 'Цвет disabled кнопок'
-            },
-            '--color-focus-bg': {
-                category: 'ui',
-                identifier: '--color-focus-bg',
-                hsl: 'hsla(149, 100%, 20%, 0.07)',
-                rgb: null,
-                hex: null,
-                usage: ['Фон фокуса пунктов меню'],
-                file: 'ui/styles/theme-colors.css',
-                description: 'Фон фокуса пунктов меню (зеленовато-бирюзовый)'
-            },
-            '--color-selected-row-bg': {
-                category: 'ui',
-                identifier: '--color-selected-row-bg',
-                hsl: 'hsla(200, 20%, 50%, 0.05)',
-                rgb: null,
-                hex: null,
-                usage: ['Фон выбранных строк таблицы'],
-                file: 'ui/styles/theme-colors.css',
-                description: 'Фон выбранных строк (нейтральный серый с синеватым оттенком)'
-            },
-            // Header цвета
-            '--color-header-bg': {
-                category: 'header',
-                identifier: '--color-header-bg',
-                hsl: 'hsl(0, 0%, 17%)',
-                rgb: null,
-                hex: null,
-                usage: ['Фон хедера'],
-                file: 'ui/styles/theme-colors.css',
-                description: 'Темный графит для хедера'
-            },
-            '--color-header-text': {
-                category: 'header',
-                identifier: '--color-header-text',
-                hsl: 'hsl(0, 0%, 100%)',
-                rgb: null,
-                hex: null,
-                usage: ['Текст в хедере'],
-                file: 'ui/styles/theme-colors.css',
-                description: 'Белый текст хедера'
-            },
-            '--color-header-overlay': {
-                category: 'header',
-                identifier: '--color-header-overlay',
-                hsl: 'hsla(0, 0%, 100%, 0.1)',
-                rgb: null,
-                hex: null,
-                usage: ['Overlay элементов хедера'],
-                file: 'ui/styles/theme-colors.css',
-                description: 'Полупрозрачный белый overlay'
-            },
-            '--color-header-overlay-hover': {
-                category: 'header',
-                identifier: '--color-header-overlay-hover',
-                hsl: 'hsla(0, 0%, 100%, 0.15)',
-                rgb: null,
-                hex: null,
-                usage: ['Hover overlay элементов хедера'],
-                file: 'ui/styles/theme-colors.css',
-                description: 'Полупрозрачный белый overlay при наведении'
-            },
-            '--color-header-border': {
-                category: 'header',
-                identifier: '--color-header-border',
-                hsl: 'hsla(0, 0%, 100%, 0.2)',
-                rgb: null,
-                hex: null,
-                usage: ['Рамки элементов хедера'],
-                file: 'ui/styles/theme-colors.css',
-                description: 'Полупрозрачный белый для рамок'
-            },
-            '--color-header-border-strong': {
-                category: 'header',
-                identifier: '--color-header-border-strong',
-                hsl: 'hsla(0, 0%, 100%, 0.3)',
-                rgb: null,
-                hex: null,
-                usage: ['Яркие рамки элементов хедера'],
-                file: 'ui/styles/theme-colors.css',
-                description: 'Более яркий полупрозрачный белый для рамок'
-            },
-            '--color-header-text-muted': {
-                category: 'header',
-                identifier: '--color-header-text-muted',
-                hsl: 'hsla(0, 0%, 100%, 0.5)',
-                rgb: null,
-                hex: null,
-                usage: ['Приглушенный текст в хедере'],
-                file: 'ui/styles/theme-colors.css',
-                description: 'Полупрозрачный белый для приглушенного текста'
-            },
-            // Dropdown цвета
-            '--color-dropdown-dark-bg': {
-                category: 'dropdown',
-                identifier: '--color-dropdown-dark-bg',
-                hsl: 'hsl(0, 0%, 17%)',
-                rgb: null,
-                hex: null,
-                usage: ['Фон темного dropdown'],
-                file: 'ui/styles/theme-colors.css',
-                description: 'Темный фон dropdown (для темной темы)'
-            },
-            '--color-dropdown-dark-text': {
-                category: 'dropdown',
-                identifier: '--color-dropdown-dark-text',
-                hsl: 'hsl(0, 0%, 100%)',
-                rgb: null,
-                hex: null,
-                usage: ['Текст темного dropdown'],
-                file: 'ui/styles/theme-colors.css',
-                description: 'Белый текст для темного dropdown'
-            },
-            '--color-dropdown-dark-overlay': {
-                category: 'dropdown',
-                identifier: '--color-dropdown-dark-overlay',
-                hsl: 'hsla(0, 0%, 100%, 0.1)',
-                rgb: null,
-                hex: null,
-                usage: ['Overlay темного dropdown'],
-                file: 'ui/styles/theme-colors.css',
-                description: 'Overlay для темного dropdown'
-            },
-            '--color-dropdown-dark-border': {
-                category: 'dropdown',
-                identifier: '--color-dropdown-dark-border',
-                hsl: 'hsla(0, 0%, 100%, 0.12)',
-                rgb: null,
-                hex: null,
-                usage: ['Рамка темного dropdown'],
-                file: 'ui/styles/theme-colors.css',
-                description: 'Рамка для темного dropdown'
-            },
-            '--color-dropdown-light-bg': {
-                category: 'dropdown',
-                identifier: '--color-dropdown-light-bg',
-                hsl: 'hsl(0, 0%, 100%)',
-                rgb: null,
-                hex: null,
-                usage: ['Фон светлого dropdown'],
-                file: 'ui/styles/theme-colors.css',
-                description: 'Белый фон dropdown (для светлой темы)'
-            },
-            '--color-dropdown-light-text': {
-                category: 'dropdown',
-                identifier: '--color-dropdown-light-text',
-                hsl: 'hsl(210, 9%, 15%)',
-                rgb: null,
-                hex: null,
-                usage: ['Текст светлого dropdown'],
-                file: 'ui/styles/theme-colors.css',
-                description: 'Темный текст для светлого dropdown'
-            },
-            '--color-dropdown-light-overlay': {
-                category: 'dropdown',
-                identifier: '--color-dropdown-light-overlay',
-                hsl: 'hsla(0, 0%, 0%, 0.08)',
-                rgb: null,
-                hex: null,
-                usage: ['Overlay светлого dropdown'],
-                file: 'ui/styles/theme-colors.css',
-                description: 'Overlay для светлого dropdown'
-            },
-            '--color-dropdown-light-border': {
-                category: 'dropdown',
-                identifier: '--color-dropdown-light-border',
-                hsl: 'hsla(0, 0%, 0%, 0.12)',
-                rgb: null,
-                hex: null,
-                usage: ['Рамка светлого dropdown'],
-                file: 'ui/styles/theme-colors.css',
-                description: 'Рамка для светлого dropdown'
-            },
-            '--color-dropdown-border-dark': {
-                category: 'dropdown',
-                identifier: '--color-dropdown-border-dark',
-                hsl: 'hsl(210, 5%, 35%)',
-                rgb: null,
-                hex: null,
-                usage: ['Рамка dropdown в основной области'],
-                file: 'ui/styles/theme-colors.css',
-                description: 'Рамка для dropdown в основной области (темная тема)'
-            },
-            // Card цвета
-            '--color-card-header': {
-                category: 'ui',
-                identifier: '--color-card-header',
-                hsl: 'hsl(210, 5%, 91%)',
-                rgb: null,
-                hex: null,
-                usage: ['Фон заголовка карточки'],
-                file: 'ui/styles/theme-colors.css',
-                description: 'Стальной серый оттенок для заголовка карточки'
-            },
-            '--color-card-header-border': {
-                category: 'ui',
-                identifier: '--color-card-header-border',
-                hsl: 'hsl(210, 8%, 82%)',
-                rgb: null,
-                hex: null,
-                usage: ['Рамка заголовка карточки'],
-                file: 'ui/styles/theme-colors.css',
-                description: 'Рамка заголовка карточки'
-            },
-            // Warning
-            '--color-warning-dark': {
-                category: 'other',
-                identifier: '--color-warning-dark',
-                hsl: 'hsl(30, 100%, 40%)',
-                rgb: null,
-                hex: null,
-                usage: ['Предупреждения'],
-                file: 'ui/styles/theme-colors.css',
-                description: 'Оранжевый цвет для предупреждений'
-            },
-            // Icons
-            '--icon-action-hover-color': {
-                category: 'ui',
-                identifier: '--icon-action-hover-color',
-                hsl: null,
-                rgb: null,
-                hex: null,
-                usage: ['Hover цвет иконок действий'],
-                file: 'ui/styles/icons.css',
-                description: 'Цвет иконок при наведении (var(--bs-primary))'
-            }
-        };
+        // Каталог цветов строится автоматически через ReviewDataPipeline.scanColors()
+        // (fallback FS/GitHub/DepGraph + кэш). Статическая часть сведена к минимуму.
 
-        // Названия категорий
         const categoryNames = {
             'bootstrap': 'Bootstrap',
             'danger': 'Danger',
@@ -416,11 +68,26 @@
             'other': 'Other'
         };
 
-        // Получает цвет из CSS переменной
+        // Получает цвет из CSS переменной (реальное значение в текущем контексте страницы)
         function getColorValue(varName) {
             const root = document.documentElement;
             const value = getComputedStyle(root).getPropertyValue(varName).trim();
             return value || null;
+        }
+
+        // Парсит HSL строку
+        function parseHSL(hslString) {
+            if (!hslString) return null;
+            const match = hslString.match(/hsla?\((\d+),\s*(\d+(?:\.\d+)?)%,\s*(\d+(?:\.\d+)?)%(?:,\s*([\d.]+))?\)/);
+            if (match) {
+                return {
+                    h: parseInt(match[1]),
+                    s: parseFloat(match[2]),
+                    l: parseFloat(match[3]),
+                    a: match[4] ? parseFloat(match[4]) : 1
+                };
+            }
+            return null;
         }
 
         // Конвертирует HSL в RGB для отображения
@@ -449,39 +116,13 @@
             return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
         }
 
-        // Парсит HSL строку
-        function parseHSL(hslString) {
-            if (!hslString) return null;
-            const match = hslString.match(/hsla?\((\d+),\s*(\d+(?:\.\d+)?)%,\s*(\d+(?:\.\d+)?)%(?:,\s*([\d.]+))?\)/);
-            if (match) {
-                return {
-                    h: parseInt(match[1]),
-                    s: parseFloat(match[2]),
-                    l: parseFloat(match[3]),
-                    a: match[4] ? parseFloat(match[4]) : 1
-                };
-            }
-            return null;
-        }
-
-        // Получает цвет для превью
         function getColorForPreview(color) {
-            if (color.hex) return color.hex;
-            if (color.hsl) {
-                const hsl = parseHSL(color.hsl);
-                if (hsl) {
-                    const rgb = hslToRgb(hsl.h, hsl.s, hsl.l);
-                    return `rgb(${rgb.join(', ')})`;
-                }
-            }
-            if (color.rgb) return `rgb(${color.rgb})`;
-            // Пытаемся получить из CSS переменной
             const cssValue = getColorValue(color.identifier);
             if (cssValue) return cssValue;
-            return '#ccc'; // Fallback
+            if (color.rawValue) return color.rawValue;
+            return '#ccc';
         }
 
-        // Генерирует превью цвета
         function renderColorPreview(color) {
             const cell = document.createElement('td');
             cell.className = 'color-preview-cell';
@@ -492,309 +133,142 @@
             return cell;
         }
 
-        // Получает только имя файла из пути
-        function getFileName(filePath) {
-            if (!filePath) return '';
-            const match = filePath.match(/([^\/\\]+\.\w+)(?:\s|$)/);
-            if (match) return match[1];
-            const parts = filePath.split(/[\/\\]/);
-            return parts[parts.length - 1] || filePath;
-        }
-
-        // Извлекает основной текст и пояснение в скобках
-        function extractMainTextAndTooltip(text) {
-            if (!text) return { main: '', tooltip: '' };
-            const match = text.match(/^([^(]+)(\s*\([^)]+\))?$/);
-            if (match) {
-                const main = match[1].trim();
-                const tooltip = match[2] ? match[2].trim() : '';
-                return { main, tooltip: tooltip ? text : '' };
-            }
-            return { main: text, tooltip: '' };
-        }
-
-        // Генерирует ячейку с идентификатором
         function renderIdentifierCell(color) {
             const cell = document.createElement('td');
             cell.className = 'identifier-cell';
-            
             const code = document.createElement('code');
             code.textContent = color.identifier;
             cell.appendChild(code);
-            
             return cell;
         }
 
-        // Генерирует ячейку со значением
         function renderValueCell(color, type) {
             const cell = document.createElement('td');
             cell.className = 'value-cell';
-            
-            let value = '';
-            if (type === 'hsl' && color.hsl) {
-                value = color.hsl;
-            } else if (type === 'rgb' && color.rgb) {
-                value = `rgb(${color.rgb})`;
-            } else if (type === 'hex' && color.hex) {
-                value = color.hex;
-            } else {
-                // Пытаемся получить из CSS
-                const cssValue = getColorValue(color.identifier);
-                value = cssValue || '—';
+            const cssValue = getColorValue(color.identifier);
+
+            let value = cssValue || color.rawValue || '—';
+            if (type === 'rgb' && cssValue?.includes('hsl')) {
+                const hsl = parseHSL(cssValue);
+                if (hsl) {
+                    const rgb = hslToRgb(hsl.h, hsl.s, hsl.l);
+                    value = `rgb(${rgb.join(', ')})`;
+                }
             }
-            
+            if (type === 'hsl' && cssValue?.includes('rgb')) {
+                // если значение rgb — оставляем как есть, не конвертируем в hsl (не требуется для review)
+                value = cssValue;
+            }
+
             const code = document.createElement('code');
             code.textContent = value;
             cell.appendChild(code);
-            
             return cell;
         }
 
-        // Генерирует ячейку с использованием
         function renderUsageCell(color) {
             const cell = document.createElement('td');
             cell.className = 'usage-cell';
-            
-            if (!color.usage || color.usage.length === 0) {
-                return cell;
-            }
-            
-            // Если мест применения больше 1 - используем select
-            if (color.usage.length > 1) {
+            const usage = Array.isArray(color.usage) ? color.usage : [];
+            if (usage.length === 0) return cell;
+
+            if (usage.length > 1) {
                 const select = document.createElement('select');
                 select.className = 'form-select form-select-sm';
                 select.style.width = 'auto';
                 select.style.display = 'inline-block';
                 select.style.minWidth = '150px';
                 select.style.fontSize = '0.85rem';
-                
-                color.usage.forEach(usage => {
+                usage.forEach(u => {
                     const option = document.createElement('option');
-                    option.value = usage;
-                    option.textContent = usage;
+                    option.value = u;
+                    option.textContent = u;
                     select.appendChild(option);
                 });
-                
                 cell.appendChild(select);
             } else {
-                // Если место применения одно - просто текст
                 const span = document.createElement('span');
-                span.textContent = color.usage[0];
+                span.textContent = usage[0];
                 span.style.fontSize = '0.85rem';
                 cell.appendChild(span);
             }
-            
             return cell;
         }
 
-        // Генерирует ячейку с файлом
-        function renderFileCell(color) {
-            const cell = document.createElement('td');
-            cell.className = 'usage-cell';
-            
-            const fileName = getFileName(color.file);
-            if (fileName) {
-                const fileCode = document.createElement('code');
-                const { main, tooltip } = extractMainTextAndTooltip(fileName);
-                fileCode.textContent = main;
-                if (tooltip) {
-                    fileCode.title = color.file;
-                }
-                fileCode.style.fontSize = '0.85rem';
-                cell.appendChild(fileCode);
-            }
-            
-            return cell;
-        }
-
-        // Сортировка цветов
-        function sortColors(colors, column, direction) {
-            const sorted = [...colors];
-            sorted.sort((a, b) => {
-                let valA, valB;
-                
-                switch(column) {
-                    case 'identifier':
-                        valA = a.identifier || '';
-                        valB = b.identifier || '';
-                        break;
-                    case 'hsl':
-                        valA = a.hsl || '';
-                        valB = b.hsl || '';
-                        break;
-                    case 'rgb':
-                        valA = a.rgb || '';
-                        valB = b.rgb || '';
-                        break;
-                    case 'file':
-                        valA = getFileName(a.file || '');
-                        valB = getFileName(b.file || '');
-                        break;
-                    default:
-                        return 0;
-                }
-                
-                if (typeof valA === 'string') {
-                    valA = valA.toLowerCase();
-                    valB = valB.toLowerCase();
-                }
-                
-                if (valA < valB) return direction === 'asc' ? -1 : 1;
-                if (valA > valB) return direction === 'asc' ? 1 : -1;
-                return 0;
-            });
-            
-            return sorted;
-        }
-
-        // Рендерит строку таблицы
         function renderTableRow(color) {
             const row = document.createElement('tr');
-            
-            // Идентификатор
             row.appendChild(renderIdentifierCell(color));
-            
-            // Превью цвета
             row.appendChild(renderColorPreview(color));
-            
-            // HSL значение
             row.appendChild(renderValueCell(color, 'hsl'));
-            
-            // RGB значение
             row.appendChild(renderValueCell(color, 'rgb'));
-            
-            // Использование
             row.appendChild(renderUsageCell(color));
-            
             return row;
         }
 
-        // Рендерит таблицу для секции
+        function groupColorsByCategory(colors) {
+            const grouped = {};
+            colors.forEach(color => {
+                const category = color.category || 'other';
+                if (!grouped[category]) grouped[category] = [];
+                grouped[category].push(color);
+            });
+            return grouped;
+        }
+
         function renderSectionTable(category, colors, container) {
             if (colors.length === 0) return;
-            
+
             const table = document.createElement('table');
             table.className = 'table table-sm review-table table-colors';
-            
-            // Заголовок секции
+
             const headerRow = document.createElement('tr');
             headerRow.className = 'section-header';
             const headerCell = document.createElement('td');
             headerCell.colSpan = 5;
             headerCell.textContent = categoryNames[category] || category;
             headerRow.appendChild(headerCell);
-            
-            // Заголовки колонок
+
             const thead = document.createElement('thead');
             const headerTr = document.createElement('tr');
             const headers = [
                 { text: 'Идентификатор', col: 'identifier', sortable: true },
                 { text: 'Цвет', col: 'color', sortable: false },
-                { text: 'HSL', col: 'hsl', sortable: true },
-                { text: 'RGB', col: 'rgb', sortable: true },
+                { text: 'HSL', col: 'hsl', sortable: false },
+                { text: 'RGB', col: 'rgb', sortable: false },
                 { text: 'Использование', col: 'usage', sortable: false }
             ];
-            
-            headers.forEach(header => {
+
+            headers.forEach(h => {
                 const th = document.createElement('th');
-                th.textContent = header.text;
-                if (header.col === 'color') {
-                    th.className = 'color-header';
-                }
-                if (header.sortable) {
-                    th.dataset.column = header.col;
-                    th.style.cursor = 'pointer';
-                }
+                th.textContent = h.text;
+                if (h.col === 'color') th.className = 'color-header';
                 headerTr.appendChild(th);
             });
-            
-            // Сначала добавляем заголовок секции в thead
+
             thead.appendChild(headerRow);
-            // Затем добавляем заголовки колонок в thead (после заголовка секции)
             thead.appendChild(headerTr);
-            
-            // Тело таблицы
+
             const tbody = document.createElement('tbody');
-            colors.forEach(color => {
-                tbody.appendChild(renderTableRow(color));
-            });
-            
+            colors.forEach(color => tbody.appendChild(renderTableRow(color)));
+
             table.appendChild(thead);
             table.appendChild(tbody);
-            
-            // #region agent log
-            fetch('http://127.0.0.1:7242/ingest/e7733f3e-f060-46bf-8fe8-79b2bd25ac6d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'review-colors.html:721',message:'Table structure order check',data:{childrenOrder:Array.from(table.children).map((el,i)=>({index:i,tagName:el.tagName,className:el.className,textContent:el.textContent?.substring(0,50)})),theadChildren:Array.from(thead.children).map((el,i)=>({index:i,tagName:el.tagName,className:el.className,textContent:el.textContent?.substring(0,50)})),headerRowTag:headerRow.tagName,headerRowClass:headerRow.className,theadTag:thead.tagName,theadClass:thead.className},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-            // #endregion
-            
-            // Обработчики сортировки
-            headerTr.querySelectorAll('th[data-column]').forEach(th => {
-                let sortDirection = null;
-                th.addEventListener('click', () => {
-                    const column = th.dataset.column;
-                    
-                    // Переключаем направление сортировки
-                    if (th.classList.contains('sort-asc')) {
-                        sortDirection = 'desc';
-                        th.classList.remove('sort-asc');
-                        th.classList.add('sort-desc');
-                    } else if (th.classList.contains('sort-desc')) {
-                        sortDirection = 'asc';
-                        th.classList.remove('sort-desc');
-                        th.classList.add('sort-asc');
-                    } else {
-                        sortDirection = 'asc';
-                        // Убираем сортировку с других колонок
-                        headerTr.querySelectorAll('th').forEach(h => {
-                            h.classList.remove('sort-asc', 'sort-desc');
-                        });
-                        th.classList.add('sort-asc');
-                    }
-                    
-                    // Сортируем цвета в этой секции
-                    const sortedColors = sortColors(colors, column, sortDirection);
-                    tbody.innerHTML = '';
-                    sortedColors.forEach(color => {
-                        tbody.appendChild(renderTableRow(color));
-                    });
-                });
-            });
-            
             container.appendChild(table);
         }
 
-        // Группирует цвета по категориям
-        function groupColorsByCategory(colors) {
-            const grouped = {};
-            colors.forEach(color => {
-                const category = color.category || 'other';
-                if (!grouped[category]) {
-                    grouped[category] = [];
-                }
-                grouped[category].push(color);
-            });
-            return grouped;
-        }
-
-        // Рендерит все таблицы по секциям
         function renderTables(colors) {
             const container = document.getElementById('colors-container');
             container.innerHTML = '';
 
-            if (colors.length === 0) {
+            if (!colors || colors.length === 0) {
                 container.innerHTML = '<p class="text-center text-muted">Цвета не найдены</p>';
                 return;
             }
 
-            // Группируем по категориям
             const grouped = groupColorsByCategory(colors);
-            
-            // Порядок категорий
             const categoryOrder = ['bootstrap', 'danger', 'success', 'theme', 'ui', 'header', 'dropdown', 'other'];
-            
             categoryOrder.forEach(category => {
-                if (grouped[category]) {
-                    renderSectionTable(category, grouped[category], container);
-                }
+                if (grouped[category]) renderSectionTable(category, grouped[category], container);
             });
         }
 
@@ -805,18 +279,15 @@
             const searchFilter = document.getElementById('filter-search').value.toLowerCase();
 
             let filtered = allColors;
-
-            if (categoryFilter) {
-                filtered = filtered.filter(color => color.category === categoryFilter);
-            }
+            if (categoryFilter) filtered = filtered.filter(c => c.category === categoryFilter);
 
             if (searchFilter) {
-                filtered = filtered.filter(color => {
+                filtered = filtered.filter(c => {
                     const searchText = (
-                        color.identifier + ' ' +
-                        (color.usage?.join(' ') || '') +
-                        (color.file || '') +
-                        (color.description || '')
+                        c.identifier + ' ' +
+                        (c.rawValue || '') + ' ' +
+                        (c.usage?.join(' ') || '') + ' ' +
+                        (c.file || '')
                     ).toLowerCase();
                     return searchText.includes(searchFilter);
                 });
@@ -825,30 +296,33 @@
             renderTables(filtered);
         }
 
-        // Экспортируем colorData в window для использования в других страницах
-        window.colorData = colorData;
+        async function loadAllColors() {
+            const pipeline = window.ReviewManager?.ReviewDataPipeline;
+            if (!pipeline?.scanColors) return [];
+            const res = await pipeline.scanColors();
+            const raw = res?.colors || [];
+            // Нормализуем в формат, ожидаемый UI
+            return raw.map(c => ({
+                category: c.category || 'other',
+                identifier: c.identifier,
+                rawValue: c.rawValue || null,
+                usage: Array.isArray(c.usageFiles) ? c.usageFiles : [],
+                file: c.file || ''
+            }));
+        }
 
-        // Инициализация
-        document.addEventListener('DOMContentLoaded', function() {
-            // Преобразуем объект colorData в массив
-            allColors = Object.values(colorData);
-            
-            // Обогащаем данные реальными значениями из CSS
-            allColors.forEach(color => {
-                const cssValue = getColorValue(color.identifier);
-                if (cssValue && !color.hsl && !color.rgb && !color.hex) {
-                    // Пытаемся определить тип значения
-                    if (cssValue.includes('hsl')) {
-                        color.hsl = cssValue;
-                    } else if (cssValue.includes('rgb')) {
-                        color.rgb = cssValue.match(/rgb\(([^)]+)\)/)?.[1] || null;
-                    }
-                }
-            });
-            
-            renderTables(allColors);
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                allColors = await loadAllColors();
+                renderTables(allColors);
+            } catch (e) {
+                console.error(e);
+                window.ReviewManager?.ReviewSystemMessages?.post?.('colors.error', {
+                    id: 'colors-load',
+                    details: String(e?.message || e)
+                });
+            }
 
-            // Настройка фильтров
             document.getElementById('filter-category').addEventListener('change', applyFilters);
             document.getElementById('filter-search').addEventListener('input', applyFilters);
         });

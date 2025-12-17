@@ -10,6 +10,9 @@
     <link rel="stylesheet" href="../review-styles.css">
     <!-- Стили layout (включая стили для alert-close-button-wrapper) -->
     <link rel="stylesheet" href="../styles/layout.css">
+    <!-- Level 2: единое хранилище и единый компонент сообщений -->
+    <script src="../utils/messages-store.js"></script>
+    <script src="../components/system-messages.js"></script>
     <!-- Единый менеджер для всех review (хедер с вкладками) - загружаем в head для ранней инициализации -->
     <script src="../review-manager.js"></script>
 </head>
@@ -17,200 +20,127 @@
     <!-- Хедер с вкладками будет вставлен здесь через review-manager.js -->
     
     <div id="app" class="container-fluid">
-        <div class="messages-container mt-4">
-            <div class="row g-4">
-                <!-- Левая колонка: Шаблоны используемых сообщений -->
-                <div class="col-md-6">
-                    <div class="d-flex flex-column gap-3">
-                        <!-- cgError - Ошибка загрузки данных CoinGecko -->
-                        <alert-message 
-                            type="danger" 
-                            :dismissible="true"
-                            :small="false"
-                        >
-                            <i class="fas fa-exclamation-circle me-1"></i>Не удалось загрузить данные
-                        </alert-message>
-                        
-                        <!-- quoteError - Ошибка загрузки цитаты -->
-                        <alert-message 
-                            type="warning" 
-                            :dismissible="true"
-                            :small="false"
-                        >
-                            <i class="fas fa-exclamation-triangle me-1"></i>Не удалось загрузить цитату
-                        </alert-message>
-                        
-                        <!-- passwordError - Неверный код доступа -->
-                        <alert-message 
-                            type="danger" 
-                            :dismissible="true"
-                            :small="false"
-                        >
-                            <i class="fas fa-exclamation-circle me-1"></i>Неверный код
-                        </alert-message>
-                        
-                        <!-- importStatus success - Успешный импорт/экспорт -->
-                        <alert-message 
-                            type="success" 
-                            :dismissible="true"
-                            :small="false"
-                        >
-                            <i class="fas fa-check-circle me-1"></i>Настройки проекта успешно экспортированы (чувствительные данные обфусцированы)
-                        </alert-message>
-                        
-                        <!-- importStatus error - Ошибка импорта/экспорта -->
-                        <alert-message 
-                            type="danger" 
-                            :dismissible="true"
-                            :small="false"
-                        >
-                            <i class="fas fa-exclamation-circle me-1"></i>Ошибка при экспорте настроек: [текст ошибки]
-                        </alert-message>
-                        
-                        <!-- perplexityApiKey warning - Предупреждение об отсутствии API ключа -->
-                        <alert-message 
-                            type="warning" 
-                            :dismissible="true"
-                            :small="false"
-                        >
-                            <i class="fas fa-exclamation-triangle me-1"></i>Для работы необходимо указать API ключ
-                        </alert-message>
-                        
-                        <!-- perplexityApiKey success - API ключ настроен -->
-                        <alert-message 
-                            type="success" 
-                            :dismissible="true"
-                            :small="false"
-                        >
-                            <i class="fas fa-check-circle me-1"></i>API ключ настроен
-                        </alert-message>
-                        
-                        <!-- failedTickers - Предупреждение о неудачных тикерах -->
-                        <alert-message 
-                            type="warning" 
-                            :dismissible="true"
-                            :small="false"
-                        >
-                            <i class="fas fa-exclamation-triangle me-1"></i>Некоторые монеты не удалось добавить. Повторите попытку позже.
-                        </alert-message>
+        <!-- Auto-scan: каталог сообщений из фактической кодовой базы -->
+        <div class="mt-4 mb-3">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Auto-scan</h5>
+                    <small v-if="autoMessagesMeta" class="text-muted">{{ autoMessagesMeta }}</small>
+                </div>
+                <div class="card-body">
+                    <!-- Единый хост сообщений для Auto-scan (показывается только при наличии сообщений) -->
+                    <system-messages scope="review-messages-auto-scan" :include-unscoped="false" :limit="2"></system-messages>
+
+                    <div v-if="autoMessagesLoading" class="text-muted">Сканирую сообщения в проекте…</div>
+                    <div v-else-if="autoMessagesError"></div>
+                    <div v-else>
+                        <div v-if="autoMessages.length === 0" class="text-muted">Сообщения не найдены (или недоступен источник данных).</div>
+                        <div v-else class="table-responsive">
+                            <table class="table table-sm review-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 110px;">Тип</th>
+                                        <th>Текст (сниппет)</th>
+                                        <th style="width: 240px;">Где найдено</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="(m, idx) in autoMessages" :key="idx">
+                                        <td><span class="badge bg-secondary">{{ m.type }}</span></td>
+                                        <td style="font-size: 0.9rem;">{{ m.text }}</td>
+                                        <td class="usage-cell">
+                                            <select v-if="m.files && m.files.length > 1" class="form-select form-select-sm" style="width: auto; display: inline-block; min-width: 200px; font-size: 0.85rem;">
+                                                <option v-for="f in m.files" :key="f" :value="f">{{ f }}</option>
+                                            </select>
+                                            <code v-else-if="m.files && m.files.length === 1" style="font-size: 0.85rem;">{{ m.files[0] }}</code>
+                                            <span v-else class="text-muted">—</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
-                
-                <!-- Правая колонка: Образцы сообщений -->
+            </div>
+        </div>
+
+        <div class="messages-container mt-4">
+            <div class="row g-4">
+                <!-- Левая колонка: быстрые пресеты -->
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Шаблоны (клик создаёт сообщение)</h5>
+                            <button class="btn btn-sm btn-outline-secondary" @click="clearScope(scopes.left)">Очистить</button>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex flex-column gap-2">
+                                <button class="btn btn-sm btn-outline-danger text-start" @click="presetLeft('cgError')">
+                                    cgError — Не удалось загрузить данные (danger)
+                                </button>
+                                <button class="btn btn-sm btn-outline-warning text-start" @click="presetLeft('quoteError')">
+                                    quoteError — Не удалось загрузить цитату (warning)
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger text-start" @click="presetLeft('passwordError')">
+                                    passwordError — Неверный код (danger)
+                                </button>
+                                <button class="btn btn-sm btn-outline-success text-start" @click="presetLeft('importSuccess')">
+                                    importStatus — Экспорт успешен (success)
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger text-start" @click="presetLeft('importError')">
+                                    importStatus — Ошибка экспорта (danger)
+                                </button>
+                                <button class="btn btn-sm btn-outline-warning text-start" @click="presetLeft('apiKeyMissing')">
+                                    perplexityApiKey — Нужен API ключ (warning)
+                                </button>
+                                <button class="btn btn-sm btn-outline-success text-start" @click="presetLeft('apiKeyOk')">
+                                    perplexityApiKey — API ключ настроен (success)
+                                </button>
+                                <button class="btn btn-sm btn-outline-warning text-start" @click="presetLeft('failedTickers')">
+                                    failedTickers — Некоторые монеты не удалось добавить (warning)
+                                </button>
+                            </div>
+
+                            <div class="mt-3">
+                                <system-messages :scope="scopes.left" :include-unscoped="false" :limit="6"></system-messages>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Правая колонка: темы -->
                 <div class="col-md-6">
                     <!-- Light Theme -->
                     <div class="card mb-4">
-                        <div class="card-header">
+                        <div class="card-header d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">Light Theme</h5>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-secondary" @click="clearScope(scopes.light)">Очистить</button>
+                                <button class="btn btn-sm btn-outline-info" @click="presetTheme(scopes.light, 'info')">Info</button>
+                                <button class="btn btn-sm btn-outline-success" @click="presetTheme(scopes.light, 'success')">Success</button>
+                                <button class="btn btn-sm btn-outline-warning" @click="presetTheme(scopes.light, 'warning')">Warning</button>
+                                <button class="btn btn-sm btn-outline-danger" @click="presetTheme(scopes.light, 'danger')">Danger</button>
+                            </div>
                         </div>
                         <div class="card-body">
-                            <!-- Info сообщение -->
-                            <alert-message 
-                                type="info" 
-                                :dismissible="true"
-                                :small="false"
-                            >
-                                <i class="fas fa-info-circle me-2"></i>
-                                <strong>Информация о прогнозе:</strong> Математическая модель завершила расчет метрик для выбранного горизонта прогноза. 
-                                Обновлены значения медианных индикаторов, коэффициентов динамики и скорректированных весов активов. 
-                                Рекомендуется проверить распределение портфеля и при необходимости выполнить ребалансировку согласно текущей стратегии.
-                            </alert-message>
-                            
-                            <!-- Success сообщение -->
-                            <alert-message 
-                                v-if="showAlert"
-                                type="success" 
-                                :dismissible="true"
-                                :small="false"
-                                @close="closeAlert"
-                            >
-                                <i class="fas fa-check-circle me-2"></i>
-                                <strong>Портфель сохранен:</strong> Все изменения в составе портфеля, весах активов и настройках стратегии успешно сохранены в локальное хранилище. 
-                                Данные синхронизированы с IndexedDB, временные ряды обновлены. 
-                                Вы можете продолжить работу с портфелем или экспортировать текущую конфигурацию для резервного копирования.
-                            </alert-message>
-                            
-                            <!-- Warning сообщение -->
-                            <alert-message 
-                                type="warning" 
-                                :dismissible="true"
-                                :small="false"
-                            >
-                                <i class="fas fa-exclamation-triangle me-2"></i>
-                                <strong>Внимание: недостаточно данных:</strong> Для расчета корреляций и построения индексов доступно менее 30 дней исторических данных по некоторым активам. 
-                                Это может повлиять на точность прогнозных метрик и рекомендаций по ребалансировке. 
-                                Рекомендуется дождаться накопления достаточного объема данных или использовать альтернативные источники информации.
-                            </alert-message>
-                            
-                            <!-- Danger сообщение -->
-                            <alert-message 
-                                type="danger" 
-                                :dismissible="true"
-                                :small="false"
-                            >
-                                <i class="fas fa-exclamation-circle me-2"></i>
-                                <strong>Ошибка загрузки данных:</strong> Не удалось получить актуальные котировки из CoinGecko API из-за превышения лимита запросов или проблем с сетевым соединением. 
-                                Приложение продолжит работу с кэшированными данными, но они могут быть устаревшими. 
-                                Пожалуйста, проверьте подключение к интернету и повторите попытку обновления через несколько минут.
-                            </alert-message>
+                            <system-messages :scope="scopes.light" :include-unscoped="false" :limit="4"></system-messages>
                         </div>
                     </div>
-                    
+
                     <!-- Dark Theme -->
                     <div class="card mb-4" data-bs-theme="dark">
-                        <div class="card-header">
+                        <div class="card-header d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">Dark Theme</h5>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-secondary" @click="clearScope(scopes.dark)">Очистить</button>
+                                <button class="btn btn-sm btn-outline-info" @click="presetTheme(scopes.dark, 'info')">Info</button>
+                                <button class="btn btn-sm btn-outline-success" @click="presetTheme(scopes.dark, 'success')">Success</button>
+                                <button class="btn btn-sm btn-outline-warning" @click="presetTheme(scopes.dark, 'warning')">Warning</button>
+                                <button class="btn btn-sm btn-outline-danger" @click="presetTheme(scopes.dark, 'danger')">Danger</button>
+                            </div>
                         </div>
                         <div class="card-body">
-                            <!-- Info сообщение -->
-                            <alert-message 
-                                type="info" 
-                                :dismissible="true"
-                                :small="false"
-                            >
-                                <i class="fas fa-info-circle me-2"></i>
-                                <strong>Информация о прогнозе:</strong> Математическая модель завершила расчет метрик для выбранного горизонта прогноза. 
-                                Обновлены значения медианных индикаторов, коэффициентов динамики и скорректированных весов активов. 
-                                Рекомендуется проверить распределение портфеля и при необходимости выполнить ребалансировку согласно текущей стратегии.
-                            </alert-message>
-                            
-                            <!-- Success сообщение -->
-                            <alert-message 
-                                v-if="showAlert"
-                                type="success" 
-                                :dismissible="true"
-                                :small="false"
-                                @close="closeAlert"
-                            >
-                                <i class="fas fa-check-circle me-2"></i>
-                                <strong>Портфель сохранен:</strong> Все изменения в составе портфеля, весах активов и настройках стратегии успешно сохранены в локальное хранилище. 
-                                Данные синхронизированы с IndexedDB, временные ряды обновлены. 
-                                Вы можете продолжить работу с портфелем или экспортировать текущую конфигурацию для резервного копирования.
-                            </alert-message>
-                            
-                            <!-- Warning сообщение -->
-                            <alert-message 
-                                type="warning" 
-                                :dismissible="true"
-                                :small="false"
-                            >
-                                <i class="fas fa-exclamation-triangle me-2"></i>
-                                <strong>Внимание: недостаточно данных:</strong> Для расчета корреляций и построения индексов доступно менее 30 дней исторических данных по некоторым активам. 
-                                Это может повлиять на точность прогнозных метрик и рекомендаций по ребалансировке. 
-                                Рекомендуется дождаться накопления достаточного объема данных или использовать альтернативные источники информации.
-                            </alert-message>
-                            
-                            <!-- Danger сообщение -->
-                            <alert-message 
-                                type="danger" 
-                                :dismissible="true"
-                                :small="false"
-                            >
-                                <i class="fas fa-exclamation-circle me-2"></i>
-                                <strong>Ошибка загрузки данных:</strong> Не удалось получить актуальные котировки из CoinGecko API из-за превышения лимита запросов или проблем с сетевым соединением. 
-                                Приложение продолжит работу с кэшированными данными, но они могут быть устаревшими. 
-                                Пожалуйста, проверьте подключение к интернету и повторите попытку обновления через несколько минут.
-                            </alert-message>
+                            <system-messages :scope="scopes.dark" :include-unscoped="false" :limit="4"></system-messages>
                         </div>
                     </div>
                 </div>
@@ -286,93 +216,125 @@
         </button>
     </script>
     
-    <!-- X-Template для компонента alert-сообщения (ДОЛЖЕН БЫТЬ ДО компонентов) -->
-    <script type="text/x-template" id="alert-message-template-review">
-        <div v-if="isVisible" class="alert-message-wrapper" ref="alertElement">
-            <div class="alert-close-button-wrapper">
-                <button 
-                    v-if="dismissible"
-                    ref="closeButton"
-                    type="button"
-                    class="btn btn-link btn-close-custom"
-                    :class="{'btn-sm': small}"
-                    @click="handleClose"
-                    aria-label="Закрыть"
-                >
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M2 2 L14 14 M14 2 L2 14" 
-                              stroke="currentColor" 
-                              stroke-width="0.25" 
-                              stroke-linecap="round" 
-                              fill="none"/>
-                    </svg>
-                </button>
-            </div>
-            <div :class="alertClasses" role="alert">
-                <slot></slot>
-            </div>
-        </div>
-    </script>
-    
-    <!-- Компоненты -->
+    <!-- Компоненты (для demo-кнопок и единых сообщений) -->
     <script src="../../ui/components/button.js"></script>
-    <script src="../../ui/components/alert-message.js"></script>
-    
-    <!-- Локальная копия компонента alert-message с правильным шаблоном -->
-    <script>
-        // Переопределяем компонент для использования правильного шаблона
-        if (window.cmpAlertMessage) {
-            window.cmpAlertMessageReview = {
-                ...window.cmpAlertMessage,
-                template: '#alert-message-template-review'
-            };
-        }
-    </script>
     
     <script>
-        // Инициализация review-хедера
+        // Инициализация Vue приложения (Auto-scan + demo сообщений)
         document.addEventListener('DOMContentLoaded', function() {
-            // Определяем текущий review из URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const currentReview = urlParams.get('review') || 'messages';
-            
-            // Создаем хедер с вкладками
-            if (typeof createReviewHeader === 'function') {
-                const header = createReviewHeader(currentReview);
-                if (header && header instanceof Node && document.body.firstChild) {
-                    document.body.insertBefore(header, document.body.firstChild);
-                } else if (header && header instanceof Node) {
-                    // Если firstChild отсутствует, просто добавляем в начало body
-                    document.body.insertBefore(header, document.body.firstChild || null);
-                }
-            }
-            
-            // Инициализация Vue приложения для компонента alert-message
-            if (typeof Vue !== 'undefined' && window.cmpButton && window.cmpAlertMessage) {
-                const { createApp } = Vue;
-                
-                const app = createApp({
-                    data() {
-                        return {
-                            showAlert: true
-                        };
-                    },
-                    methods: {
-                        closeAlert() {
-                            this.showAlert = false;
-                        }
+            if (typeof Vue === 'undefined' || !window.AppMessages || !window.cmpSystemMessages) return;
+
+            const { createApp } = Vue;
+
+            const app = createApp({
+                data() {
+                    return {
+                        scopes: {
+                            left: 'review-messages-left',
+                            light: 'review-messages-light',
+                            dark: 'review-messages-dark'
+                        },
+                        autoMessagesLoading: true,
+                        autoMessagesError: null,
+                        autoMessagesMeta: null,
+                        autoMessages: []
+                    };
+                },
+                async mounted() {
+                    const pipeline = window.ReviewManager?.ReviewDataPipeline;
+                    if (!pipeline?.scanMessages) {
+                        this.autoMessagesLoading = false;
+                        this.autoMessagesError = 'ReviewDataPipeline недоступен.';
+                        window.AppMessages?.replace?.('rm_auto_scan_error', {
+                            scope: 'review-messages-auto-scan',
+                            type: 'danger',
+                            text: 'Auto-scan: ReviewDataPipeline недоступен.',
+                            details: this.autoMessagesError
+                        });
+                        return;
                     }
-                });
-                
-                // Регистрация компонентов
-                app.component('cmp-button', window.cmpButton);
-                // Используем локальную копию компонента с правильным шаблоном
-                const alertComponent = window.cmpAlertMessageReview || window.cmpAlertMessage;
-                app.component('alert-message', alertComponent);
-                
-                // Монтирование приложения
-                app.mount('#app');
-            }
+
+                    try {
+                        const res = await pipeline.scanMessages();
+                        this.autoMessages = Array.isArray(res?.messages) ? res.messages : [];
+                        this.autoMessagesMeta = res?.generatedAt ? `generatedAt: ${res.generatedAt}` : null;
+                        this.autoMessagesLoading = false;
+                        window.AppMessages?.dismiss?.('rm_auto_scan_error');
+                    } catch (e) {
+                        this.autoMessagesLoading = false;
+                        this.autoMessagesError = String(e?.message || e);
+                        window.AppMessages?.replace?.('rm_auto_scan_error', {
+                            scope: 'review-messages-auto-scan',
+                            type: 'danger',
+                            text: 'Auto-scan сообщений: ошибка.',
+                            details: this.autoMessagesError
+                        });
+                        window.ReviewManager?.ReviewSystemMessages?.post?.('messages.scan.error', {
+                            id: 'messages-scan',
+                            details: this.autoMessagesError
+                        });
+                    }
+                },
+                methods: {
+                    clearScope(scope) {
+                        window.AppMessages?.clear?.(scope);
+                    },
+                    pushDemo({ id, scope, type, text, details }) {
+                        if (!window.AppMessages) return;
+                        window.AppMessages.replace?.(id, { scope, type, text, details });
+                    },
+                    presetLeft(key) {
+                        const scope = this.scopes.left;
+                        const map = {
+                            cgError: { id: 'rm_left_cg', type: 'danger', text: 'Не удалось загрузить данные', details: 'CoinGecko: пример системной ошибки.' },
+                            quoteError: { id: 'rm_left_quote', type: 'warning', text: 'Не удалось загрузить цитату', details: 'Perplexity: пример предупреждения.' },
+                            passwordError: { id: 'rm_left_pin', type: 'danger', text: 'Неверный код', details: 'Splash: неверный PIN.' },
+                            importSuccess: { id: 'rm_left_import_ok', type: 'success', text: 'Экспорт успешен', details: 'Чувствительные данные обфусцированы.' },
+                            importError: { id: 'rm_left_import_err', type: 'danger', text: 'Ошибка экспорта настроек', details: 'Пример текста ошибки…' },
+                            apiKeyMissing: { id: 'rm_left_key_missing', type: 'warning', text: 'Для работы необходимо указать API ключ', details: 'Perplexity API key отсутствует.' },
+                            apiKeyOk: { id: 'rm_left_key_ok', type: 'success', text: 'API ключ настроен', details: 'Perplexity API key сохранён.' },
+                            failedTickers: { id: 'rm_left_failed_tickers', type: 'warning', text: 'Некоторые монеты не удалось добавить', details: 'Повторите попытку позже.' }
+                        };
+                        const v = map[key];
+                        if (!v) return;
+                        this.pushDemo({ ...v, scope });
+                    },
+                    presetTheme(scope, type) {
+                        const base = {
+                            info: {
+                                id: `${scope}_info`,
+                                type: 'info',
+                                text: 'Информация о прогнозе',
+                                details: 'Модель завершила расчёт метрик; проверьте распределение портфеля.'
+                            },
+                            success: {
+                                id: `${scope}_success`,
+                                type: 'success',
+                                text: 'Портфель сохранён',
+                                details: 'Изменения сохранены в локальное хранилище.'
+                            },
+                            warning: {
+                                id: `${scope}_warning`,
+                                type: 'warning',
+                                text: 'Внимание: недостаточно данных',
+                                details: 'Данных < 30 дней по некоторым активам — точность может снизиться.'
+                            },
+                            danger: {
+                                id: `${scope}_danger`,
+                                type: 'danger',
+                                text: 'Ошибка загрузки данных',
+                                details: 'CoinGecko API: лимит запросов / сеть. Используйте кэш.'
+                            }
+                        }[type];
+                        if (!base) return;
+                        this.pushDemo({ ...base, scope });
+                    }
+                }
+            });
+
+            app.component('cmp-button', window.cmpButton);
+            app.component('system-messages', window.cmpSystemMessages);
+            app.mount('#app');
         });
     </script>
 </body>

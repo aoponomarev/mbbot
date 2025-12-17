@@ -346,6 +346,48 @@ Example structure: "For in the pursuit of understanding, we often discover that 
     showSplash(newValue) {
       if (newValue) {
         this.focusInput();
+      } else {
+        // Level 2 migration (Step 3, case 2): при закрытии сплэша чистим его сообщения
+        try {
+          window.AppMessages?.clear?.('splash');
+        } catch (e) {
+          // ignore
+        }
+      }
+    },
+
+    // Level 2 migration (Step 3, case 2): passwordError -> AppMessages (scope: splash)
+    passwordError(newValue) {
+      if (!window.AppMessages) return;
+      const id = 'splash_pin_error';
+      if (newValue) {
+        window.AppMessages.replace?.(id, { scope: 'splash', type: 'danger', text: 'Неверный код.' });
+      } else {
+        window.AppMessages.dismiss?.(id);
+      }
+    },
+
+    // Level 2 migration (Step 3, case 2): quoteError -> AppMessages (scope: splash)
+    quoteError(newValue) {
+      if (!window.AppMessages) return;
+      const id = 'splash_quote_error';
+      if (newValue && !this.quoteLoading) {
+        window.AppMessages.replace?.(id, { scope: 'splash', type: 'warning', text: 'Не удалось загрузить цитату.' });
+      } else {
+        window.AppMessages.dismiss?.(id);
+      }
+    },
+
+    // Level 2 migration (Step 3, case 2): гарантируем, что сообщение quoteError появится
+    // ПОСЛЕ завершения загрузки (quoteLoading=false), даже если quoteError выставился раньше.
+    quoteLoading(newValue) {
+      if (!window.AppMessages) return;
+      const id = 'splash_quote_error';
+      const shouldShow = Boolean(this.quoteError) && !Boolean(newValue);
+      if (shouldShow) {
+        window.AppMessages.replace?.(id, { scope: 'splash', type: 'warning', text: 'Не удалось загрузить цитату.' });
+      } else {
+        window.AppMessages.dismiss?.(id);
       }
     }
   },

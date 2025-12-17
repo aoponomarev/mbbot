@@ -50,6 +50,16 @@ window.cmpSettings = {
   },
 
   methods: {
+    syncApiKeyMessage() {
+      if (!window.AppMessages) return;
+      const id = 'settings_api_key_status';
+      const hasKey = Boolean(String(this.perplexityApiKey || '').trim());
+      if (hasKey) {
+        window.AppMessages.replace?.(id, { scope: 'settings', type: 'success', text: 'API ключ настроен' });
+      } else {
+        window.AppMessages.replace?.(id, { scope: 'settings', type: 'warning', text: 'Для работы необходимо указать API ключ' });
+      }
+    },
     saveApiKey() {
       if (this.perplexityApiKey) {
         // Используем обфусцированное хранилище для безопасности
@@ -95,6 +105,10 @@ window.cmpSettings = {
     }
   },
 
+  mounted() {
+    this.syncApiKeyMessage();
+  },
+
   computed: {
     importStatus() {
       const root = this.$root || window.appRoot;
@@ -105,6 +119,9 @@ window.cmpSettings = {
   watch: {
     '$root.importStatus'() {
       this.$forceUpdate();
+    },
+    perplexityApiKey() {
+      this.syncApiKeyMessage();
     },
     perplexityModel(newModel) {
       localStorage.setItem('perplexityModel', newModel);

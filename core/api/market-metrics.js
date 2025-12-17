@@ -47,6 +47,15 @@ window.marketMetrics = {
 
   // Получение VIX из нескольких источников (fallback стратегия)
   async fetchVIX() {
+    // file:// (origin:null) почти всегда упирается в CORS на публичных источниках.
+    // Чтобы не спамить консоль ошибками, в этом режиме VIX считаем недоступным.
+    if (String(window.location && window.location.protocol) === 'file:') {
+      vixVal = null;
+      vixAvailable = false;
+      this.updateWindowMetrics();
+      return { success: false, value: null, numericValue: null };
+    }
+
     const sources = [
       async () => {
         const resp = await fetch('https://api.allorigins.win/raw?url=https://query1.finance.yahoo.com/v8/finance/chart/%5EVIX?interval=1d&range=1d');

@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "messages": {
+    "source.fs": {
+      "level": "info",
+      "text": "Источник данных: локальная папка проекта (FS)."
+    },
+    "source.github": {
+      "level": "info",
+      "text": "Источник данных: GitHub.",
+      "details": "Список файлов и чтение исходников берутся из репозитория."
+    },
+    "source.depgraph": {
+      "level": "warning",
+      "text": "Источник данных: DepGraph (только подключённые файлы).",
+      "details": "Неполный режим: файлы, не подключённые из entrypoint’ов, могут отсутствовать.",
+      "actions": ["chooseFolderFull"]
+    },
+
+    "github.unavailable": {
+      "level": "warning",
+      "text": "GitHub источник недоступен — пробую fallback."
+    },
+
+    "chooseFolder.prompt": {
+      "level": "warning",
+      "text": "Не удалось собрать список файлов автоматически. Выберите папку проекта.",
+      "actions": ["chooseFolder"]
+    },
+
+    "stats.loading": {
+      "level": "info",
+      "text": "Сбор статистики: читаю файлы проекта…"
+    },
+    "stats.done": {
+      "level": "info",
+      "text": "Сбор статистики завершён."
+    },
+    "stats.error": {
+      "level": "error",
+      "text": "Не удалось собрать статистику проекта.",
+      "actions": ["retry"]
+    },
+
+    "icons.error": {
+      "level": "error",
+      "text": "Не удалось собрать каталог иконок."
+    },
+    "colors.error": {
+      "level": "error",
+      "text": "Не удалось собрать каталог цветов."
+    },
+    "messages.scan.error": {
+      "level": "error",
+      "text": "Auto-scan сообщений: ошибка."
+    }
+  },
+  "actions": {
+    "chooseFolderFull": {
+      "label": "Выбрать папку (полный режим)",
+      "kind": "primary"
+    },
+    "chooseFolder": {
+      "label": "Выбрать папку проекта",
+      "kind": "primary"
+    },
+    "retry": {
+      "label": "Повторить",
+      "kind": "primary"
+    }
+  }
+}

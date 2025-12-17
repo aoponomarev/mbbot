@@ -690,6 +690,8 @@ main .cg-coin-sort-dropdown {
     /* Значение скорректировано: уменьшаем подъем ещё на ~5px для точного выравнивания */
     margin-top: calc(-2.2rem + 0.45ex) !important;
     top: 100% !important;
+    /* Должна быть поверх таблицы (у анимируемых строк z-index=100) */
+    z-index: var(--z-index-dropdown);
 }
 
 /* =========================

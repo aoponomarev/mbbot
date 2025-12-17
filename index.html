@@ -32,10 +32,15 @@
 <body class="min-vh-100">
     <div id="app">
         <!-- Компонент сплэш-экрана -->
-        <splash-screen :last-commit-message="lastCommitMessage" :perplexity-model="perplexityModel"></splash-screen>
+        <splash-screen ref="splash" :last-commit-message="lastCommitMessage" :perplexity-model="perplexityModel"></splash-screen>
 
         <!-- Компонент хэдера -->
         <app-header :horizon-days="horizonDays" @update:horizon-days="horizonDays = $event"></app-header>
+
+        <!-- Единая область системных сообщений (Level 2, Step 0: инфраструктура) -->
+        <div class="container-fluid app-main-container avto-X7pL2nQ px-0 px-md-2 mt-3">
+            <system-messages scope="global"></system-messages>
+        </div>
 
         <!-- Компонент футера -->
         <app-footer></app-footer>
@@ -61,6 +66,7 @@
                 <!-- Компонент виджета CoinGecko (показывается на вкладках "%" и "Компл. дельты") -->
                 <app-coins-manager 
                     v-if="!showSettings && (activeTab === 'percent' || activeTab === 'complex-deltas')"
+                    ref="coinsManager"
                     :horizon-days="horizonDays"
                 ></app-coins-manager>
             </main>
@@ -104,9 +110,8 @@
                 <p v-if="lastCommitMessage" class="text-muted small mb-3 app-splash-commit-message">
                     {{ lastCommitMessage }}<span v-if="quoteLoading">{{ loadingDotsString }}</span><span v-if="quote && !quoteLoading">. {{ quote }}</span>
                 </p>
-                <div v-if="quoteError && !quoteLoading" class="text-warning small mb-3 app-splash-quote-error">
-                    <i class="fas fa-exclamation-triangle me-1"></i>Не удалось загрузить цитату
-                </div>
+                <!-- Level 2 migration (Step 3, case 2): единый хост сообщений для сплэша -->
+                <system-messages scope="splash" :include-unscoped="false" :limit="2"></system-messages>
 
                 <!-- API Key настройка -->
                 <div class="pt-3 mt-3">
@@ -136,9 +141,6 @@
                     </div>
                 </div>
 
-                <div v-if="passwordError" class="alert alert-danger mt-3 mb-0">
-                    <small>Неверный код</small>
-                </div>
             </div>
         </div>
     </script>
@@ -301,22 +303,22 @@
                             <menu-item
                                 :label="themeMenuLabel"
                                 item-id="settings-theme"
-                                @click.stop="handleThemeMenuClick"
+                                @click="handleThemeMenuClick"
                             ></menu-item>
                             <menu-item
                                 label="Обновить страницу"
                                 item-id="settings-refresh"
-                                @click.stop="handleRefreshMenuClick"
+                                @click="handleRefreshMenuClick"
                             ></menu-item>
                             <menu-item
                                 label="Экспорт в JSON"
                                 item-id="settings-export"
-                                @click.stop="handleExportMenuClick"
+                                @click="handleExportMenuClick"
                             ></menu-item>
                             <menu-item
                                 label="Импорт из JSON"
                                 item-id="settings-import"
-                                @click.stop="handleImportMenuClick"
+                                @click="handleImportMenuClick"
                             ></menu-item>
                         </dropdown-menu>
                     </div>
@@ -372,25 +374,9 @@
                             </select>
                         </div>
 
-                        <div v-if="!perplexityApiKey" class="alert alert-warning mb-0">
-                            <small><i class="fas fa-exclamation-triangle me-1"></i>Для работы необходимо указать API ключ</small>
-                        </div>
-                        <div v-else class="alert alert-success mb-0">
-                            <small><i class="fas fa-check-circle me-1"></i>API ключ настроен</small>
-                        </div>
+                        <!-- Level 2 migration (Step 3, case 4): единый хост сообщений для настроек -->
+                        <system-messages scope="settings" :include-unscoped="false" :limit="2"></system-messages>
                     </div>
-
-                    <!-- Статус импорта (если есть) -->
-                    <div v-if="importStatus" class="mt-2">
-                            <div v-if="importStatus.type === 'success'" class="alert alert-success alert-dismissible fade show mb-0" role="alert">
-                                <small><i class="fas fa-check-circle me-1"></i>{{ importStatus.message }}</small>
-                                <button type="button" class="btn-close btn-close-sm" @click="closeImportStatus"></button>
-                            </div>
-                            <div v-else-if="importStatus.type === 'error'" class="alert alert-danger alert-dismissible fade show mb-0" role="alert">
-                                <small><i class="fas fa-exclamation-circle me-1"></i>{{ importStatus.message }}</small>
-                                <button type="button" class="btn-close btn-close-sm" @click="closeImportStatus"></button>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -439,14 +425,8 @@
                     @fetch-coins="fetchCoinGecko"
                 ></header-coins>
                 <div class="card-body">
-                    <alert-message 
-                        v-if="cgError"
-                        type="danger" 
-                        :dismissible="false"
-                        :small="true"
-                    >
-                        <i class="fas fa-exclamation-circle me-1"></i>{{ cgError }}
-                    </alert-message>
+                    <!-- Level 2 migration (Step 3): единый хост сообщений для CoinGecko виджета -->
+                    <system-messages scope="coins" :include-unscoped="false" :limit="2"></system-messages>
 
 <!--                     <code class="info-box" id="infoBox">
                       Медианы<br>
@@ -686,10 +666,8 @@
                                     +{{ remainingTickersDisplay.length - 15 }}...
                                 </span>
                             </div>
-                            <div v-if="failedTickers.length > 0" class="small text-warning-dark">
-                                <i class="fas fa-exclamation-triangle me-1"></i>
-                                Неудачные тикеры будут добавлены в избранное после 5 попыток
-                            </div>
+                            <!-- Level 2 migration (Step 3, case 5): единый хост сообщений для добавления тикеров -->
+                            <system-messages scope="coins-tickers" :include-unscoped="false" :limit="2"></system-messages>
                         </div>
                         <!-- Выпадающий список результатов поиска -->
                         <dropdown-menu
@@ -1033,37 +1011,6 @@
         </button>
     </script>
 
-    <!-- X-Template для компонента alert-сообщения (должен быть ДО загрузки Vue и компонентов) -->
-    <script type="text/x-template" id="alert-message-template">
-        <div v-if="isVisible" class="alert-message-wrapper" ref="alertElement">
-            <!-- #region agent log -->
-            <!-- Log будет добавлен в mounted hook компонента -->
-            <!-- #endregion -->
-            <div class="alert-close-button-wrapper">
-                <button 
-                    v-if="dismissible"
-                    ref="closeButton"
-                    type="button"
-                    class="btn btn-link btn-close-custom"
-                    :class="{'btn-sm': small}"
-                    @click="handleClose"
-                    aria-label="Закрыть"
-                >
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M2 2 L14 14 M14 2 L2 14" 
-                              stroke="currentColor" 
-                              stroke-width="0.25" 
-                              stroke-linecap="round" 
-                              fill="none"/>
-                    </svg>
-                </button>
-            </div>
-            <div :class="alertClasses" role="alert">
-                <slot></slot>
-            </div>
-        </div>
-    </script>
-
     <script type="text/x-template" id="menu-item-template">
         <a 
             :href="href || '#'"
@@ -1371,7 +1318,8 @@
     <script src="./ui/components/button.js"></script>
     <script src="./ui/components/menu-item.js"></script>
     <script src="./ui/components/horizon-input.js"></script>
-    <script src="./ui/components/alert-message.js"></script>
+    <script src="./ui/utils/messages-store.js"></script>
+    <script src="./ui/components/system-messages.js"></script>
     <script src="./ui/components/dropdown-menu.js"></script>
     <script src="./ui/utils/column-visibility-mixin.js"></script>
     <script src="./ui/api/coins-manager.js"></script>

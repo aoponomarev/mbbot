@@ -312,11 +312,12 @@ window.cmpMenuItem = {
       // Клик на основной части
       // Останавливаем всплытие события, чтобы предотвратить двойную обработку
       event.stopPropagation();
-      this.$emit('click', {
+      const payload = {
         itemId: this.itemId,
         iconCommand: this.iconCommand,
         label: this.displayLabel
-      });
+      };
+      this.$emit('click', payload);
     },
     
     // Обработчики наведения на индикатор

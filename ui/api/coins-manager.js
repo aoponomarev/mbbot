@@ -27,6 +27,100 @@ window.cmpCoinsManager = {
       if (newValue !== oldValue && newValue >= 1 && newValue <= 90) {
         this.recalculateCDHOnly();
       }
+    },
+
+    // Level 2 migration (Step 3): cgError -> единые системные сообщения
+    cgError(newValue) {
+      try {
+        if (!window.AppMessages) return;
+
+        const id = 'coins_cg_error';
+        if (!newValue) {
+          window.AppMessages.dismiss?.(id);
+          return;
+        }
+
+        window.AppMessages.replace?.(id, {
+          scope: 'coins',
+          type: 'danger',
+          text: 'CoinGecko: ошибка загрузки данных.',
+          details: String(newValue)
+        });
+      } catch (e) {
+        console.warn('[coins-manager] cgError -> AppMessages failed:', e);
+      }
+    },
+
+    // Level 2 migration (Step 3, case 5): failedTickers -> единые системные сообщения
+    failedTickers: {
+      handler() {
+        this.syncFailedTickersMessage();
+      },
+      deep: true
+    },
+    isAddingTickers() {
+      this.syncFailedTickersMessage();
+    },
+
+    // Поиск с задержкой для уменьшения количества запросов
+    cgSearchQuery(newQuery) {
+      clearTimeout(this.searchTimeout);
+
+      // Если идет процесс добавления тикеров - не обрабатываем изменения
+      if (this.isAddingTickers) {
+        return;
+      }
+
+      if (!newQuery || newQuery.length < 1) {
+        this.cgSearchResults = [];
+        return;
+      }
+
+      // Проверяем, является ли запрос числом (для загрузки топ N монет)
+      const trimmedQuery = newQuery.trim();
+      const numberMatch = trimmedQuery.match(/^\d+$/);
+      if (numberMatch) {
+        const count = parseInt(numberMatch[0], 10);
+        if (count > 0 && count <= 250) {
+          // Показываем кастомные пункты сразу без задержки
+          this.cgSearchResults = [
+            {
+              id: 'top-by-cap',
+              type: 'top-by-cap',
+              count: count,
+              symbol: 'TOP',
+              name: `Топ ${count} по капитализации`,
+              thumb: null
+            },
+            {
+              id: 'top-by-volume',
+              type: 'top-by-volume',
+              count: count,
+              symbol: 'TOP',
+              name: `Топ ${count} по дневному объему`,
+              thumb: null
+            }
+          ];
+          return;
+        }
+      }
+
+      if (newQuery.length < 2) {
+        this.cgSearchResults = [];
+        return;
+      }
+
+      // Проверяем режим парсинга: если есть разделители (не буквы) - это режим парсинга
+      // В режиме парсинга не делаем задержку, сразу парсим
+      if (this.isParseMode(newQuery)) {
+        // Режим парсинга: запускаем сразу без задержки
+        this.parseAndAddTickers(newQuery);
+      } else {
+        // Обычный режим поиска: с задержкой
+        this.searchTimeout = setTimeout(() => {
+          this.searchCoins(newQuery);
+        }, 500); // Задержка 500ms после ввода
+      }
     }
   },
 
@@ -302,6 +396,34 @@ window.cmpCoinsManager = {
   },
 
   methods: {
+    syncFailedTickersMessage() {
+      // Показываем предупреждение в overlay добавления тикеров (только когда panel видим).
+      const id = 'coins_failed_tickers_hint';
+      const shouldShow = Boolean(this.isAddingTickers) && Array.isArray(this.failedTickers) && this.failedTickers.length > 0;
+
+      if (!window.AppMessages) return;
+
+      if (!shouldShow) {
+        window.AppMessages.dismiss?.(id);
+        return;
+      }
+
+      const tickers = this.failedTickers.slice(0, 5);
+      const details = tickers
+        .map(t => {
+          const n = (this.tickerAttempts && this.tickerAttempts[t]) ? this.tickerAttempts[t] : 0;
+          return `${t}${n ? ` (${n}/5)` : ''}`;
+        })
+        .join(', ');
+
+      window.AppMessages.replace?.(id, {
+        scope: 'coins-tickers',
+        type: 'warning',
+        text: 'Неудачные тикеры будут добавлены в избранное после 5 попыток.',
+        details: details ? `Тикеры: ${details}${this.failedTickers.length > 5 ? ' …' : ''}` : null
+      });
+    },
+
     // Получить все классы колонок для управления видимостью
     // Используется mixin columnVisibilityMixin для определения, какие колонки скрывать
     getColumnClasses() {
@@ -2138,69 +2260,6 @@ window.cmpCoinsManager = {
     }
   },
   
-  watch: {
-    // Поиск с задержкой для уменьшения количества запросов
-    cgSearchQuery(newQuery) {
-      clearTimeout(this.searchTimeout);
-      
-      // Если идет процесс добавления тикеров - не обрабатываем изменения
-      if (this.isAddingTickers) {
-        return;
-      }
-      
-      if (!newQuery || newQuery.length < 1) {
-        this.cgSearchResults = [];
-        return;
-      }
-      
-      // Проверяем, является ли запрос числом (для загрузки топ N монет)
-      const trimmedQuery = newQuery.trim();
-      const numberMatch = trimmedQuery.match(/^\d+$/);
-      if (numberMatch) {
-        const count = parseInt(numberMatch[0], 10);
-        if (count > 0 && count <= 250) {
-          // Показываем кастомные пункты сразу без задержки
-          this.cgSearchResults = [
-            {
-              id: 'top-by-cap',
-              type: 'top-by-cap',
-              count: count,
-              symbol: 'TOP',
-              name: `Топ ${count} по капитализации`,
-              thumb: null
-            },
-            {
-              id: 'top-by-volume',
-              type: 'top-by-volume',
-              count: count,
-              symbol: 'TOP',
-              name: `Топ ${count} по дневному объему`,
-              thumb: null
-            }
-          ];
-          return;
-        }
-      }
-      
-      if (newQuery.length < 2) {
-        this.cgSearchResults = [];
-        return;
-      }
-      
-      // Проверяем режим парсинга: если есть разделители (не буквы) - это режим парсинга
-      // В режиме парсинга не делаем задержку, сразу парсим
-      if (this.isParseMode(newQuery)) {
-        // Режим парсинга: запускаем сразу без задержки
-        this.parseAndAddTickers(newQuery);
-      } else {
-        // Обычный режим поиска: с задержкой
-        this.searchTimeout = setTimeout(() => {
-          this.searchCoins(newQuery);
-        }, 500); // Задержка 500ms после ввода
-      }
-    }
-  },
-
   mounted() {
     // Инициализируем предыдущее значение horizonDays для отслеживания изменений в updated hook
     this._previousHorizonDays = this.horizonDays;

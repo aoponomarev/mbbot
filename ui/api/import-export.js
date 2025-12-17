@@ -14,6 +14,20 @@ window.cmpImportExport = function () {
       importStatus: null
     },
     methods: {
+      postImportStatusToMessages(status) {
+        if (!window.AppMessages) return;
+        if (!status) {
+          window.AppMessages.dismiss?.('global_import_status');
+          return;
+        }
+        const t = String(status.type || '').toLowerCase();
+        const type = (t === 'error' || t === 'danger') ? 'danger' : (t === 'warning' ? 'warning' : 'success');
+        window.AppMessages.replace?.('global_import_status', {
+          scope: 'global',
+          type,
+          text: status.message || ''
+        });
+      },
       /**
        * Собирает все настройки из localStorage для экспорта
        * Автоматически определяет обычные и обфусцированные настройки
@@ -98,8 +112,10 @@ window.cmpImportExport = function () {
             type: 'success',
             message: 'Настройки проекта успешно экспортированы (чувствительные данные обфусцированы)'
           };
+          this.postImportStatusToMessages(this.importStatus);
           setTimeout(() => {
             this.importStatus = null;
+            this.postImportStatusToMessages(null);
           }, 3000);
         } catch (error) {
           console.error('Ошибка при экспорте:', error);
@@ -107,6 +123,7 @@ window.cmpImportExport = function () {
             type: 'error',
             message: 'Ошибка при экспорте настроек: ' + error.message
           };
+          this.postImportStatusToMessages(this.importStatus);
         }
       },
       triggerImport() {
@@ -284,8 +301,10 @@ window.cmpImportExport = function () {
               type: 'success',
               message: `Настройки проекта импортированы (формат: v${version})`
             };
+            this.postImportStatusToMessages(this.importStatus);
             setTimeout(() => {
               this.importStatus = null;
+              this.postImportStatusToMessages(null);
             }, 3000);
 
             event.target.value = '';
@@ -295,6 +314,7 @@ window.cmpImportExport = function () {
               type: 'error',
               message: 'Ошибка при импорте настроек: ' + error.message
             };
+            this.postImportStatusToMessages(this.importStatus);
             event.target.value = '';
           }
         };
@@ -303,6 +323,7 @@ window.cmpImportExport = function () {
             type: 'error',
             message: 'Ошибка при чтении файла'
           };
+          this.postImportStatusToMessages(this.importStatus);
           event.target.value = '';
         };
         reader.readAsText(file);

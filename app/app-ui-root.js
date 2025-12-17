@@ -245,12 +245,12 @@
     }
   }
 
-  // Регистрация компонента alert-сообщения
-  if (window.cmpAlertMessage) {
+  // Регистрация компонента системных сообщений (единый хост сообщений)
+  if (window.cmpSystemMessages) {
     try {
-      app.component('alert-message', window.cmpAlertMessage);
+      app.component('system-messages', window.cmpSystemMessages);
     } catch (error) {
-      console.error('Ошибка при регистрации компонента alert-сообщения:', error);
+      console.error('Ошибка при регистрации компонента системных сообщений:', error);
     }
   }
 
