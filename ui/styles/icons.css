@@ -51,27 +51,6 @@
   color: var(--icon-bootstrap-color);
 }
 
-/* Иконки статусов */
-.fa-check-circle {
-  color: var(--icon-status-success-color);
-}
-
-.fa-circle-info {
-  color: var(--icon-status-info-color);
-}
-
-.fa-triangle-exclamation {
-  color: var(--icon-status-warning-color);
-}
-
-.fa-circle-exclamation {
-  color: var(--icon-status-error-color);
-}
-
-.fa-check {
-  color: var(--icon-status-success-color);
-}
-
 /* Иконки действий (базовые стили) */
 .fa-sync-alt,
 .fa-moon,

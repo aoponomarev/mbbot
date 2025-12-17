@@ -41,8 +41,16 @@
         <app-header :horizon-days="horizonDays" @update:horizon-days="horizonDays = $event"></app-header>
 
         <!-- Единая область системных сообщений (Level 2, Step 0: инфраструктура) -->
-        <div class="container-fluid app-main-container avto-X7pL2nQ px-0 px-md-2 mt-3">
-            <system-messages scope="global"></system-messages>
+        <!-- Глобальные сообщения: приклеены к низу страницы, поверх основного контента и над футером -->
+        <!-- ВАЖНО: внутри этого блока всегда применяется неизменяемая dark-тема (data-bs-theme="dark") -->
+        <div
+            v-if="hasGlobalSystemMessages"
+            class="global-system-messages-container"
+            data-bs-theme="dark"
+        >
+            <div class="container-fluid px-3 px-md-5">
+                <system-messages scope="global"></system-messages>
+            </div>
         </div>
 
         <!-- Компонент футера -->

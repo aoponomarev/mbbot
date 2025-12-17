@@ -28,9 +28,12 @@
                     <label class="form-label">Категория</label>
                     <select class="form-select form-select-sm" id="filter-category">
                         <option value="">Все категории</option>
-                        <option value="bootstrap">Bootstrap</option>
-                        <option value="danger">Danger</option>
+                        <option value="primary">Primary</option>
+                        <option value="info">Info</option>
                         <option value="success">Success</option>
+                        <option value="warning">Warning</option>
+                        <option value="danger">Danger</option>
+                        <option value="bootstrap">Bootstrap</option>
                         <option value="theme">Theme</option>
                         <option value="ui">UI элементы</option>
                         <option value="header">Header</option>
@@ -64,6 +67,9 @@
 
         const categoryNames = {
             'bootstrap': 'Bootstrap',
+            'primary': 'Primary',
+            'info': 'Info',
+            'warning': 'Warning',
             'danger': 'Danger',
             'success': 'Success',
             'theme': 'Theme',
@@ -78,6 +84,63 @@
             const root = document.documentElement;
             const value = getComputedStyle(root).getPropertyValue(varName).trim();
             return value || null;
+        }
+
+        // === Фильтрация non-color переменных ===
+        // Убираем: rem/px/%/ms, z-index, "h/s/l/alpha" числа, строки и т.п.
+        // Оставляем:
+        // - значения, которые реально являются цветом (или var(...) → цвет)
+        // - rgb tuple вида "13, 110, 253" (Bootstrap --*-rgb): считаем color-data и показываем как rgb(...)
+        function isRgbTuple(value) {
+            const v = String(value || '').trim();
+            return /^\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}(?:\s*,\s*[\d.]+)?$/.test(v);
+        }
+
+        function rgbFromTuple(value) {
+            const parts = String(value || '').split(',').map(x => x.trim());
+            if (parts.length === 3) return `rgb(${parts.join(', ')})`;
+            if (parts.length === 4) return `rgba(${parts.join(', ')})`;
+            return null;
+        }
+
+        function isCssColor(value) {
+            const v = String(value || '').trim();
+            if (!v) return false;
+            if (isRgbTuple(v)) return true;
+
+            const el = document.createElement('span');
+            el.style.display = 'none';
+            // sentinel
+            el.style.color = 'rgb(1, 2, 3)';
+            el.style.backgroundColor = 'rgb(4, 5, 6)';
+
+            el.style.color = v;
+            el.style.backgroundColor = v;
+
+            document.body.appendChild(el);
+            const c = getComputedStyle(el).color;
+            const bg = getComputedStyle(el).backgroundColor;
+            document.body.removeChild(el);
+
+            return (c !== 'rgb(1, 2, 3)') || (bg !== 'rgb(4, 5, 6)');
+        }
+
+        // Переносим ВСЕ цвета, где есть упоминания info/success/warning/danger, в 4 отдельные секции подряд.
+        // (делаем это здесь, после получения данных/DOM; сканер не обязан знать про info/warning)
+        function primaryCategory(varName) {
+            // Любая переменная, где встречается "-primary" (например: --bs-primary, --bs-primary-text-emphasis, --color-btn-primary-bg)
+            const n = String(varName || '').toLowerCase();
+            return n.includes('-primary') ? 'primary' : null;
+        }
+
+        function statusCategory(varName) {
+            const n = String(varName || '').toLowerCase();
+            const token = (t) => new RegExp(`(^|[-_])${t}([-_]|$)`, 'i');
+            if (token('info').test(n)) return 'info';
+            if (token('success').test(n)) return 'success';
+            if (token('warning').test(n) || token('warn').test(n)) return 'warning';
+            if (token('danger').test(n) || token('error').test(n)) return 'danger';
+            return null;
         }
 
         // Парсит HSL строку
@@ -123,6 +186,8 @@
 
         function getColorForPreview(color) {
             const cssValue = getColorValue(color.identifier);
+            const v = cssValue || color.rawValue || null;
+            if (v && isRgbTuple(v)) return rgbFromTuple(v) || '#ccc';
             if (cssValue) return cssValue;
             if (color.rawValue) return color.rawValue;
             return '#ccc';
@@ -153,6 +218,10 @@
             const cssValue = getColorValue(color.identifier);
             
             let value = cssValue || color.rawValue || '—';
+            if (isRgbTuple(value)) {
+                if (type === 'rgb') value = rgbFromTuple(value) || value;
+                if (type === 'hsl') value = '—';
+            }
             if (type === 'rgb' && cssValue?.includes('hsl')) {
                 const hsl = parseHSL(cssValue);
                 if (hsl) {
@@ -271,7 +340,8 @@
             }
 
             const grouped = groupColorsByCategory(colors);
-            const categoryOrder = ['bootstrap', 'danger', 'success', 'theme', 'ui', 'header', 'dropdown', 'other'];
+            // Primary + 4 статусные секции идут подряд
+            const categoryOrder = ['primary', 'info', 'success', 'warning', 'danger', 'bootstrap', 'theme', 'ui', 'header', 'dropdown', 'other'];
             categoryOrder.forEach(category => {
                 if (grouped[category]) renderSectionTable(category, grouped[category], container);
             });
@@ -306,14 +376,34 @@
             if (!pipeline?.scanColors) return [];
             const res = await pipeline.scanColors();
             const raw = res?.colors || [];
-            // Нормализуем в формат, ожидаемый UI
-            return raw.map(c => ({
-                category: c.category || 'other',
-                identifier: c.identifier,
-                rawValue: c.rawValue || null,
-                usage: Array.isArray(c.usageFiles) ? c.usageFiles : [],
-                file: c.file || ''
-            }));
+            // Нормализуем + фильтруем non-color + переносим в status-секции по упоминаниям в имени
+            const out = [];
+            for (const c of raw) {
+                const identifier = c.identifier;
+                // Исключаем технические переменные z-index (по требованию): любые с "-zindex" в имени.
+                if (String(identifier || '').toLowerCase().includes('-zindex')) {
+                    continue;
+                }
+                const cssValue = getColorValue(identifier);
+                const testValue = cssValue || c.rawValue || '';
+
+                // 1) фильтр non-color
+                if (!isCssColor(testValue)) continue;
+
+                // 2) секции после получения данных (DOM-side)
+                const forcedPrimary = primaryCategory(identifier);
+                const forcedStatus = forcedPrimary ? null : statusCategory(identifier);
+                const category = forcedPrimary || forcedStatus || c.category || 'other';
+
+                out.push({
+                    category,
+                    identifier,
+                    rawValue: c.rawValue || null,
+                    usage: Array.isArray(c.usageFiles) ? c.usageFiles : [],
+                    file: c.file || ''
+                });
+            }
+            return out;
         }
 
         document.addEventListener('DOMContentLoaded', async function() {

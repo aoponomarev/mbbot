@@ -270,6 +270,85 @@ body {
     min-height: 160px;
 }
 
+/* Review: "Сообщения" — кликабельные badge-пресеты */
+.review-badge-btn {
+    cursor: pointer;
+    user-select: none;
+}
+.review-badge-btn:hover {
+    filter: brightness(0.96);
+}
+.review-badge-btn.review-badge-active {
+    filter: brightness(0.92);
+    box-shadow: 0 0 0 0.14rem rgba(0, 0, 0, 0.18);
+}
+.review-badge-btn:focus {
+    outline: 2px solid rgba(13, 110, 253, 0.35);
+    outline-offset: 2px;
+}
+
+/* Review: "Сообщения" — radio toggles (Info/Success/Warning/Danger) */
+.rm-type-toggle .rm-type-label {
+    /* используем Bootstrap button variables, чтобы не спорить со стилями .btn */
+    --bs-btn-padding-x: 0.55rem;
+    --bs-btn-padding-y: 0.22rem;
+    --bs-btn-font-size: 0.78rem;
+    --bs-btn-border-width: 1px;
+}
+.rm-type-toggle .rm-type-label[data-type="info"] {
+    --bs-btn-bg: var(--bs-info-bg-subtle);
+    --bs-btn-border-color: var(--bs-info-border-subtle);
+    --bs-btn-color: var(--bs-info-text-emphasis);
+    --bs-btn-hover-bg: var(--bs-info-bg-subtle);
+    --bs-btn-hover-border-color: var(--bs-info-border-subtle);
+    --bs-btn-hover-color: var(--bs-info-text-emphasis);
+}
+.rm-type-toggle .rm-type-label[data-type="success"] {
+    --bs-btn-bg: var(--bs-success-bg-subtle);
+    --bs-btn-border-color: var(--bs-success-border-subtle);
+    --bs-btn-color: var(--bs-success-text-emphasis);
+    --bs-btn-hover-bg: var(--bs-success-bg-subtle);
+    --bs-btn-hover-border-color: var(--bs-success-border-subtle);
+    --bs-btn-hover-color: var(--bs-success-text-emphasis);
+}
+.rm-type-toggle .rm-type-label[data-type="warning"] {
+    /* должно совпадать с alert-warning: bg-subtle + border-subtle + text-emphasis */
+    --bs-btn-bg: var(--bs-warning-bg-subtle);
+    --bs-btn-border-color: var(--bs-warning-border-subtle);
+    --bs-btn-color: var(--bs-warning-text-emphasis);
+    --bs-btn-hover-bg: var(--bs-warning-bg-subtle);
+    --bs-btn-hover-border-color: var(--bs-warning-border-subtle);
+    --bs-btn-hover-color: var(--bs-warning-text-emphasis);
+}
+.rm-type-toggle .rm-type-label[data-type="danger"] {
+    --bs-btn-bg: var(--bs-danger-bg-subtle);
+    --bs-btn-border-color: var(--bs-danger-border-subtle);
+    --bs-btn-color: var(--bs-danger-text-emphasis);
+    --bs-btn-hover-bg: var(--bs-danger-bg-subtle);
+    --bs-btn-hover-border-color: var(--bs-danger-border-subtle);
+    --bs-btn-hover-color: var(--bs-danger-text-emphasis);
+}
+.rm-type-toggle .btn-check:checked + .rm-type-label[data-type="info"] {
+    --bs-btn-bg: var(--bs-info-text-emphasis);
+    --bs-btn-border-color: var(--bs-info-text-emphasis);
+    --bs-btn-color: #fff;
+}
+.rm-type-toggle .btn-check:checked + .rm-type-label[data-type="success"] {
+    --bs-btn-bg: var(--bs-success-text-emphasis);
+    --bs-btn-border-color: var(--bs-success-text-emphasis);
+    --bs-btn-color: #fff;
+}
+.rm-type-toggle .btn-check:checked + .rm-type-label[data-type="warning"] {
+    --bs-btn-bg: var(--bs-warning-text-emphasis);
+    --bs-btn-border-color: var(--bs-warning-text-emphasis);
+    --bs-btn-color: #fff;
+}
+.rm-type-toggle .btn-check:checked + .rm-type-label[data-type="danger"] {
+    --bs-btn-bg: var(--bs-danger-text-emphasis);
+    --bs-btn-border-color: var(--bs-danger-text-emphasis);
+    --bs-btn-color: #fff;
+}
+
 .chart-container {
     position: relative;
     height: 300px;
@@ -562,8 +641,6 @@ body {
     padding: 0.15rem 0.3rem;
     font-weight: normal;
     font-size: 0.75rem;
-    background-color: #6c757d;
-    color: white;
 }
 
 .category-badge {
@@ -590,8 +667,6 @@ body {
 .commands-list .badge {
     margin: 0.1rem;
     display: inline-block;
-    background-color: #6c757d;
-    color: white;
 }
 
 /* Списки использования */

@@ -100,6 +100,24 @@
     },
     methods,
     watch,
+    computed: {
+      // Показывать ли глобальный контейнер системных сообщений (в хедере index.html)
+      // Учитывает как сообщения со scope === 'global', так и "безскоповые" (legacy),
+      // аналогично поведению cmpSystemMessages с include-unscoped=true.
+      hasGlobalSystemMessages() {
+        const store = window.AppMessages;
+        const list = store?.state?.messages || [];
+        if (!Array.isArray(list) || list.length === 0) return false;
+        return list.some(m => {
+          if (!m) return false;
+          const scope = (m.scope || 'global').trim() || 'global';
+          if (scope === 'global') return true;
+          // Поддерживаем старые сообщения без scope
+          if (!m.scope || m.scope === '') return true;
+          return false;
+        });
+      }
+    },
     mounted() {
       this.vueVersion = Vue.version || '3.x';
       mountedFns.forEach(fn => {
@@ -110,6 +128,22 @@
       
       // Устанавливаем глобальный обработчик клика для закрытия всех выпадающих списков
       document.addEventListener('click', this.closeAllDropdowns);
+
+      // Заглушка: нейтральное приветственное сообщение в глобальном слое системных сообщений
+      try {
+        const store = window.AppMessages;
+        const list = store?.state?.messages || [];
+        if (store && Array.isArray(list) && list.length === 0) {
+          store.push({
+            scope: 'global',
+            type: 'info',
+            text: 'Добро пожаловать в мониторинг монет.',
+            details: 'Эта панель покажет важные системные сообщения во время работы приложения.'
+          });
+        }
+      } catch (e) {
+        // Молча игнорируем ошибки, чтобы не ломать загрузку приложения
+      }
       
     },
     

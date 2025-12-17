@@ -109,6 +109,29 @@ table td.col-hidden {
     padding-bottom: 80px;
 }
 
+/* Глобальный контейнер системных сообщений на index.html:
+   - приклеен к низу страницы, поверх основного контента и над футером
+   - показывается только когда есть сообщения (v-if в index.html)
+*/
+.global-system-messages-container {
+    position: fixed;
+    left: 0;
+    right: 0;
+    /* Приклеиваем непосредственно к нижней границе окна браузера */
+    bottom: 0;
+    z-index: calc(var(--z-index-footer) + 1);
+    pointer-events: none; /* чтобы не блокировать клики по контенту под контейнером */
+    /* Вертикальные внутренние отступы */
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    /* Полупрозрачный черный фон под сообщениями (75%) */
+    background-color: rgba(0, 0, 0, 0.75);
+}
+
+.global-system-messages-container .system-messages-host {
+    pointer-events: auto; /* внутри сообщений клики должны работать нормально */
+}
+
 /* Основной контент: центрирование, адаптивность, ограничение ширины */
 .avto-K9mP4rT {
     max-width: 1400px;
@@ -338,8 +361,8 @@ table td.col-hidden {
 
 /* Кнопки в хедерах всех карточек: единый стиль без прозрачности */
 .card-header .btn {
-    /* Используем цвет secondary для фона (адаптируется под тему) */
-    background-color: var(--bs-secondary-bg);
+    /* Дефолтный фон кнопок совпадает с фоном хедера карточки */
+    background-color: var(--color-card-header);
     border-color: var(--color-border);
     color: var(--bs-body-color);
     opacity: 1; /* Убираем любую прозрачность */
@@ -580,6 +603,45 @@ main .cg-coin-sort-dropdown {
     color: var(--bs-white) !important;
 }
 
+/* Вариант A: делаем badge.bg-* ближе к --bs-*-text-emphasis (без изменения глобальных .bg-*) */
+.badge.bg-danger {
+    background-color: var(--bs-danger-text-emphasis) !important;
+    color: var(--bs-white) !important;
+}
+.badge.bg-success {
+    background-color: var(--bs-success-text-emphasis) !important;
+    color: var(--bs-white) !important;
+}
+.badge.bg-info {
+    background-color: var(--bs-info-text-emphasis) !important;
+    color: var(--bs-white) !important;
+}
+.badge.bg-warning {
+    background-color: var(--bs-warning-text-emphasis) !important;
+    color: var(--bs-white) !important;
+}
+/* если где-то остался text-dark вместе с bg-warning — всё равно держим контраст */
+.badge.bg-warning.text-dark {
+    color: var(--bs-white) !important;
+}
+
+/* Притягиваем к text-emphasis "средне":
+   смешиваем базовый --bs-* и --bs-*-text-emphasis примерно 50/50. */
+@supports (background-color: color-mix(in srgb, red, blue)) {
+    .badge.bg-danger {
+        background-color: color-mix(in srgb, var(--bs-danger) 50%, var(--bs-danger-text-emphasis)) !important;
+    }
+    .badge.bg-success {
+        background-color: color-mix(in srgb, var(--bs-success) 50%, var(--bs-success-text-emphasis)) !important;
+    }
+    .badge.bg-info {
+        background-color: color-mix(in srgb, var(--bs-info) 50%, var(--bs-info-text-emphasis)) !important;
+    }
+    .badge.bg-warning {
+        background-color: color-mix(in srgb, var(--bs-warning) 50%, var(--bs-warning-text-emphasis)) !important;
+    }
+}
+
 /* Специальный класс для таблицы с монетами - убираем фон у строк и ячеек для видимости перемещения */
 .cg-coins-table tbody tr,
 .cg-coins-table tbody td {
@@ -604,6 +666,11 @@ main .cg-coin-sort-dropdown {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+/* Заголовок колонки с монетами: разрешаем выходить dropdown-меню за пределы ячейки */
+.cg-coins-table thead th.col-coin {
+    overflow: visible;
 }
 
 /* Внутренний контейнер ячейки монеты: правильный overflow */
@@ -726,9 +793,12 @@ main .cg-coin-sort-dropdown {
 
 /* Иконка типа системного сообщения (слева от текста) */
 .system-message-type-icon {
+    font-size: 1.4rem;
     line-height: 1;
     margin-top: 0.05rem;
-    opacity: 0.9;
+    /* иконка должна быть того же цвета, что и текст сообщения */
+    opacity: 1;
+    color: inherit;
 }
 
 /* Обертка для кнопки закрытия */

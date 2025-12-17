@@ -72,7 +72,12 @@
                                 </thead>
                                 <tbody>
                                     <tr v-for="(m, idx) in autoMessages" :key="idx">
-                                        <td><span class="badge bg-secondary">{{ m.type }}</span></td>
+                                        <td>
+                                            <span
+                                                class="badge"
+                                                :class="badgeClassForType(m.type)"
+                                            >{{ m.type }}</span>
+                                        </td>
                                         <td style="font-size: 0.9rem;">{{ m.text }}</td>
                                         <td class="usage-cell">
                                             <select v-if="m.files && m.files.length > 1" class="form-select form-select-sm" style="width: auto; display: inline-block; min-width: 200px; font-size: 0.85rem;">
@@ -97,35 +102,22 @@
                 <div class="col-md-6">
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">Шаблоны (клик создаёт сообщение)</h5>
-                            <button class="btn btn-sm btn-outline-secondary" @click="clearScope(scopes.left)">Очистить</button>
+                            <h5 class="mb-0">Шаблоны</h5>
                         </div>
                         <div class="card-body">
-                            <div class="d-flex flex-column gap-2">
-                                <button class="btn btn-sm btn-outline-danger text-start" @click="presetLeft('cgError')">
-                                    cgError — Не удалось загрузить данные (danger)
-                                </button>
-                                <button class="btn btn-sm btn-outline-warning text-start" @click="presetLeft('quoteError')">
-                                    quoteError — Не удалось загрузить цитату (warning)
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger text-start" @click="presetLeft('passwordError')">
-                                    passwordError — Неверный код (danger)
-                                </button>
-                                <button class="btn btn-sm btn-outline-success text-start" @click="presetLeft('importSuccess')">
-                                    importStatus — Экспорт успешен (success)
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger text-start" @click="presetLeft('importError')">
-                                    importStatus — Ошибка экспорта (danger)
-                                </button>
-                                <button class="btn btn-sm btn-outline-warning text-start" @click="presetLeft('apiKeyMissing')">
-                                    perplexityApiKey — Нужен API ключ (warning)
-                                </button>
-                                <button class="btn btn-sm btn-outline-success text-start" @click="presetLeft('apiKeyOk')">
-                                    perplexityApiKey — API ключ настроен (success)
-                                </button>
-                                <button class="btn btn-sm btn-outline-warning text-start" @click="presetLeft('failedTickers')">
-                                    failedTickers — Некоторые монеты не удалось добавить (warning)
-                                </button>
+                            <div class="d-flex flex-wrap gap-2">
+                                <span
+                                    v-for="p in leftPresets"
+                                    :key="p.key"
+                                    class="badge review-badge-btn"
+                                    :class="[p.badgeClass, { 'review-badge-active': selected.left === p.key }]"
+                                    :title="p.title"
+                                    role="button"
+                                    tabindex="0"
+                                    @click="selectLeftPreset(p.key)"
+                                    @keydown.enter.prevent="selectLeftPreset(p.key)"
+                                    @keydown.space.prevent="selectLeftPreset(p.key)"
+                                >{{ p.key }}</span>
                             </div>
 
                             <div class="mt-3">
@@ -141,12 +133,18 @@
                     <div class="card mb-4">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">Light Theme</h5>
-                            <div class="btn-group">
-                                <button class="btn btn-sm btn-outline-secondary" @click="clearScope(scopes.light)">Очистить</button>
-                                <button class="btn btn-sm btn-outline-info" @click="presetTheme(scopes.light, 'info')">Info</button>
-                                <button class="btn btn-sm btn-outline-success" @click="presetTheme(scopes.light, 'success')">Success</button>
-                                <button class="btn btn-sm btn-outline-warning" @click="presetTheme(scopes.light, 'warning')">Warning</button>
-                                <button class="btn btn-sm btn-outline-danger" @click="presetTheme(scopes.light, 'danger')">Danger</button>
+                            <div class="btn-group btn-group-sm rm-type-toggle" role="group" aria-label="Light Theme message types">
+                                <input type="radio" class="btn-check" name="rm-light-type" id="rm-light-info" value="info" v-model="selected.light">
+                                <label class="btn rm-type-label" data-type="info" for="rm-light-info">Info</label>
+
+                                <input type="radio" class="btn-check" name="rm-light-type" id="rm-light-success" value="success" v-model="selected.light">
+                                <label class="btn rm-type-label" data-type="success" for="rm-light-success">Success</label>
+
+                                <input type="radio" class="btn-check" name="rm-light-type" id="rm-light-warning" value="warning" v-model="selected.light">
+                                <label class="btn rm-type-label" data-type="warning" for="rm-light-warning">Warning</label>
+
+                                <input type="radio" class="btn-check" name="rm-light-type" id="rm-light-danger" value="danger" v-model="selected.light">
+                                <label class="btn rm-type-label" data-type="danger" for="rm-light-danger">Danger</label>
                             </div>
                         </div>
                         <div class="card-body">
@@ -158,12 +156,18 @@
                     <div class="card mb-4" data-bs-theme="dark">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">Dark Theme</h5>
-                            <div class="btn-group">
-                                <button class="btn btn-sm btn-outline-secondary" @click="clearScope(scopes.dark)">Очистить</button>
-                                <button class="btn btn-sm btn-outline-info" @click="presetTheme(scopes.dark, 'info')">Info</button>
-                                <button class="btn btn-sm btn-outline-success" @click="presetTheme(scopes.dark, 'success')">Success</button>
-                                <button class="btn btn-sm btn-outline-warning" @click="presetTheme(scopes.dark, 'warning')">Warning</button>
-                                <button class="btn btn-sm btn-outline-danger" @click="presetTheme(scopes.dark, 'danger')">Danger</button>
+                            <div class="btn-group btn-group-sm rm-type-toggle" role="group" aria-label="Dark Theme message types">
+                                <input type="radio" class="btn-check" name="rm-dark-type" id="rm-dark-info" value="info" v-model="selected.dark">
+                                <label class="btn rm-type-label" data-type="info" for="rm-dark-info">Info</label>
+
+                                <input type="radio" class="btn-check" name="rm-dark-type" id="rm-dark-success" value="success" v-model="selected.dark">
+                                <label class="btn rm-type-label" data-type="success" for="rm-dark-success">Success</label>
+
+                                <input type="radio" class="btn-check" name="rm-dark-type" id="rm-dark-warning" value="warning" v-model="selected.dark">
+                                <label class="btn rm-type-label" data-type="warning" for="rm-dark-warning">Warning</label>
+
+                                <input type="radio" class="btn-check" name="rm-dark-type" id="rm-dark-danger" value="danger" v-model="selected.dark">
+                                <label class="btn rm-type-label" data-type="danger" for="rm-dark-danger">Danger</label>
                             </div>
                         </div>
                         <div class="card-body">
@@ -261,6 +265,21 @@
                             light: 'review-messages-light',
                             dark: 'review-messages-dark'
                         },
+                        selected: {
+                            left: 'cgError',
+                            light: 'info',
+                            dark: 'info'
+                        },
+                        leftPresets: [
+                            { key: 'cgError', type: 'danger', title: 'Не удалось загрузить данные', badgeClass: 'bg-danger' },
+                            { key: 'quoteError', type: 'warning', title: 'Не удалось загрузить цитату', badgeClass: 'bg-warning text-dark' },
+                            { key: 'passwordError', type: 'danger', title: 'Неверный код', badgeClass: 'bg-danger' },
+                            { key: 'importSuccess', type: 'success', title: 'Экспорт успешен', badgeClass: 'bg-success' },
+                            { key: 'importError', type: 'danger', title: 'Ошибка экспорта', badgeClass: 'bg-danger' },
+                            { key: 'apiKeyMissing', type: 'warning', title: 'Нужен API ключ', badgeClass: 'bg-warning text-dark' },
+                            { key: 'apiKeyOk', type: 'success', title: 'API ключ настроен', badgeClass: 'bg-success' },
+                            { key: 'failedTickers', type: 'warning', title: 'Некоторые монеты не удалось добавить', badgeClass: 'bg-warning text-dark' }
+                        ],
                         autoMessagesLoading: true,
                         autoMessagesError: null,
                         autoMessagesMeta: null,
@@ -292,7 +311,29 @@
                         return parts.join(' • ');
                     }
                 },
+                watch: {
+                    'selected.light'(val) {
+                        try { this.selectTheme(this.scopes.light, val); } catch (_) { /* ignore */ }
+                    },
+                    'selected.dark'(val) {
+                        try { this.selectTheme(this.scopes.dark, val); } catch (_) { /* ignore */ }
+                    }
+                },
                 async mounted() {
+                    // Default: показываем первый пример в каждом блоке (radio-mode),
+                    // но не затираем, если пользователь уже создавал сообщения.
+                    try {
+                        const msgs = window.AppMessages?.state?.messages || [];
+                        const hasLeft = Array.isArray(msgs) && msgs.some(m => m && m.scope === this.scopes.left);
+                        const hasLight = Array.isArray(msgs) && msgs.some(m => m && m.scope === this.scopes.light);
+                        const hasDark = Array.isArray(msgs) && msgs.some(m => m && m.scope === this.scopes.dark);
+                        if (!hasLeft) this.selectLeftPreset(this.selected.left);
+                        if (!hasLight) this.selectTheme(this.scopes.light, this.selected.light);
+                        if (!hasDark) this.selectTheme(this.scopes.dark, this.selected.dark);
+                    } catch (_) {
+                        // ignore
+                    }
+
                     const pipeline = window.ReviewManager?.ReviewDataPipeline;
                     if (!pipeline?.scanMessages) {
                         this.autoMessagesLoading = false;
@@ -328,57 +369,65 @@
                     }
                 },
                 methods: {
-                    clearScope(scope) {
-                        window.AppMessages?.clear?.(scope);
+                    badgeClassForType(type) {
+                        const t = String(type || 'info').toLowerCase();
+                        if (t === 'danger' || t === 'error') return 'bg-danger';
+                        if (t === 'warning' || t === 'warn') return 'bg-warning';
+                        if (t === 'success') return 'bg-success';
+                        if (t === 'info') return 'bg-info';
+                        return 'bg-secondary';
                     },
                     pushDemo({ id, scope, type, text, details }) {
                         if (!window.AppMessages) return;
                         window.AppMessages.replace?.(id, { scope, type, text, details });
                     },
-                    presetLeft(key) {
+                    selectLeftPreset(key) {
                         const scope = this.scopes.left;
                         const map = {
-                            cgError: { id: 'rm_left_cg', type: 'danger', text: 'Не удалось загрузить данные', details: 'CoinGecko: пример системной ошибки.' },
-                            quoteError: { id: 'rm_left_quote', type: 'warning', text: 'Не удалось загрузить цитату', details: 'Perplexity: пример предупреждения.' },
-                            passwordError: { id: 'rm_left_pin', type: 'danger', text: 'Неверный код', details: 'Splash: неверный PIN.' },
-                            importSuccess: { id: 'rm_left_import_ok', type: 'success', text: 'Экспорт успешен', details: 'Чувствительные данные обфусцированы.' },
-                            importError: { id: 'rm_left_import_err', type: 'danger', text: 'Ошибка экспорта настроек', details: 'Пример текста ошибки…' },
-                            apiKeyMissing: { id: 'rm_left_key_missing', type: 'warning', text: 'Для работы необходимо указать API ключ', details: 'Perplexity API key отсутствует.' },
-                            apiKeyOk: { id: 'rm_left_key_ok', type: 'success', text: 'API ключ настроен', details: 'Perplexity API key сохранён.' },
-                            failedTickers: { id: 'rm_left_failed_tickers', type: 'warning', text: 'Некоторые монеты не удалось добавить', details: 'Повторите попытку позже.' }
+                            cgError: { id: 'rm_left_selected', type: 'danger', text: 'Не удалось загрузить данные', details: 'CoinGecko: пример системной ошибки.' },
+                            quoteError: { id: 'rm_left_selected', type: 'warning', text: 'Не удалось загрузить цитату', details: 'Perplexity: пример предупреждения.' },
+                            passwordError: { id: 'rm_left_selected', type: 'danger', text: 'Неверный код', details: 'Splash: неверный PIN.' },
+                            importSuccess: { id: 'rm_left_selected', type: 'success', text: 'Экспорт успешен', details: 'Чувствительные данные обфусцированы.' },
+                            importError: { id: 'rm_left_selected', type: 'danger', text: 'Ошибка экспорта настроек', details: 'Пример текста ошибки…' },
+                            apiKeyMissing: { id: 'rm_left_selected', type: 'warning', text: 'Для работы необходимо указать API ключ', details: 'Perplexity API key отсутствует.' },
+                            apiKeyOk: { id: 'rm_left_selected', type: 'success', text: 'API ключ настроен', details: 'Perplexity API key сохранён.' },
+                            failedTickers: { id: 'rm_left_selected', type: 'warning', text: 'Некоторые монеты не удалось добавить', details: 'Повторите попытку позже.' }
                         };
                         const v = map[key];
                         if (!v) return;
+                        this.selected.left = key;
                         this.pushDemo({ ...v, scope });
                     },
-                    presetTheme(scope, type) {
+                    selectTheme(scope, type) {
                         const base = {
                             info: {
-                                id: `${scope}_info`,
+                                id: `${scope}_selected`,
                                 type: 'info',
                                 text: 'Информация о прогнозе',
                                 details: 'Модель завершила расчёт метрик; проверьте распределение портфеля.'
                             },
                             success: {
-                                id: `${scope}_success`,
+                                id: `${scope}_selected`,
                                 type: 'success',
                                 text: 'Портфель сохранён',
                                 details: 'Изменения сохранены в локальное хранилище.'
                             },
                             warning: {
-                                id: `${scope}_warning`,
+                                id: `${scope}_selected`,
                                 type: 'warning',
                                 text: 'Внимание: недостаточно данных',
                                 details: 'Данных < 30 дней по некоторым активам — точность может снизиться.'
                             },
                             danger: {
-                                id: `${scope}_danger`,
+                                id: `${scope}_selected`,
                                 type: 'danger',
                                 text: 'Ошибка загрузки данных',
                                 details: 'CoinGecko API: лимит запросов / сеть. Используйте кэш.'
                             }
                         }[type];
                         if (!base) return;
+                        if (scope === this.scopes.light) this.selected.light = type;
+                        if (scope === this.scopes.dark) this.selected.dark = type;
                         this.pushDemo({ ...base, scope });
                     }
                 }
