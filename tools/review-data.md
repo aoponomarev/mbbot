@@ -248,7 +248,7 @@ GitHub источник требует `owner/repo/branch`.
 Файлы:
 - берутся из `idx.listFiles()`
 - читаются через `idx.readText()`
-- фильтруются по расширениям: `js/css/html/json/md`
+- фильтруются по расширениям: `js/css/html/json/md/txt/rst/adoc`
 - исключаются: `docs/`, `old_app_not_write/`, `history/`, `.git/`, `node_modules/`, review-страницы
 
 `ProjectStats.loadFilesData()` теперь использует `ReviewDataPipeline.scanStats()`.

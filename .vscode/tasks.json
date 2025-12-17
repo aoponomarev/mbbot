@@ -17,11 +17,11 @@
       }
     },
     {
-      "label": "Open TODO.TXT",
+      "label": "Open заметки.txt",
       "type": "process",
       "command": "${execPath}",
       "args": [
-        "${workspaceFolder}/docs/TODO.TXT"
+        "${workspaceFolder}/docs/заметки.txt"
       ],
       "problemMatcher": [],
       "runOptions": {
