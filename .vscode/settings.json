@@ -71,5 +71,12 @@
   "workbench.editor.revealIfOpen": true,
   "workbench.editor.showTabs": "multiple",
   "workbench.editor.tabActionLocation": "right",
-  "workbench.editor.splitInGroupLayout": "default"
+  "workbench.editor.splitInGroupLayout": "default",
+
+  // Cursor: не показывать правую AI-панель по hover у края окна
+  // (если настройка поддерживается вашей версией Cursor)
+  "cursor.windowSwitcher.sidebarHoverCollapsed": false,
+
+  // VS Code layout: держать Secondary Side Bar скрытой по умолчанию
+  "workbench.secondarySideBar.defaultVisibility": "hidden"
 }

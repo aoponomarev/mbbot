@@ -7,5 +7,9 @@
   {
     "key": "ctrl+shift+r",
     "command": "workbench.action.reloadWindow"
+  },
+  {
+    "key": "ctrl+k ctrl+u",
+    "command": "simpleBrowser.show"
   }
 ]
