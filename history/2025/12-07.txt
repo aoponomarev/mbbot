@@ -3,7 +3,7 @@
 
 ## UI (оформление)
 
-### Коммит: 4f3def2 - "2025-12-07: Update dependencies, fix integrity hash, add daily log, update commit rules"
+### Коммит: [4f3def2] - 2025-12-07: Update dependencies, fix integrity hash, add daily log, update commit rules
 
 - **Что сделано**: Перешли на Bootstrap 5.3.8 и Vue.js 3.5.25 с корректными integrity-хешами и production-сборкой; создан дневной лог на 12-07; в `.cursorrules` зафиксировано правило про коммиты только по явному запросу.
 
@@ -16,7 +16,7 @@
 - **Функциональность**: Библиотеки грузятся через CDN без предупреждений и с проверкой целостности; фиксированная версия Vue даёт предсказуемость; правило коммитов исключает авто-коммиты.
 
 
-### Коммит: 8eba1ea - "Restore Vue init into external scripts (config.js/app.js)"
+### Коммит: [8eba1ea] - Restore Vue init into external scripts (config.js/app.js)
 
 - **Что сделано**: Вынесена инициализация Vue из инлайна в обычные скрипты `config.js` и `app.js`, чтобы работать без сборки и с `file://`.
 
@@ -28,7 +28,7 @@
 - **Функциональность**: Приложение снова запускается напрямую из файловой системы (OneDrive/Android) без CORS и сборки; настройки persist; интерфейс остаётся прежним.
 
 
-### Коммит: 249aee0 - "Refactor: вынести Vue в отдельные обычные скрипты без сборки"
+### Коммит: [249aee0] - Refactor: вынести Vue в отдельные обычные скрипты без сборки
 
 - **Что сделано**: Разбита логика приложения на отдельные модули-компоненты (`cmp-theme.js`, `cmp-perplexity-settings.js`, `cmp-chat.js`, `cmp-import-export.js`) и собрана в `app.js`; добавлено правило в `.cursorrules` про учёт GitHub Pages.
 
@@ -41,7 +41,7 @@
 - **Функциональность**: Код модульный и читаемый; переключение темы/модели/ключа и чат работают через общий стейт; экспорт/импорт настроек сохранён; проект готов к статическому хостингу.
 
 
-### Коммит: fa1e338 - "Add CoinGecko top-10 widget (price & % change)"
+### Коммит: [fa1e338] - Add CoinGecko top-10 widget (price & % change)
 
 - **Что сделано**: Добавлен виджет CoinGecko с топ-10 монетами (BTC, ETH, SOL, BNB, XRP, ADA, DOGE, TRX, AVAX, DOT), ценами и изменениями за 1h/24h/7d/30d/60d; индикаторы загрузки/ошибки и кнопка обновления.
 

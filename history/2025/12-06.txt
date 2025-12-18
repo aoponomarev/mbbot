@@ -6,7 +6,7 @@
 
 
 
-### Коммит: 03a174a - "Start"
+### Коммит: [03a174a] - Start
 
 - **Что сделано**: Инициализирован Git-проект и добавлен пустой `index.html`, чтобы сразу поставить фронтенд под контроль версий.
 
@@ -20,7 +20,7 @@
 
 
 
-### Коммит: 44bd5af - "Initial commit: add minimal HTML structure"
+### Коммит: [44bd5af] - Initial commit: add minimal HTML structure
 
 - **Что сделано**: Пустой файл заменён валидной HTML5-разметкой с базовыми метатегами и заголовком.
 
@@ -34,7 +34,7 @@
 
 
 
-### Коммит: e245cda - "Add Principles section and Vue.js 3 + Bootstrap 5 integration"
+### Коммит: [e245cda] - Add Principles section and Vue.js 3 + Bootstrap 5 integration
 
 - **Что сделано**: Подключены Bootstrap 5.3.2 и Vue 3, добавлен контейнер приложения и стартовый Vue-компонент.
 
@@ -50,7 +50,7 @@
 
 
 
-### Коммит: e5ae56d - "Remove style section, use Bootstrap classes only; add Bootstrap styling rule to .cursorrules"
+### Коммит: [e5ae56d] - Remove style section, use Bootstrap classes only; add Bootstrap styling rule to .cursorrules
 
 - **Что сделано**: Удалён единственный `<style>` блок, весь декор переведён на Bootstrap-утилиты.
 
@@ -64,7 +64,7 @@
 
 
 
-### Коммит: 7be4bde - "Add Font Awesome, theme toggle button, and extract UI functionality to ui.js"
+### Коммит: [7be4bde] - Add Font Awesome, theme toggle button, and extract UI functionality to ui.js
 
 - **Что сделано**: Добавлены иконки Font Awesome и плавающая кнопка переключения темы, логика вынесена в `ui.js`.
 
@@ -82,7 +82,7 @@
 
 
 
-### Коммит: 52f6e11 - "Add Font Awesome icons and theme toggle button with dark/light mode support"
+### Коммит: [52f6e11] - Add Font Awesome icons and theme toggle button with dark/light mode support
 
 - **Что сделано**: Логика переключения темы перенесена обратно во Vue-приложение, `data-bs-theme` привязан к `<html>` через реактивные методы.
 
@@ -98,7 +98,7 @@
 
 
 
-### Коммит: ce3e564 - "Remove unused ui.js file"
+### Коммит: [ce3e564] - Remove unused ui.js file
 
 - **Что сделано**: Удалён устаревший `ui.js`, чтобы не было мёртвого кода после миграции логики в Vue.
 
@@ -158,7 +158,7 @@
 
 ## Architect (архитектура, настройки)
 
-### Коммит: 3ce210f - "Add AI agent configuration files (.cursorrules and .ai-config.md)"
+### Коммит: [3ce210f] - Add AI agent configuration files (.cursorrules and .ai-config.md)
 
 - **Что сделано**: Заданы базовые правила работы ИИ-агента с проектом и пользователем.
 
@@ -172,7 +172,7 @@
 
 
 
-### Коммит: 433448a - "Add VS Code settings and spell checker configuration for seamless Cursor-VS Code transition"
+### Коммит: [433448a] - Add VS Code settings and spell checker configuration for seamless Cursor-VS Code transition
 
 - **Что сделано**: Настроена синхронизация окружений Cursor ↔ VS Code для единообразной работы.
 
@@ -188,7 +188,7 @@
 
 
 
-### Коммит: d6745bc - "Sync VS Code settings: update theme to Atom One Light and user preferences"
+### Коммит: [d6745bc] - Sync VS Code settings: update theme to Atom One Light and user preferences
 
 - **Что сделано**: Синхронизированы личные предпочтения пользователя по редактору (темы, вкладки, подсветка совпадений).
 
@@ -204,7 +204,7 @@
 
 
 
-### Коммит: 1fa4dbf - "Remove unused .ai-config.md, update theme to default, add rule for tracking unnecessary files"
+### Коммит: [1fa4dbf] - Remove unused .ai-config.md, update theme to default, add rule for tracking unnecessary files
 
 - **Что сделано**: Удалена устаревшая конфигурация и добавлено правило проактивного удаления "болтающихся" файлов.
 
@@ -218,7 +218,7 @@
 
 
 
-### Коммит: 34cd3fb - "Update logging system: switch to manual daily protocol, add .gitignore, remove Python dependencies"
+### Коммит: [34cd3fb] - Update logging system: switch to manual daily protocol, add .gitignore, remove Python dependencies
 
 - **Что сделано**: Перешли от Python-скриптов к ручному протоколированию дневников и ввели `.gitignore`.
 
@@ -234,7 +234,7 @@
 
 
 
-### Коммит: e245cda - "Add Principles section and Vue.js 3 + Bootstrap 5 integration"
+### Коммит: [e245cda] - Add Principles section and Vue.js 3 + Bootstrap 5 integration
 
 - **Что сделано**: В `.cursorrules` появилась секция "Принципы" (UI/UX/MM) и правило обработки команд `UI:/UX:/MM:`.
 
@@ -246,7 +246,7 @@
 
 
 
-### Коммит: e5ae56d - "Remove style section, use Bootstrap classes only; add Bootstrap styling rule to .cursorrules"
+### Коммит: [e5ae56d] - Remove style section, use Bootstrap classes only; add Bootstrap styling rule to .cursorrules
 
 - **Что сделано**: В `.cursorrules` добавлено требование использовать только Bootstrap-классы без кастомных `<style>`.
 
@@ -258,7 +258,7 @@
 
 
 
-### Коммит: c4ad8b7 - "Update daily log format: narrative style with commit references in text"
+### Коммит: [c4ad8b7] - Update daily log format: narrative style with commit references in text
 
 - **Что сделано**: Регламент протоколирования уточнён — дневной лог обязан состоять из трёх секций (UI/UX/MM) с детальными пояснениями и хешами коммитов.
 
