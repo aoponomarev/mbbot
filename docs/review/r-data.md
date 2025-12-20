@@ -194,7 +194,6 @@ File System Access API требует user gesture. Поэтому pipeline:
 - `docs/` (не читать автоматически)
 - `old_app_not_write/` (не читать/не трогать)
 - `.git/`, `node_modules/`
-- `history/` (для статистики исключается отдельно)
 
 ---
 
@@ -249,7 +248,7 @@ GitHub источник требует `owner/repo/branch`.
 - берутся из `idx.listFiles()`
 - читаются через `idx.readText()`
 - фильтруются по расширениям: `js/css/html/json/md/txt/rst/adoc`
-- исключаются: `docs/`, `old_app_not_write/`, `history/`, `.git/`, `node_modules/`, review-страницы
+- исключаются: `docs/`, `old_app_not_write/`, `.git/`, `node_modules/`, review-страницы
 
 `ProjectStats.loadFilesData()` теперь использует `ReviewDataPipeline.scanStats()`.
 

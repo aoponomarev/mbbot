@@ -1095,7 +1095,7 @@ const ReviewDataPipeline = (() => {
 
     /**
      * Сканер: статистика по файлам (строки/размеры/типы/папки).
-     * Исключает docs/, old_app_not_write/, node_modules/, .git/ и history/ (дневники).
+     * Исключает docs/, old_app_not_write/, node_modules/, .git/.
      */
     async function scanStats() {
         // v3: учитываем .gitignore + добавляем DOCS (txt и др.) + best-effort docs в DepGraph
@@ -1103,7 +1103,6 @@ const ReviewDataPipeline = (() => {
             const isGitIgnored = await buildGitignorePredicate(idx);
             const basePaths = (await idx.listFiles())
                 .map(p => String(p || '').replace(/\\/g, '/'))
-                .filter(p => !p.startsWith('history/'))
                 .filter(p => !shouldExcludePath(p))
                 .filter(p => !isGitIgnored(p));
 
@@ -1121,7 +1120,6 @@ const ReviewDataPipeline = (() => {
             for (const p of docCandidates) {
                 const norm = String(p || '').replace(/\\/g, '/').replace(/^\/+/, '');
                 if (!norm) continue;
-                if (norm.startsWith('history/')) continue;
                 if (shouldExcludePath(norm)) continue;
                 if (isGitIgnored(norm)) continue;
                 pathsSet.add(norm);
@@ -1214,7 +1212,7 @@ const ReviewDataPipeline = (() => {
         // Bump cache version: фильтрация icon-* по реальным svg-ассетам + чистка Font Awesome "модификаторов"
         return await runScannerWithCache('icons_v5', async (idx) => {
             const paths = (await idx.listFiles())
-                .filter(p => !shouldExcludePath(p) && !p.startsWith('history/'));
+                .filter(p => !shouldExcludePath(p));
 
             // Реальные SVG-иконки (важно: не считаем "icon-*" иконкой, если svg-файла нет).
             // Это фильтрует шум от CSS-переменных/классов вида icon-action-color, icon-preview, etc.
@@ -1441,7 +1439,7 @@ const ReviewDataPipeline = (() => {
     async function scanColors() {
         return await runScannerWithCache('colors', async (idx) => {
             const paths = (await idx.listFiles())
-                .filter(p => !shouldExcludePath(p) && !p.startsWith('history/'));
+                .filter(p => !shouldExcludePath(p));
 
             const cssFiles = paths.filter(p => p.endsWith('.css'));
             const textFiles = paths.filter(p => /\.(css|js|html|md|json)$/i.test(p));
@@ -1533,7 +1531,7 @@ const ReviewDataPipeline = (() => {
         // (store + AppMessages эвристика) и старый кэш может быть пустым/неполным.
         return await runScannerWithCache('messages_v2', async (idx) => {
             const allPaths = (await idx.listFiles())
-                .filter(p => !shouldExcludePath(p) && !p.startsWith('history/'))
+                .filter(p => !shouldExcludePath(p))
                 .filter(p => p.endsWith('.html') || p.endsWith('.js') || p.endsWith('.json'));
 
             const messages = new Map(); // key -> {type,text,files:Set}
