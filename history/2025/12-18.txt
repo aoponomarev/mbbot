@@ -12,6 +12,10 @@
 
 ## ARCH (архитектура, настройки)
 
+### Коммит: 18.12.2025 - Configure VS Code settings sync and fix Git configuration
+◆ Добавлены полные настройки VS Code (редактор, терминал, Git, тема, проверка орфографии). Переименованы review-файлы в `docs/review/` с префиксом `r-` для единообразия.
+→ Создан `.vscode/settings.json` с полными настройками проекта (редактор, терминал Git Bash, тема Default Light+, Git интеграция, cSpell). Создан `.vscode/cspell-dict.txt` со словарем проекта. Переименованы review-файлы: `review-app.html` → `docs/review/r-app.html`, `review-colors.html` → `docs/review/r-colors.html`, `review-data.md` → `docs/review/r-data.md`, `review-icons.html` → `docs/review/r-icons.html`, `review-manager.js` → `docs/review/r-manager.js`, `review-messages.html` → `docs/review/r-messages.html`, `review-styles.css` → `docs/review/r-styles.css`, `review-system-messages.json` → `docs/review/r-system-messages.json`.
+
 ### Коммит: [56b884b] - Start of day: 12-18
 ◆ Открыт рабочий день 18 декабря 2025 и зафиксировано исходное состояние проекта.
 → Проверены ключевые документы (`.cursorrules`, `architect.md`, `ui/guide-ii.md`, `mm/median.md`), состояние репозитория (ветка `master`, синхронизация с `origin/master`), актуальность зависимостей (Vue.js 3.5.25, Bootstrap 5.3.8, Font Awesome 6.5.1); создан файл дневного лога `history/2025/12-18.txt`, обновлён `lastCommitMessage` в `core/cfg-app.js` на "Start of day: 12-18".
@@ -21,6 +25,10 @@
 → Переструктурирован раздел `.cursorrules` по работе с Git (регламент, протоколы "комить"/"закомить", "новый рабочий день", "завершаем день") и добавлен `.cursorignore` с исключением `docs/` и `old_app_not_write/` из анализа и коммитов.
 
 ## DOCS (документация)
+
+### Коммит: 18.12.2025 - Configure VS Code settings sync and fix Git configuration
+◆ Обновлен протокол синхронизации настроек Cursor → VS Code с автоматической синхронизацией расширений и их настроек (добавление, редактирование, удаление). Обновлен регламент работы с Git с проверкой конфигурации перед коммитами.
+→ Изменен `.cursorrules`: добавлен протокол автоматической синхронизации настроек Cursor → VS Code (расширения, настройки расширений, все операции), обновлен регламент работы с Git (проверка user.name, user.email, core.editor).
 
 ### Коммит: [ef278d8] - End of day: 12-18
 ◆ Завершён рабочий день 18 декабря 2025 итоговым коммитом.
