@@ -1,6 +1,6 @@
 # Архитектура, структура файлов/компонентов, js/api/io
 
-## Коммит от 20.12.2025 : Integrate independent file counting and dynamic badge coloring in review stats
+## Коммит dc67625 от 20.12.2025 : Integrate independent file counting and dynamic badge coloring in review stats
 ◆ Интегрирован независимый метод подсчета файлов во все компоненты статистики review-страниц и реализована динамическая раскраска бейджей. → Все методы статистики (`renderMainStats()`, `renderFilesRanking()`, `renderFileTypesChart()`) переведены на использование `scanAllFilesIndependent()` вместо устаревшего `scanStats()` и `loadFilesData()`. Удалены методы `scanStats()`, `loadFilesData()`, `showStatsProgress()`, `hideStatsProgress()`, инициализация `codeStats: null`. Реализована динамическая раскраска бейджей в таблице рейтинга файлов: добавлен метод `getTypeColor()`, бейджи окрашиваются в цвета секторов диаграммы типов файлов (`this.fileTypesColors`), если тип файла представлен в диаграмме, иначе остаются серыми. Цвета диаграммы сохраняются в `this.fileTypesColors` для использования в бейджах. ◉ Независимый метод подсчета файлов обеспечивает точность статистики независимо от ограничений DepGraph и других источников данных. Динамическая связь цветов бейджей с диаграммой создает визуальную согласованность интерфейса: пользователь сразу видит соответствие между типами файлов на диаграмме и в таблице.
 
 ## Коммит 8e28b75 от 18.12.2025 : Refine Git workflow rules and header layout

@@ -1,6 +1,6 @@
 # Разметка и стили проекта
 
-## Коммит от 20.12.2025 : Decouple review pages CSS from main application styles
+## Коммит dc67625 от 20.12.2025 : Decouple review pages CSS from main application styles
 ◆ Полностью отвязаны CSS review-страниц от стилей основного приложения. → Удалены ссылки на `../../ui/styles/layout.css` и `../../ui/styles/icons.css` из всех review-файлов (`r-app.html`, `r-colors.html`, `r-icons.html`, `r-messages.html`). Перенесены все необходимые стили из `layout.css` (системные сообщения, alert-компоненты, кнопки закрытия) и `icons.css` (CSS переменные для иконок, стили material-symbols, Font Awesome, SVG иконки) в `docs/review/r-styles.css`. Стили полностью инкапсулированы в `r-styles.css`, обеспечивая независимость review-страниц от основных стилей приложения. ◉ Полная инкапсуляция стилей review-страниц демонстрирует принцип модульности: review-инструменты не зависят от изменений в основных стилях приложения, что упрощает поддержку и предотвращает конфликты стилей. Независимость review-страниц критична для их использования как автономных инструментов разработки.
 
 ## Коммит 8e28b75 от 18.12.2025 : Refine Git workflow rules and header layout
