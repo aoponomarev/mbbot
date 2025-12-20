@@ -2,6 +2,9 @@
   "recommendations": [
     "mhutchie.git-graph",
     "eamodio.gitlens",
-    "philhindle.openFileOnStartup"
+    "philhindle.openFileOnStartup",
+    "streetsidesoftware.code-spell-checker",
+    "tunylabs.firacode",
+    "pkief.material-icon-theme"
   ]
 }

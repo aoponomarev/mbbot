@@ -17,21 +17,18 @@
       }
     },
     {
-      "label": "Open заметки.txt",
-      "type": "process",
-      "command": "${execPath}",
-      "args": [
-        "${workspaceFolder}/docs/заметки.txt"
-      ],
+      "label": "Check Cursor Chat Tabs",
+      "type": "shell",
+      "command": "echo \"Проверьте вкладки чатов Агента: ARCH, HTML CSS, DOCS, Cursor (см. .vscode/CURSOR-CHAT-TABS.md)\"",
       "problemMatcher": [],
       "runOptions": {
         "runOn": "folderOpen"
       },
       "presentation": {
-        "reveal": "silent",
+        "reveal": "always",
         "panel": "dedicated",
-        "showReuseMessage": false,
-        "clear": false
+        "showReuseMessage": true,
+        "clear": true
       }
     }
   ]

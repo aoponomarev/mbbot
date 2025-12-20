@@ -11,6 +11,7 @@
   "files.insertFinalNewline": true,
   "files.autoSave": "afterDelay",
   "files.autoSaveDelay": 1000,
+  "files.hotExit": "onExitAndWindowClose",
   "files.exclude": {
     "**/.git": true,
     "**/.DS_Store": true,
@@ -20,13 +21,16 @@
   // ============================================
   // Настройки редактора
   // ============================================
+  "editor.fontFamily": "'Fira Code', 'JetBrains Mono', 'Source Code Pro', Consolas, 'Courier New', monospace",
+  "editor.fontLigatures": true,
+  "editor.fontSize": 14,
   "editor.tabSize": 2,
   "editor.insertSpaces": true,
   "editor.detectIndentation": false,
   "editor.renderWhitespace": "boundary",
   "editor.renderControlCharacters": false,
-  "editor.wordWrap": "off",
-  "editor.minimap.enabled": true,
+  "editor.wordWrap": "on",
+  "editor.minimap.enabled": false,
   "editor.lineNumbers": "on",
   "editor.rulers": [],
   "editor.matchBrackets": "always",
@@ -84,14 +88,33 @@
   // ============================================
   // Настройки интерфейса
   // ============================================
-  "workbench.colorTheme": "Default Light+",
+  "workbench.colorTheme": "Prism (No Bold)",
   "workbench.iconTheme": "vs-seti",
   "workbench.editor.enablePreview": false,
   "workbench.editor.enablePreviewFromQuickOpen": false,
-  "workbench.editor.closeOnFileDelete": true,
-  "workbench.startupEditor": "none",
+  "workbench.editor.closeOnFileDelete": false,
+  "workbench.editor.restoreViewState": true,
+  "workbench.startupEditor": "welcomePage",
   "workbench.sideBar.location": "left",
   "workbench.statusBar.visible": true,
+  "workbench.panel.defaultLocation": "bottom",
+  "workbench.panel.opensMaximized": "never",
+  "workbench.editor.showTabs": "multiple",
+  "workbench.editor.tabActionLocation": "right",
+  "workbench.editor.tabSizing": "shrink",
+  "workbench.editor.tabSizingFixedMinWidth": 30,
+  "workbench.editor.tabSizingFixedMaxWidth": 120,
+  "workbench.localHistory.enabled": true,
+  "workbench.localHistory.maxFileSize": 256,
+
+  // ============================================
+  // Настройки чата Cursor (вкладки Агента)
+  // ============================================
+  // Отключение лимита на количество вкладок
+  "workbench.editor.limit.enabled": false,
+  "workbench.editor.limit.perEditorGroup": false,
+  // Прокрутка вкладок для отображения большего количества
+  "workbench.editor.scrollToSwitchTabs": true,
 
   // ============================================
   // Настройки языков
@@ -125,5 +148,6 @@
       "path": "${workspaceFolder}/.vscode/cspell-dict.txt",
       "addWords": true
     }
-  }
+  },
+
 }
