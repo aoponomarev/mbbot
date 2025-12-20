@@ -7,22 +7,22 @@
 const REVIEW_CONFIG = {
     'stats': {
         title: 'Статистика',
-        file: 'review-app.html',
+        file: 'docs/review/r-app.html',
         description: 'Статистика проекта: рейтинг файлов, диаграммы, метрики'
     },
     'icons': {
         title: 'Иконки',
-        file: 'ui/assets/review-icons.html',
+        file: 'docs/review/r-icons.html',
         description: 'Каталог всех иконок проекта'
     },
     'colors': {
         title: 'Цвета',
-        file: 'ui/styles/review-colors.html',
+        file: 'docs/review/r-colors.html',
         description: 'Каталог всех цветовых переменных проекта'
     },
     'messages': {
         title: 'Сообщения',
-        file: 'ui/interaction/review-messages.html',
+        file: 'docs/review/r-messages.html',
         description: 'Демо единого компонента сообщений (AppMessages + system-messages)'
     }
     // Здесь можно добавлять новые review в будущем
@@ -35,25 +35,29 @@ const REVIEW_CONFIG = {
 function createReviewHeader(currentReview) {
     const header = document.createElement('div');
     header.className = 'review-header';
-    
+
     const tabs = document.createElement('ul');
     tabs.className = 'review-tabs';
-    
+
     // Определяем текущий review из URL или используем переданный
     const urlParams = new URLSearchParams(window.location.search);
     const activeReview = urlParams.get('review') || currentReview || Object.keys(REVIEW_CONFIG)[0];
-    
+
     // Создаем вкладки для каждого review
     Object.entries(REVIEW_CONFIG).forEach(([id, config]) => {
         const li = document.createElement('li');
         const a = document.createElement('a');
         // Вычисляем относительный путь от текущего файла к целевому
         const currentPath = window.location.pathname;
-        
+
         // Определяем базовый путь в зависимости от текущего местоположения
-        // config.file содержит полный путь от корня проекта (например, 'ui/assets/review-icons.html')
+        // config.file содержит полный путь от корня проекта (например, 'docs/review/r-icons.html')
         let basePath = '';
-        if (currentPath.includes('/ui/assets/')) {
+        if (currentPath.includes('/docs/review/')) {
+            basePath = '../../'; // Из docs/review/ в корень проекта
+        } else if (currentPath.includes('/review/')) {
+            basePath = '../'; // Из review/ в корень проекта (старая папка, для совместимости)
+        } else if (currentPath.includes('/ui/assets/')) {
             basePath = '../../'; // Из ui/assets/ в корень проекта
         } else if (currentPath.includes('/ui/styles/')) {
             basePath = '../../'; // Из ui/styles/ в корень проекта
@@ -64,31 +68,31 @@ function createReviewHeader(currentReview) {
         } else if (currentPath.includes('/docs/')) {
             basePath = '../'; // Из docs/ в корень проекта
         }
-        
+
         a.href = `${basePath}${config.file}?review=${id}`;
         a.textContent = config.title;
         a.title = config.description;
-        
+
         if (id === activeReview) {
             a.classList.add('active');
         }
-        
+
         li.appendChild(a);
         tabs.appendChild(li);
     });
-    
+
     header.appendChild(tabs);
-    
+
     // Проверяем, не вставлен ли уже хедер
     if (document.querySelector('.review-header')) {
         return null; // Хедер уже существует
     }
-    
+
     // Вставляем хедер перед блоком фильтрации или контейнером
     const body = document.body;
     const filterControls = body.querySelector('.filter-controls');
     const container = body.querySelector('.container-fluid');
-    
+
     if (filterControls) {
         // Вставляем перед блоком фильтрации
         filterControls.parentNode.insertBefore(header, filterControls);
@@ -236,22 +240,22 @@ function initReviewHeader() {
     const currentPath = window.location.pathname;
     const currentFile = currentPath.split('/').pop();
     let currentReview = null;
-    
-    // Специальная проверка для review-app.html (должен быть 'stats')
-    if (currentFile === 'review-app.html') {
+
+    // Специальная проверка для r-app.html (должен быть 'stats')
+    if (currentFile === 'r-app.html' || currentFile === 'review-app.html') {
         currentReview = 'stats';
     } else {
         // Для остальных файлов проверяем по конфигурации
         Object.entries(REVIEW_CONFIG).forEach(([id, config]) => {
             // Проверяем как по полному пути, так и по имени файла
             const configFileName = config.file.split('/').pop();
-            if (currentPath.includes(config.file) || config.file.endsWith(currentFile) || 
+            if (currentPath.includes(config.file) || config.file.endsWith(currentFile) ||
                 currentFile === configFileName) {
                 currentReview = id;
             }
         });
     }
-    
+
     createReviewHeader(currentReview);
     // Шина сообщений — отдельной карточкой сразу после хедера
     ensureReviewSystemMessagesSection();
@@ -270,6 +274,8 @@ const ReviewSystemMessages = {
 
     _getBasePathToRoot() {
         const currentPath = window.location.pathname;
+        if (currentPath.includes('/docs/review/')) return '../../';
+        if (currentPath.includes('/review/')) return '../'; // старая папка, для совместимости
         if (currentPath.includes('/ui/assets/')) return '../../';
         if (currentPath.includes('/ui/styles/')) return '../../';
         if (currentPath.includes('/ui/interaction/')) return '../../';
@@ -285,7 +291,7 @@ const ReviewSystemMessages = {
         this._storeLoading = (async () => {
             try {
                 const base = this._getBasePathToRoot();
-                const resp = await fetch(`${base}tools/review-system-messages.json`);
+                const resp = await fetch(`${base}docs/review/r-system-messages.json`);
                 if (!resp.ok) return null;
                 const json = await resp.json();
                 this._store = json;
@@ -519,6 +525,8 @@ const ReviewDataPipeline = (() => {
      */
     function getBasePathToRoot() {
         const currentPath = window.location.pathname;
+        if (currentPath.includes('/docs/review/')) return '../../';
+        if (currentPath.includes('/review/')) return '../'; // старая папка, для совместимости
         if (currentPath.includes('/ui/assets/')) return '../../';
         if (currentPath.includes('/ui/styles/')) return '../../';
         if (currentPath.includes('/ui/interaction/')) return '../../';
@@ -898,8 +906,8 @@ const ReviewDataPipeline = (() => {
         const base = getBasePathToRoot();
         const entrypoints = [
             'index.html',
-            'review-app.html',
-            'ui/review-manager.js'
+            'docs/review/r-app.html',
+            'docs/review/r-manager.js'
         ];
 
         const visited = new Set();
@@ -1122,10 +1130,10 @@ const ReviewDataPipeline = (() => {
             const paths = Array.from(pathsSet);
             const allowedExt = new Set(['js', 'css', 'html', 'json', 'md', 'txt', 'rst', 'adoc']);
             const reviewFiles = new Set([
-                'review-app.html',
-                'ui/assets/review-icons.html',
-                'ui/styles/review-colors.html',
-                'ui/interaction/review-messages.html'
+                'docs/review/r-app.html',
+                'docs/review/r-icons.html',
+                'docs/review/r-colors.html',
+                'docs/review/r-messages.html'
             ]);
 
             const isCommentLine = (trimmed, fileType) => {
@@ -1517,7 +1525,7 @@ const ReviewDataPipeline = (() => {
     /**
      * Сканер: сообщения (best-effort).
      * Источники:
-     * - tools/review-system-messages.json (шаблоны системных сообщений review)
+     * - docs/review/r-system-messages.json (шаблоны системных сообщений review)
      * - AppMessages.push/replace({ scope, type, text, details }) (эвристика, JS/HTML)
      */
     async function scanMessages() {
@@ -1546,17 +1554,17 @@ const ReviewDataPipeline = (() => {
                 if (file) messages.get(key).files.add(file);
             };
 
-            // 1) review-system-messages.json (если доступен через выбранный fileIndex)
+            // 1) docs/review/r-system-messages.json (если доступен через выбранный fileIndex)
             let storeCount = 0;
             try {
-                const raw = await idx.readText('tools/review-system-messages.json');
+                const raw = await idx.readText('docs/review/r-system-messages.json');
                 const json = raw ? JSON.parse(raw) : null;
                 const storeMsgs = json?.messages || {};
                 Object.entries(storeMsgs).forEach(([k, tpl]) => {
                     const level = tpl?.level || 'info';
                     const type = level === 'error' ? 'danger' : (level === 'warning' ? 'warning' : 'info');
                     const text = tpl?.text || k;
-                    addMessage({ type, text, file: 'tools/review-system-messages.json' });
+                    addMessage({ type, text, file: 'docs/review/r-system-messages.json' });
                     storeCount++;
                 });
             } catch (_) {
@@ -1632,25 +1640,25 @@ const TableSorter = {
         sorted.sort((a, b) => {
             let valA = getValue ? getValue(a, column) : a[column];
             let valB = getValue ? getValue(b, column) : b[column];
-            
+
             // Обработка строк
             if (typeof valA === 'string') {
                 valA = valA.toLowerCase();
                 valB = valB.toLowerCase();
             }
-            
+
             // Обработка null/undefined
             if (valA == null) valA = '';
             if (valB == null) valB = '';
-            
+
             if (valA < valB) return direction === 'asc' ? -1 : 1;
             if (valA > valB) return direction === 'asc' ? 1 : -1;
             return 0;
         });
-        
+
         return sorted;
     },
-    
+
     /**
      * Добавляет обработчики сортировки к заголовкам таблицы
      * @param {HTMLElement} table - Элемент таблицы
@@ -1661,16 +1669,16 @@ const TableSorter = {
     attachSortHandlers(table, data, renderRow, getValue) {
         const thead = table.querySelector('thead');
         if (!thead) return;
-        
+
         const sortableHeaders = thead.querySelectorAll('th[data-column]');
         const tbody = table.querySelector('tbody');
-        
+
         sortableHeaders.forEach(th => {
             let sortDirection = null;
-            
+
             th.addEventListener('click', () => {
                 const column = th.dataset.column;
-                
+
                 // Переключаем направление сортировки
                 if (th.classList.contains('sort-asc')) {
                     sortDirection = 'desc';
@@ -1688,10 +1696,10 @@ const TableSorter = {
                     });
                     th.classList.add('sort-asc');
                 }
-                
+
                 // Сортируем данные
                 const sortedData = this.sort(data, column, sortDirection, getValue);
-                
+
                 // Перерисовываем таблицу
                 tbody.innerHTML = '';
                 sortedData.forEach(item => {
@@ -1714,13 +1722,13 @@ const DataFilter = {
      */
     apply(data, filters, matchesFilter) {
         let filtered = [...data];
-        
+
         Object.entries(filters).forEach(([key, value]) => {
             if (value && value !== '') {
                 filtered = filtered.filter(item => matchesFilter(item, key, value));
             }
         });
-        
+
         return filtered;
     }
 };
@@ -1741,7 +1749,7 @@ const FileUtils = {
         const parts = filePath.split(/[\/\\]/);
         return parts[parts.length - 1] || filePath;
     },
-    
+
     /**
      * Извлекает основной текст и пояснение в скобках
      * @param {string} text - Текст для обработки
@@ -1774,6 +1782,8 @@ async function initReviewVueSystemMessages() {
 
     const base = (() => {
         const currentPath = window.location.pathname;
+        if (currentPath.includes('/docs/review/')) return '../../';
+        if (currentPath.includes('/review/')) return '../'; // старая папка, для совместимости
         if (currentPath.includes('/ui/assets/')) return '../../';
         if (currentPath.includes('/ui/styles/')) return '../../';
         if (currentPath.includes('/ui/interaction/')) return '../../';
@@ -1856,7 +1866,7 @@ function initializeWhenReady() {
 initializeWhenReady();
 
 /**
- * Модуль статистики проекта (только для review-app.html)
+ * Модуль статистики проекта (только для r-app.html)
  */
 const ProjectStats = {
     // Данные файлов проекта
@@ -1870,10 +1880,10 @@ const ProjectStats = {
         const lines = content.split('\n');
         let codeLines = 0;
         let inBlockComment = false;
-        
+
         for (let line of lines) {
             const trimmed = line.trim();
-            
+
             if (ext === 'js' || ext === 'css') {
                 if (trimmed.includes('/*')) {
                     inBlockComment = true;
@@ -1884,12 +1894,12 @@ const ProjectStats = {
                 }
                 if (inBlockComment) continue;
             }
-            
+
             if (trimmed && !this.isCommentLine(trimmed, ext)) {
                 codeLines++;
             }
         }
-        
+
         return codeLines;
     },
 
@@ -1937,7 +1947,7 @@ const ProjectStats = {
     // Плоский индикатор прогресса (без alert-оформления), живёт в .review-system-messages.
     showStatsProgress() {
         const currentFile = window.location.pathname.split('/').pop();
-        if (currentFile !== 'review-app.html') return;
+        if (currentFile !== 'r-app.html' && currentFile !== 'review-app.html') return;
 
         // Прогресс теперь показываем в правом углу хедера карточки (как Auto-scan summary).
         const summary = document.querySelector('.review-system-messages-summary');
@@ -1953,7 +1963,7 @@ const ProjectStats = {
 
     hideStatsProgress() {
         const currentFile = window.location.pathname.split('/').pop();
-        if (currentFile !== 'review-app.html') return;
+        if (currentFile !== 'r-app.html' && currentFile !== 'review-app.html') return;
 
         const summary = document.querySelector('.review-system-messages-summary');
         if (summary && summary.dataset) {
@@ -1992,12 +2002,12 @@ const ProjectStats = {
             if (totalLinesEl) totalLinesEl.textContent = this.codeStats.totalLines.toLocaleString();
             if (totalFilesEl) totalFilesEl.textContent = this.codeStats.totalFiles;
         }
-        
+
         if (this.iconsStats) {
             const totalIconsEl = document.getElementById('total-icons');
             if (totalIconsEl) totalIconsEl.textContent = this.iconsStats.total;
         }
-        
+
         if (this.colorsStats) {
             const totalColorsEl = document.getElementById('total-colors');
             if (totalColorsEl) totalColorsEl.textContent = this.colorsStats.total;
@@ -2008,22 +2018,22 @@ const ProjectStats = {
     renderFilesRanking() {
         const tbody = document.getElementById('files-ranking-body');
         if (!tbody) return;
-        
+
         tbody.innerHTML = '';
-        
+
         this.filesData.forEach((file, index) => {
             const tr = document.createElement('tr');
-            
+
             tr.innerHTML = `
                 <td class="text-end"><strong>${file.lines.toLocaleString()}</strong></td>
                 <td><code>${file.path}</code></td>
                 <td><span class="badge bg-secondary">${file.type.toUpperCase()}</span></td>
                 <td>${this.formatFileSize(file.size)}</td>
             `;
-            
+
             tbody.appendChild(tr);
         });
-        
+
         // Добавляем обработчики сортировки
         this.attachSortHandlers();
     },
@@ -2037,38 +2047,38 @@ const ProjectStats = {
     attachSortHandlers() {
         const table = document.getElementById('files-ranking-table');
         if (!table) return;
-        
+
         const headers = table.querySelectorAll('th[data-column]');
-        
+
         headers.forEach(th => {
             th.style.cursor = 'pointer';
             th.addEventListener('click', () => {
                 const column = th.dataset.column;
-                const currentDir = th.classList.contains('sort-asc') ? 'desc' : 
+                const currentDir = th.classList.contains('sort-asc') ? 'desc' :
                                   th.classList.contains('sort-desc') ? null : 'asc';
-                
+
                 // Убираем сортировку с других заголовков
                 headers.forEach(h => h.classList.remove('sort-asc', 'sort-desc'));
-                
+
                 if (currentDir) {
                     th.classList.add(`sort-${currentDir}`);
-                    
+
                     // Сортируем данные
                     const sorted = [...this.filesData];
                     sorted.sort((a, b) => {
                         let valA = a[column];
                         let valB = b[column];
-                        
+
                         if (column === 'path') {
                             valA = valA.toLowerCase();
                             valB = valB.toLowerCase();
                         }
-                        
+
                         if (valA < valB) return currentDir === 'asc' ? -1 : 1;
                         if (valA > valB) return currentDir === 'asc' ? 1 : -1;
                         return 0;
                     });
-                    
+
                     this.filesData = sorted;
                     this.renderFilesRanking();
                 }
@@ -2284,13 +2294,13 @@ const ProjectStats = {
     // Отображение статистики иконок (для popover)
     renderIconsStats() {
         if (!this.iconsStats) return '';
-        
+
         let html = `
             <div class="stat-item">
                 <div class="stat-item-label"><strong>По категориям:</strong></div>
             </div>
         `;
-        
+
         Object.entries(this.iconsStats.byCategory).sort((a, b) => b[1] - a[1]).forEach(([category, count]) => {
             html += `
                 <div class="stat-item">
@@ -2299,20 +2309,20 @@ const ProjectStats = {
                 </div>
             `;
         });
-        
+
         return html;
     },
 
     // Отображение статистики цветов (для popover)
     renderColorsStats() {
         if (!this.colorsStats) return '';
-        
+
         let html = `
             <div class="stat-item">
                 <div class="stat-item-label"><strong>По категориям:</strong></div>
             </div>
         `;
-        
+
         Object.entries(this.colorsStats.byCategory).sort((a, b) => b[1] - a[1]).forEach(([category, count]) => {
             html += `
                 <div class="stat-item">
@@ -2321,30 +2331,30 @@ const ProjectStats = {
                 </div>
             `;
         });
-        
+
         return html;
     },
 
-    // Инициализация статистики (только для review-app.html)
+    // Инициализация статистики (только для r-app.html)
     async init() {
         // Проверяем, что мы на странице статистики
         const currentFile = window.location.pathname.split('/').pop();
-        if (currentFile !== 'review-app.html') {
+        if (currentFile !== 'r-app.html' && currentFile !== 'review-app.html') {
             return; // Не инициализируем статистику на других страницах
         }
-        
+
         await this.loadFilesData();
         await this.loadIconsStats();
         await this.loadColorsStats();
-        
+
         this.renderMainStats();
         this.renderFilesRanking();
         await this.renderCharts();
-        
+
         // Инициализируем popover для карточек иконок и цветов
         this.initPopovers();
     },
-    
+
     // Инициализация popover для карточек
     initPopovers() {
         // Ждем загрузки Bootstrap
@@ -2352,7 +2362,7 @@ const ProjectStats = {
             setTimeout(() => this.initPopovers(), 100);
             return;
         }
-        
+
         // Popover для иконок
         const iconsCard = document.getElementById('icons-stat-card');
         if (iconsCard) {
@@ -2366,7 +2376,7 @@ const ProjectStats = {
                 });
             }
         }
-        
+
         // Popover для цветов
         const colorsCard = document.getElementById('colors-stat-card');
         if (colorsCard) {
@@ -2398,7 +2408,7 @@ if (typeof window !== 'undefined') {
     };
 }
 
-// Автоматическая инициализация статистики при загрузке DOM (только для review-app.html)
+// Автоматическая инициализация статистики при загрузке DOM (только для r-app.html)
 document.addEventListener('DOMContentLoaded', () => {
     ProjectStats.init();
 });

@@ -1,11 +1,48 @@
 # Пользовательский словарь для проверки орфографии
-# Добавляйте сюда слова, которые должны игнорироваться при проверке орфографии
+# Добавляйте сюда слова, которые должны игнорироваться при проверке
+# (технические термины, аббревиатуры, имена собственные и т.д.)
 # По одному слову на строку
 
-# Примеры (можно удалить):
-# HTML
-# CSS
-# JavaScript
-# API
-# JSON
+# Технические термины
+CoinGecko
+Perplexity
+localStorage
+IndexedDB
+CDN
+Vue
+Bootstrap
+GitHub
+Bybit
 
+# Аббревиатуры
+API
+UI
+UX
+MM
+ARCH
+DOCS
+CPT
+CD
+CGR
+DIN
+MDN
+AGR
+PRC
+PV1h
+CDH
+BTC
+FGI
+VIX
+OI
+FR
+LSR
+
+# Имена собственные и названия
+appConfig
+coingecko
+perplexity
+avto
+cmpHeader
+cmpTheme
+cmpChat
+appRoot

@@ -1,82 +1,129 @@
 {
-  // Git настройки
-  "git.enableSmartCommit": true,
-  "git.confirmSync": false,
-  "git.autofetch": true,
-  "git.autoRepositoryDetection": true,
-  "git.suggestSmartCommit": true,
-  "git.scmProvider": "git",
-  "git.useEditorAsCommitInput": false,
-  
-  // Автосохранение файлов
-  "files.autoSave": "afterDelay",
-  "files.autoSaveDelay": 1000,
+  // Настройки проекта для совместимости с Cursor
+  // Синхронизировано согласно протоколу синхронизации настроек Cursor → VS Code
+
+  // ============================================
+  // Настройки работы с файлами
+  // ============================================
   "files.encoding": "utf8",
   "files.eol": "\r\n",
-  
-  // Редактор
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 1000,
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true
+  },
+
+  // ============================================
+  // Настройки редактора
+  // ============================================
   "editor.tabSize": 2,
   "editor.insertSpaces": true,
   "editor.detectIndentation": false,
-  "editor.formatOnSave": false,
+  "editor.renderWhitespace": "boundary",
+  "editor.renderControlCharacters": false,
   "editor.wordWrap": "off",
-  "editor.fontFamily": "'JetBrains Mono', 'Consolas', 'Courier New', monospace",
-  "editor.fontSize": 14,
-  "editor.fontLigatures": true,
-  "editor.fontStretch": "condensed",
-  "editor.mouseWheelZoom": true,
-  
-  // Файлы
-  "files.exclude": {
-    "**/.git": true,
-    "**/.DS_Store": true
+  "editor.minimap.enabled": true,
+  "editor.lineNumbers": "on",
+  "editor.rulers": [],
+  "editor.matchBrackets": "always",
+  "editor.bracketPairColorization.enabled": true,
+  "editor.guides.bracketPairs": true,
+  "editor.formatOnSave": false,
+  "editor.formatOnPaste": false,
+  "editor.suggestSelection": "first",
+  "editor.acceptSuggestionOnCommitCharacter": true,
+  "editor.acceptSuggestionOnEnter": "on",
+  "editor.snippetSuggestions": "top",
+  "editor.wordBasedSuggestions": "allDocuments",
+  "editor.quickSuggestions": {
+    "other": true,
+    "comments": false,
+    "strings": true
   },
-  "files.watcherExclude": {
-    "**/.git/objects/**": true,
-    "**/.git/subtree-cache/**": true,
-    "**/node_modules/**": true
+
+  // ============================================
+  // Настройки терминала
+  // ============================================
+  "terminal.integrated.defaultProfile.windows": "Git Bash",
+  "terminal.integrated.profiles.windows": {
+    "Git Bash": {
+      "path": "C:\\Program Files\\Git\\bin\\bash.exe",
+      "args": []
+    }
   },
-  
-  // Поиск
+  "terminal.integrated.cursorBlinking": true,
+  "terminal.integrated.cursorStyle": "line",
+  "terminal.integrated.fontSize": 14,
+
+  // ============================================
+  // Настройки Git
+  // ============================================
+  "git.enabled": true,
+  "git.autofetch": true,
+  "git.confirmSync": false,
+  "git.path": "C:\\Program Files\\Git\\bin\\git.exe",
+  "git.ignoreLimitWarning": true,
+
+  // ============================================
+  // Настройки поиска
+  // ============================================
   "search.exclude": {
     "**/node_modules": true,
     "**/bower_components": true,
-    "**/.git": true
+    "**/.git": true,
+    "**/dist": true,
+    "**/build": true
   },
-  
-  // Открывать Markdown файлы в режиме preview
-  "workbench.editorAssociations": {
-    "*.md": "vscode.markdown.preview.editor"
-  },
-  
-  // Настройки для текстовых файлов
-  "[*.txt]": {
-    "editor.wordWrap": "on",
-    "editor.wordWrapColumn": 0
-  },
-  "[plaintext]": {
-    "editor.wordWrap": "on",
-    "editor.wordWrapColumn": 0
-  },
-  
-  // Автоматическое открытие файла при старте workspace
-  "openFileOnStartup.files": [
-    "docs/заметки.txt"
-  ],
-  
-  // Настройки редактора - без разделения на группы
+  "search.useIgnoreFiles": true,
+  "search.smartCase": true,
+
+  // ============================================
+  // Настройки интерфейса
+  // ============================================
+  "workbench.colorTheme": "Default Light+",
+  "workbench.iconTheme": "vs-seti",
   "workbench.editor.enablePreview": false,
-  "workbench.editor.openPositioning": "last",
-  "workbench.editor.splitOnDragAndDrop": false,
-  "workbench.editor.revealIfOpen": true,
-  "workbench.editor.showTabs": "multiple",
-  "workbench.editor.tabActionLocation": "right",
-  "workbench.editor.splitInGroupLayout": "default",
+  "workbench.editor.enablePreviewFromQuickOpen": false,
+  "workbench.editor.closeOnFileDelete": true,
+  "workbench.startupEditor": "none",
+  "workbench.sideBar.location": "left",
+  "workbench.statusBar.visible": true,
 
-  // Cursor: не показывать правую AI-панель по hover у края окна
-  // (если настройка поддерживается вашей версией Cursor)
-  "cursor.windowSwitcher.sidebarHoverCollapsed": false,
+  // ============================================
+  // Настройки языков
+  // ============================================
+  "[javascript]": {
+    "editor.tabSize": 2,
+    "editor.defaultFormatter": null
+  },
+  "[json]": {
+    "editor.tabSize": 2
+  },
+  "[html]": {
+    "editor.tabSize": 2
+  },
+  "[css]": {
+    "editor.tabSize": 2
+  },
+  "[markdown]": {
+    "editor.tabSize": 2,
+    "editor.wordWrap": "on"
+  },
 
-  // VS Code layout: держать Secondary Side Bar скрытой по умолчанию
-  "workbench.secondarySideBar.defaultVisibility": "hidden"
+  // ============================================
+  // Настройки проверки орфографии
+  // ============================================
+  "cSpell.enabled": true,
+  "cSpell.language": "en,ru",
+  "cSpell.customDictionaries": {
+    "project-dict": {
+      "name": "project-dict",
+      "path": "${workspaceFolder}/.vscode/cspell-dict.txt",
+      "addWords": true
+    }
+  }
 }
