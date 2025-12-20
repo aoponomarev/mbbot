@@ -21,7 +21,7 @@
   // ============================================
   // Настройки редактора
   // ============================================
-  "editor.fontFamily": "'Fira Code', 'JetBrains Mono', 'Source Code Pro', Consolas, 'Courier New', monospace",
+  "editor.fontFamily": "'JetBrains Mono', 'Source Code Pro', Consolas, 'Courier New', monospace",
   "editor.fontLigatures": true,
   "editor.fontSize": 14,
   "editor.tabSize": 2,
@@ -48,6 +48,7 @@
     "comments": false,
     "strings": true
   },
+  "editor.occurrencesHighlight": "singleFile",
 
   // ============================================
   // Настройки терминала
@@ -115,6 +116,19 @@
   "workbench.editor.limit.perEditorGroup": false,
   // Прокрутка вкладок для отображения большего количества
   "workbench.editor.scrollToSwitchTabs": true,
+
+  // ============================================
+  // Настройки ассоциаций редакторов
+  // ============================================
+  "workbench.editorAssociations": {
+    "*.md": "vscode.markdown.preview.editor"
+  },
+
+  // ============================================
+  // Настройки Markdown
+  // ============================================
+  "markdown.preview.fontFamily": "'JetBrains Mono', 'Source Code Pro', Consolas, 'Courier New', monospace",
+  "markdown.preview.codeFontFamily": "'JetBrains Mono', 'Source Code Pro', Consolas, 'Courier New', monospace",
 
   // ============================================
   // Настройки языков

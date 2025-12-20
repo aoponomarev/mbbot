@@ -713,19 +713,331 @@ body {
     font-size: 1rem;
 }
 
+/* Кастомный popover для диаграммы типов файлов */
+.file-types-custom-popover {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1060;
+    pointer-events: none;
+}
+
+.file-types-popover-content {
+    background: white;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 0.5rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    padding: 0;
+    min-width: 320px;
+    max-width: 90%;
+    max-height: 80vh;
+    overflow: auto;
+    pointer-events: auto;
+    position: relative;
+}
+
+#file-types-popover-body {
+    padding: 0;
+}
+
+.file-types-custom-popover .table {
+    border-top: none;
+    border-bottom: none;
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+.file-types-custom-popover .table thead th,
+.file-types-custom-popover .table tbody td {
+    border: 0;
+    border-bottom: 1px solid #dee2e6 !important;
+}
+
+.file-types-custom-popover .table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.file-types-custom-popover .table tbody tr:hover {
+    background-color: transparent !important;
+    background: transparent !important;
+}
+
+.file-types-custom-popover .table tbody tr:hover td {
+    background-color: transparent !important;
+    background: transparent !important;
+}
+
+.file-types-custom-popover .table tbody tr:hover th {
+    background-color: transparent !important;
+    background: transparent !important;
+}
+
 /* Адаптивность */
 @media (max-width: 768px) {
     body {
         padding: 1rem;
     }
-    
+
     .review-tabs {
         flex-wrap: wrap;
     }
-    
+
     .review-tabs a {
         padding: 8px 16px;
         font-size: 0.9rem;
     }
+}
+
+/* =========================
+   СТИЛИ ДЛЯ СИСТЕМНЫХ СООБЩЕНИЙ (из layout.css)
+   ========================= */
+
+/* Иконка типа системного сообщения (слева от текста) */
+.system-message-type-icon {
+    font-size: 1.4rem;
+    line-height: 1;
+    margin-top: 0.05rem;
+    opacity: 1;
+    color: inherit;
+}
+
+/* Обертка для alert-сообщения с кнопкой закрытия */
+.alert-message-wrapper {
+    position: relative;
+    width: 100%;
+    margin-bottom: 0 !important;
+}
+
+/* Убираем нижний отступ у Bootstrap alert внутри обертки */
+.alert-message-wrapper .alert {
+    margin-bottom: 0;
+    position: relative;
+}
+
+/* Для alert-dismissible добавляем padding справа для места под кнопку */
+.alert-message-wrapper .alert-dismissible {
+    padding-right: 3rem;
+}
+
+/* Обертка для кнопки закрытия */
+.alert-close-button-wrapper {
+    position: absolute;
+    height: 0;
+    z-index: 1;
+    width: 100%;
+}
+
+/* Кастомная кнопка закрытия для alert */
+.alert-close-button-wrapper .btn-close-custom {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    z-index: 1;
+    padding: 0.5rem 0.75rem;
+    margin: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 0.375rem;
+    opacity: 1;
+    transition: opacity 0.15s ease-in-out;
+    pointer-events: auto;
+}
+
+.alert .btn-close-custom:hover {
+    opacity: 1;
+}
+
+.alert .btn-close-custom:focus {
+    opacity: 1;
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Скрываем текст в кнопке закрытия, оставляем только иконку */
+.alert .btn-close-custom .button-label {
+    display: none !important;
+}
+
+/* Убираем стандартный background-image и mask-image Bootstrap */
+.btn-close,
+.alert .btn-close,
+.alert-dismissible .btn-close {
+    background-image: none !important;
+    background: transparent !important;
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
+    -webkit-mask: none !important;
+    mask: none !important;
+}
+
+/* Создаем тонкий крестик через ::before */
+.btn-close::before,
+.alert .btn-close::before,
+.alert-dismissible .btn-close::before {
+    content: '' !important;
+    display: block !important;
+    width: 1em !important;
+    height: 1em !important;
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 2 L14 14 M14 2 L2 14' stroke='%23000' stroke-width='0.5' stroke-linecap='round' fill='none'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    background-size: 100% 100% !important;
+    opacity: 0.5 !important;
+}
+
+.btn-close:hover::before,
+.alert .btn-close:hover::before,
+.alert-dismissible .btn-close:hover::before {
+    opacity: 0.75 !important;
+}
+
+/* Для маленькой версии кнопки (.btn-close-sm) */
+.btn-close-sm::before,
+.alert .btn-close-sm::before,
+.alert-dismissible .btn-close-sm::before {
+    width: 0.75em !important;
+    height: 0.75em !important;
+}
+
+/* Цвет крестика соответствует цвету текста сообщения */
+.alert-message-wrapper .alert-close-button-wrapper .btn-close-custom {
+    color: var(--alert-close-color, var(--bs-alert-color, currentColor));
+    opacity: 0.6;
+}
+
+.alert-close-button-wrapper .btn-close-custom:hover {
+    opacity: 0.9;
+}
+
+/* Адаптивный размер шрифта для alert-сообщений */
+.alert-message-wrapper .alert {
+    font-size: 1rem;
+}
+
+@media (max-width: 576px) {
+    .alert-message-wrapper .alert {
+        font-size: 0.875rem;
+    }
+}
+
+/* =========================
+   СТИЛИ ДЛЯ ИКОНОК (из icons.css)
+   ========================= */
+
+/* CSS переменные для цветов иконок */
+:root {
+    /* Цвета иконок метрик (динамические, вычисляются в JS) */
+    --icon-metric-default-color: hsl(0, 0%, 43%); /* #6c757d - серый по умолчанию */
+
+    /* Цвета статусов */
+    --icon-status-warning-color: hsl(45, 100%, 51%); /* Bootstrap warning */
+    --icon-status-error-color: hsl(354, 70%, 54%); /* Bootstrap danger */
+    --icon-status-success-color: hsl(142, 71%, 45%); /* Bootstrap success */
+    --icon-status-info-color: hsl(199, 89%, 48%); /* Bootstrap info */
+
+    /* Цвета действий */
+    --icon-action-color: var(--bs-body-color);
+    --icon-action-hover-color: var(--bs-primary);
+    --icon-action-disabled-color: var(--bs-secondary);
+
+    /* SVG-иконка крестика */
+    --icon-cross-stroke-width: 0.25px;
+    --icon-cross-color: var(--bs-body-color);
+}
+
+/* Темная тема */
+[data-bs-theme="dark"] {
+    --icon-metric-default-color: hsl(0, 0%, 60%);
+}
+
+/* Material Symbols (Sharp) */
+.material-symbols-sharp {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    font-size: 1em;
+    line-height: 1;
+    vertical-align: -0.125em;
+    display: inline-block;
+    color: var(--icon-action-color);
+}
+
+/* Иконки действий (базовые стили) */
+.fa-sync-alt,
+.fa-moon,
+.fa-sun,
+.fa-cog,
+.fa-trash,
+.fa-save,
+.fa-eye,
+.fa-eye-slash,
+.fa-stop {
+    color: var(--icon-action-color);
+}
+
+/* Hover эффекты для интерактивных иконок */
+button:hover .fa-sync-alt,
+button:hover .fa-moon,
+button:hover .fa-sun,
+button:hover .fa-cog,
+button:hover .fa-trash,
+button:hover .fa-save,
+button:hover .fa-eye,
+button:hover .fa-eye-slash,
+button:hover .fa-stop,
+button:hover .material-symbols-sharp {
+    color: var(--icon-action-hover-color);
+}
+
+/* Disabled состояние */
+button:disabled .fa-sync-alt,
+button:disabled .fa-moon,
+button:disabled .fa-sun,
+button:disabled .fa-cog,
+button:disabled .fa-trash,
+button:disabled .fa-save,
+button:disabled .fa-eye,
+button:disabled .fa-eye-slash,
+button:disabled .fa-stop,
+button:disabled .material-symbols-sharp {
+    color: var(--icon-action-disabled-color);
+    opacity: 0.6;
+}
+
+/* SVG-иконка крестика (две тонкие линии) */
+.icon-cross {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    vertical-align: middle;
+    color: var(--icon-cross-color);
+}
+
+/* Стили для SVG внутри object (наследуют currentColor и CSS переменные) */
+.icon-cross object {
+    width: 100%;
+    height: 100%;
+    color: inherit;
+}
+
+.icon-cross object svg {
+    width: 100%;
+    height: 100%;
+    stroke: currentColor;
+    stroke-width: var(--icon-cross-stroke-width);
+    stroke-linecap: round;
+    fill: none;
+}
+
+/* Hover эффект для крестика */
+button:hover .icon-cross,
+a:hover .icon-cross {
+    --icon-cross-color: var(--icon-action-hover-color);
+}
+
+/* Disabled состояние для крестика */
+button:disabled .icon-cross,
+a[aria-disabled="true"] .icon-cross {
+    --icon-cross-color: var(--icon-action-disabled-color);
+    opacity: 0.6;
 }
 
