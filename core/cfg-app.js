@@ -13,5 +13,5 @@ window.appConfig = {
     { value: 'llama-3.1-sonar-small-128k-online', label: 'llama-3.1-sonar-small-128k-online' },
     { value: 'llama-3.1-sonar-large-128k-online', label: 'llama-3.1-sonar-large-128k-online' }
   ],
-  lastCommitMessage: 'Move thematic logs to docs/logs and rename to match chat tabs'
+  lastCommitMessage: 'Update thematic logs structure and add theme mismatch check'
 };

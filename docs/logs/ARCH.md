@@ -1,4 +1,4 @@
-# Архитектура и настройки проекта
+# Архитектура, структура файлов/компонентов, js/api/io
 
 ## Коммит: 20.12.2025 - Move thematic logs to docs/logs and rename to match chat tabs
 
