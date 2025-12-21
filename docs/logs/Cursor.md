@@ -1,6 +1,6 @@
 # Настройки и правила проекта
 
-## Коммит 823b3e1 от 21.12.2025 : Start of day: 12-21
+## Коммит a6e5734 от 21.12.2025 : Start of day: 12-21
 ◆ Открыт новый рабочий день 21 декабря 2025. → Перемещены файлы документации в папку `docs/`: `architect.md`, `ui/guide-ii.md` → `docs/guide-ii.md`, `migration-plan.md`, `mm/median.md` → `docs/mm-median.md`. Обновлен `lastCommitMessage` в `core/cfg-app.js` на "Start of day: 12-21". ◉ Зафиксировано начало рабочего дня в истории репозитория.
 
 ## Коммит 8462463 от 20.12.2025 : Update commit hash rules and add mass edits protocol
