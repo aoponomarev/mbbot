@@ -1,6 +1,9 @@
 /* Общие стили layout */
 
-/* Глобально: вертикальная полоса прокрутки всегда видна для предотвращения "дергания" интерфейса */
+/* Полосы прокрутки
+ * Вертикальная полоса прокрутки: Всегда видна глобально (overflow-y: scroll на html) для предотвращения "дергания" интерфейса при появлении/исчезновении полосы
+ * Горизонтальная полоса прокрутки: Скрыта визуально глобально (overflow-x: hidden на html/body, скрытие через CSS ::-webkit-scrollbar { height: 0 } и scrollbar-width: none), но горизонтальная прокрутка доступна через Shift + колесико мыши (или пальцем на мобильных)
+ */
 html {
     overflow-y: scroll;
     /* Запрещаем горизонтальную прокрутку на уровне страницы */
@@ -146,18 +149,18 @@ table td.col-hidden {
         padding-left: 10px;
         padding-right: 10px;
     }
-    
+
     /* Контейнер основного контента: уменьшаем вертикальные отступы на мобильных */
     .container-fluid.app-main-container {
         padding-top: 50px;
         padding-bottom: 50px;
     }
-    
+
     /* Карточка с числовой таблицей: убираем внешнюю рамку на мобильных */
     .card.for-coinsindicator {
         border: 0;
     }
-    
+
     /* Убираем скругление углов у хедера карточки на мобильных */
     .card.for-coinsindicator > .card-header {
         border-radius: 0px;
@@ -324,7 +327,7 @@ table td.col-hidden {
     .cg-favorites-btn .button-icon {
         display: none;
     }
-    
+
     .cg-favorites-btn .button-label {
         display: inline;
     }
@@ -341,7 +344,7 @@ table td.col-hidden {
     .cg-update-btn .button-icon {
         display: none;
     }
-    
+
     .cg-update-btn .button-label {
         display: inline;
     }
@@ -359,7 +362,14 @@ table td.col-hidden {
     font-weight: 600; /* Полужирный для большей контрастности */
 }
 
-/* Кнопки в хедерах всех карточек: единый стиль без прозрачности */
+/* Кнопки в хедерах всех карточек: единый стиль без прозрачности
+ * Кнопки: Единый стиль для всех кнопок в хедерах карточек (класс .card-header .btn)
+ *   - Фон: var(--bs-secondary-bg) (адаптируется под тему)
+ *   - Рамки: Через var(--color-border) (нормальное состояние), var(--color-border-hover) (при hover/focus)
+ *   - Прозрачность: Полностью непрозрачные (opacity: 1)
+ *   - Hover/Focus: Фон через var(--color-button-hover)
+ *   - Фиксированная ширина: Кнопка обновления (.cg-update-btn) имеет фиксированную ширину 7em для предотвращения "прыжков" интерфейса при показе спиннера
+ */
 .card-header .btn {
     /* Дефолтный фон кнопок совпадает с фоном хедера карточки */
     background-color: var(--color-card-header);
@@ -527,7 +537,10 @@ th.col-checkbox .form-check-input:focus {
     opacity: 0.65;
 }
 
-/* Цвет всех card-header: более стальной (темнее, в сторону стального серого с легким синеватым оттенком) */
+/* Хедер карточки (.card-header)
+ * Вертикальные паддинги: padding-top: 0.75rem, padding-bottom: 0.75rem для улучшенной читаемости
+ * Фон: Более темный и "стальной" оттенок через var(--color-card-header) для визуального отделения от основного контента
+ */
 .card-header {
     /* Стальной серый оттенок для светлой темы - темнее и с легким синеватым оттенком */
     background-color: var(--color-card-header);

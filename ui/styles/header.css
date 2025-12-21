@@ -1,6 +1,10 @@
 /* Стили для компонента хедера */
 
-/* Хедер - фиксированный, темный фон */
+/* Хедер - фиксированный, темный фон
+ * Позиционирование: position-fixed top-0, высота 50px, z-index через var(--z-index-header) (1050, совпадает с Bootstrap modal)
+ * Фон: Темный графит через var(--color-header-bg), тень сверху
+ * Всегда в темной теме (не реагирует на переключалку темы приложения)
+ */
 .app-header {
     position: fixed;
     top: 0;
@@ -11,18 +15,26 @@
     box-shadow: 0 2px 4px hsla(0, 0%, 0%, 0.1);
 }
 
-/* Контейнер хедера - убираем боковые паддинги */
+/* Контейнер хедера - убираем боковые паддинги
+ * Боковые паддинги отсутствуют (0px) для десктоп и мобильной версии
+ */
 .app-header-container-fluid {
     padding-left: 0;
     padding-right: 0;
 }
 
-/* Контейнер хедера */
+/* Контейнер хедера
+ * Высота: 50px
+ */
 .app-header-container {
     height: 50px;
 }
 
-/* Гамбургер меню */
+/* Гамбургер меню
+ * Размер: 50px x 50px
+ * SVG иконка для пиксельной четкости
+ * Левая секция хедера, готов к реализации бокового меню
+ */
 .app-header-hamburger {
     width: 50px;
     height: 50px;
@@ -40,7 +52,10 @@
     display: block;
 }
 
-/* Унифицированные стили для селектов в хедере (десктоп и мобильная версия) */
+/* Унифицированные стили для селектов в хедере (десктоп и мобильная версия)
+ * Селекты: Полупрозрачный фон через var(--color-header-overlay), белый текст через var(--color-header-text)
+ * Полупрозрачная стрелка через data URI SVG (см. .app-header-select-model)
+ */
 .app-header-select-model,
 .btn.app-header-dropdown-btn,
 .btn.dropdown-toggle.app-header-dropdown-btn {
@@ -119,7 +134,12 @@
     color: var(--bs-body-color);
 }
 
-/* Вкладки отображения (десктоп) */
+/* Вкладки отображения (десктоп)
+ * Bootstrap btn-group с btn-check
+ * Активная вкладка — белый текст через var(--color-header-text)
+ * Неактивные — полупрозрачный белый через var(--color-header-text-muted)
+ * Адаптивность: десктоп — радиокнопки, мобильные — dropdown
+ */
 .btn-group .app-header-tab {
     transition: background-color 0.2s;
     border-color: var(--color-header-border-strong);
@@ -160,7 +180,11 @@
     border-color: var(--color-header-border-strong);
 }
 
-/* Кнопки управления (рефреш, тема) */
+/* Кнопки управления (рефреш, тема)
+ * Размер: 2x50px (правая секция хедера)
+ * Без ободков, только иконки
+ * Легкая подсветка при наведении через var(--color-header-overlay)
+ */
 .app-header-control-btn {
     width: 50px;
     height: 50px;

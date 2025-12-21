@@ -1,5 +1,9 @@
 /* Стили для компонента сплэш-экрана */
 
+/* Сплэш-экран
+ * Позиционирование: position-fixed, полный экран, z-index через var(--z-index-splash) (9999 - самый верхний слой)
+ * Темный фон через hsla(0, 0%, 0%, 0.95)
+ */
 .app-splash-screen {
     position: fixed;
     top: 0;
@@ -10,6 +14,10 @@
     z-index: var(--z-index-splash);
 }
 
+/* Контейнер сплэш-экрана
+ * Максимальная ширина: 400px
+ * Ширина: 90%
+ */
 .app-splash-container {
     max-width: 400px;
     width: 90%;
@@ -23,6 +31,10 @@
     opacity: 0.7;
 }
 
+/* Поле ввода API-ключа
+ * По умолчанию: прозрачный фон, прозрачная рамка, полупрозрачный текст (opacity: 0.5)
+ * При фокусе: фон var(--bs-dark), рамка var(--bs-secondary), полная непрозрачность
+ */
 .app-splash-api-field {
     opacity: 0.5;
     text-align: center;
@@ -51,6 +63,9 @@
     cursor: pointer;
 }
 
+/* Индикатор загрузки цитаты
+ * Анимированные точки (1,2,3,4,5) вместо спиннера
+ */
 .app-splash-save-icon,
 .app-splash-check-icon {
     font-size: 1.5em;
