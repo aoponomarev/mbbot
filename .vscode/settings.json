@@ -17,6 +17,9 @@
     "**/.DS_Store": true,
     "**/Thumbs.db": true
   },
+  "files.associations": {
+    "*.cursorrules": "markdown"
+  },
 
   // ============================================
   // Настройки редактора
@@ -129,6 +132,11 @@
   // ============================================
   "markdown.preview.fontFamily": "'JetBrains Mono', 'Source Code Pro', Consolas, 'Courier New', monospace",
   "markdown.preview.codeFontFamily": "'JetBrains Mono', 'Source Code Pro', Consolas, 'Courier New', monospace",
+  // Настройки Markdown All in One для улучшенной подсветки синтаксиса
+  "markdown.extension.syntax.plainTheme": false,
+  "markdown.extension.syntax.decorationFileSizeLimit": 1048576,
+  "markdown.extension.toc.updateOnSave": true,
+  "markdown.extension.preview.autoShowPreviewToSide": false,
 
   // ============================================
   // Настройки языков

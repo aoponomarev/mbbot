@@ -1,5 +1,8 @@
 # Настройки и правила проекта
 
+## Коммит от 21.12.2025 : Configure Markdown syntax highlighting and file associations
+◆ Настроена подсветка синтаксиса Markdown и ассоциации файлов. → Добавлено расширение `yzhang.markdown-all-in-one` в `.vscode/extensions.json`. Добавлены настройки Markdown All in One для улучшенной подсветки синтаксиса в `.vscode/settings.json`: `markdown.extension.syntax.plainTheme`, `markdown.extension.syntax.decorationFileSizeLimit`, `markdown.extension.toc.updateOnSave`, `markdown.extension.preview.autoShowPreviewToSide`. Добавлена ассоциация файлов `*.cursorrules` с языком `markdown` через `files.associations`. ◉ Улучшение работы с Markdown-файлами: расширение Markdown All in One обеспечивает полную подсветку синтаксиса, а ассоциация `.cursorrules` с Markdown позволяет использовать все возможности подсветки для файлов правил проекта.
+
 ## Коммит a6e5734 от 21.12.2025 : Start of day: 12-21
 ◆ Открыт новый рабочий день 21 декабря 2025. → Перемещены файлы документации в папку `docs/`: `architect.md`, `ui/guide-ii.md` → `docs/guide-ii.md`, `migration-plan.md`, `mm/median.md` → `docs/mm-median.md`. Обновлен `lastCommitMessage` в `core/cfg-app.js` на "Start of day: 12-21". ◉ Зафиксировано начало рабочего дня в истории репозитория.
 
