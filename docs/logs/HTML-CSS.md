@@ -1,6 +1,6 @@
 # Разметка и стили проекта
 
-## Коммит от 21.12.2025 : Fix file counting and restore chart with GitHub data
+## Коммит 4ec711d от 21.12.2025 : Fix file counting and restore chart with GitHub data
 ◆ Убрана линия под последней строкой таблицы в popover типов файлов, добавлен popover при клике на карточку "Файлов". → Добавлен `!important` к правилу `.file-types-custom-popover .table tbody tr:last-child td { border-bottom: none !important; }` для гарантированного удаления линии под последней строкой таблицы в popover. Добавлен `id="files-stat-card"` и `style="cursor: pointer;"` к карточке с числом файлов для возможности открытия popover при клике. Обновлена функция `initFileTypesPopover()` для обработки кликов на обе карточки (диаграмму и карточку с числом файлов), обе показывают один и тот же popover с таблицей типов файлов. Удален неиспользуемый файл `ui/styles/chat.css`. ◉ Улучшение UX через добавление popover на карточку "Файлов" демонстрирует принцип доступности: пользователь может получить детальную информацию из разных точек интерфейса. Удаление визуального шума (линия под последней строкой) улучшает восприятие таблицы.
 
 ## Коммит dc67625 от 20.12.2025 : Decouple review pages CSS from main application styles
