@@ -1,5 +1,8 @@
 # Настройки и правила проекта
 
+## Коммит от 21.12.2025 : Fix cross-references in documentation
+◆ Обновлены ссылки на документацию в правилах работы ИИ-агента. → Исправлены ссылки в `.cursorrules`: `median.md` → `mm-median.md`, `docs/ui/guide-ii.md` → `docs/guide-ii.md`, `docs/median.md` → `docs/mm-median.md`. ◉ Обеспечение актуальности ссылок на документацию в правилах работы агента.
+
 ## Коммит от 21.12.2025 : Configure Markdown syntax highlighting and file associations
 ◆ Настроена подсветка синтаксиса Markdown и ассоциации файлов. → Добавлено расширение `yzhang.markdown-all-in-one` в `.vscode/extensions.json`. Добавлены настройки Markdown All in One для улучшенной подсветки синтаксиса в `.vscode/settings.json`: `markdown.extension.syntax.plainTheme`, `markdown.extension.syntax.decorationFileSizeLimit`, `markdown.extension.toc.updateOnSave`, `markdown.extension.preview.autoShowPreviewToSide`. Добавлена ассоциация файлов `*.cursorrules` с языком `markdown` через `files.associations`. ◉ Улучшение работы с Markdown-файлами: расширение Markdown All in One обеспечивает полную подсветку синтаксиса, а ассоциация `.cursorrules` с Markdown позволяет использовать все возможности подсветки для файлов правил проекта.
 
