@@ -686,7 +686,7 @@ const ReviewDataPipeline = (() => {
                     const relPath = `${prefix}${name}`;
                     if (entry.kind === 'directory') {
                         // Исключения по правилам проекта
-                        if (name === '.git' || name === 'node_modules' || name === 'old_app_not_write') {
+                        if (name === '.git' || name === 'node_modules' || name === 'do-overs' || name === 'drafts') {
                             continue;
                         }
                         await walk(entry, `${relPath}/`);
@@ -777,10 +777,10 @@ const ReviewDataPipeline = (() => {
     }
 
     function shouldExcludePath(p) {
-        // Правила проекта: docs/ не читаем; old_app_not_write/ не трогаем
+        // Правила проекта: do-overs/ и drafts/ не трогаем
         return (
-            p.startsWith('docs/') ||
-            p.startsWith('old_app_not_write/') ||
+            p.startsWith('do-overs/') ||
+            p.startsWith('drafts/') ||
             p.startsWith('.git/') ||
             p.includes('/.git/') ||
             p.startsWith('node_modules/') ||
@@ -915,6 +915,93 @@ const ReviewDataPipeline = (() => {
         const collected = new Set();
         const contentDigests = []; // path:sha256(text) — для устойчивого fingerprint при изменении содержимого
 
+        // Явно добавляем все файлы из docs/ и ui/styles/ (кроме исключенных папок)
+        // Это гарантирует, что эти папки не будут пропущены, даже если файлы не подключены из entrypoint'ов
+        // DepGraph работает через dependency graph и не видит файлы, которые не подключены напрямую
+        const addDocsFiles = async () => {
+            try {
+                // Список всех известных файлов из docs/ (получен через glob_file_search)
+                // ВАЖНО: docs/ полностью разрешена, никаких запретов на неё нет
+                const docsFiles = [
+                    'docs/.cursorrules',
+                    'docs/architect.md',
+                    'docs/guide-ii.md',
+                    'docs/mm-median.md',
+                    'docs/migration-plan.md',
+                    'docs/review/r-app.html',
+                    'docs/review/r-colors.html',
+                    'docs/review/r-data.md',
+                    'docs/review/r-icons.html',
+                    'docs/review/r-manager.js',
+                    'docs/review/r-messages.html',
+                    'docs/review/r-styles.css',
+                    'docs/review/r-system-messages.json',
+                    'docs/logs/ARCH.md',
+                    'docs/logs/Cursor.md',
+                    'docs/logs/DOCS.md',
+                    'docs/logs/HTML-CSS.md',
+                    'docs/logs/MM.md'
+                ];
+
+                // Добавляем файлы из docs/
+                for (const filePath of docsFiles) {
+                    // Проверяем исключения (do-overs/, drafts/, .git/, node_modules/)
+                    // docs/ НЕ исключается, поэтому все файлы из docs/ будут добавлены
+                    if (shouldExcludePath(filePath)) continue;
+                    try {
+                        const resp = await fetch(`${base}${filePath}`);
+                        if (resp.ok) {
+                            collected.add(filePath);
+                            try {
+                                const text = await resp.text();
+                                const h = await sha256(text);
+                                if (h) contentDigests.push(`${filePath}:${h}`);
+                            } catch {
+                                // ignore digest failure
+                            }
+                        }
+                    } catch {
+                        // ignore fetch failures
+                    }
+                }
+
+                // Добавляем все файлы из ui/styles/
+                // Это гарантирует, что все CSS файлы будут видны, даже если они не подключены из entrypoint'ов
+                const uiStylesFiles = [
+                    'ui/styles/button.css',
+                    'ui/styles/dropdown.css',
+                    'ui/styles/footer.css',
+                    'ui/styles/header.css',
+                    'ui/styles/icons.css',
+                    'ui/styles/layout.css',
+                    'ui/styles/splash.css',
+                    'ui/styles/theme-colors.css',
+                    'ui/styles/z-index.css'
+                ];
+
+                for (const filePath of uiStylesFiles) {
+                    if (shouldExcludePath(filePath)) continue;
+                    try {
+                        const resp = await fetch(`${base}${filePath}`);
+                        if (resp.ok) {
+                            collected.add(filePath);
+                            try {
+                                const text = await resp.text();
+                                const h = await sha256(text);
+                                if (h) contentDigests.push(`${filePath}:${h}`);
+                            } catch {
+                                // ignore digest failure
+                            }
+                        }
+                    } catch {
+                        // ignore fetch failures
+                    }
+                }
+            } catch {
+                // ignore errors
+            }
+        };
+
         const addLocal = (ref) => {
             if (!ref) return;
             // Отбрасываем внешние ссылки
@@ -930,6 +1017,9 @@ const ReviewDataPipeline = (() => {
                 queue.push(norm);
             }
         };
+
+        // Сначала явно добавляем все файлы из docs/
+        await addDocsFiles();
 
         while (queue.length > 0) {
             const p = queue.shift();
@@ -1009,9 +1099,10 @@ const ReviewDataPipeline = (() => {
 
     async function getFileIndex(options = {}) {
         const allowPrompt = options.allowPrompt === true;
+        const skipFS = options.skipFS === true; // Опция для пропуска FS индекса (только Git репозиторий)
 
-        // 1) Если пользователь уже выбрал папку — используем её.
-        if (fsIndex) {
+        // 1) Если пользователь уже выбрал папку — используем её (если не пропущен FS).
+        if (fsIndex && !skipFS) {
             activeIndex = fsIndex;
             // best-effort: показываем источник через централизованный store (если доступен)
             ReviewSystemMessages.post?.('source.fs', { id: 'source' });
@@ -1853,24 +1944,29 @@ const ProjectStats = {
         }
     },
 
-    // Отображение рейтинга файлов
-    async renderFilesRanking() {
+    // Отображение рейтинга файлов (использует данные из GitHub через scanAllFilesIndependent)
+    async renderFilesRanking(useCachedData = false) {
         const tbody = document.getElementById('files-ranking-body');
         if (!tbody) return;
 
-        // Загружаем данные независимым методом
-        const scanResult = await this.scanAllFilesIndependent();
-        const files = scanResult.files || [];
+        let files = [];
 
-        // Сохраняем для сортировки
-        this.filesData = files;
+        // Если не используем кешированные данные, загружаем из GitHub
+        if (!useCachedData || !this.filesData || this.filesData.length === 0) {
+            // Загружаем данные из GitHub через независимый метод
+            const scanResult = await this.scanAllFilesIndependent();
+            files = scanResult.files || [];
+            // Сохраняем для сортировки и сортируем по умолчанию (по количеству строк, по убыванию)
+            this.filesData = [...files].sort((a, b) => b.lines - a.lines);
+            files = this.filesData;
+        } else {
+            // Используем уже загруженные и отсортированные данные из GitHub
+            files = this.filesData;
+        }
 
         tbody.innerHTML = '';
 
-        // Сортируем по количеству строк (по убыванию)
-        const sorted = [...files].sort((a, b) => b.lines - a.lines);
-
-        sorted.forEach((file, index) => {
+        files.forEach((file, index) => {
             const tr = document.createElement('tr');
 
             // Определяем тип для цвета (docs/ → docs, иначе по расширению)
@@ -1883,6 +1979,7 @@ const ProjectStats = {
             const badgeStyle = badgeColor ? `style="background-color: ${badgeColor}; color: white;"` : '';
 
             tr.innerHTML = `
+                <td class="text-end file-ranking-number">${(index + 1).toLocaleString()}</td>
                 <td class="text-end"><strong>${file.lines.toLocaleString()}</strong></td>
                 <td><code>${file.path}</code></td>
                 <td><span class="badge ${badgeClass}" ${badgeStyle}>${file.type.toUpperCase()}</span></td>
@@ -1892,8 +1989,11 @@ const ProjectStats = {
             tbody.appendChild(tr);
         });
 
-        // Добавляем обработчики сортировки
-        this.attachSortHandlers();
+        // Добавляем обработчики сортировки (только один раз)
+        if (!this._sortHandlersAttached) {
+            this.attachSortHandlers();
+            this._sortHandlersAttached = true;
+        }
     },
 
     formatFileSize(bytes) {
@@ -1911,131 +2011,82 @@ const ProjectStats = {
 
     // Полностью независимый подсчет всех файлов проекта для popover диаграммы
     async scanAllFilesIndependent() {
-        const baseUrl = window.location.origin + window.location.pathname.replace(/docs\/review\/.*$/, '');
+        // Получаем индекс файлов из Git репозитория (GitHub или DepGraph), НЕ из File System
+        // Используем опцию skipFS=true, чтобы пропустить FS индекс и использовать только Git
+        const idx = await ReviewDataPipeline.getFileIndex({ allowPrompt: false, skipFS: true });
 
-        // Полный список всех файлов проекта (хардкод для надежности)
-        const allProjectFiles = [
-            // DOCS (13 файлов из docs/)
-            'docs/review/r-manager.js',
-            'docs/review/r-styles.css',
-            'docs/review/r-app.html',
-            'docs/review/r-messages.html',
-            'docs/review/r-icons.html',
-            'docs/review/r-colors.html',
-            'docs/review/r-system-messages.json',
-            'docs/review/r-data.md',
-            'docs/logs/Cursor.md',
-            'docs/logs/DOCS.md',
-            'docs/logs/MM.md',
-            'docs/logs/HTML-CSS.md',
-            'docs/logs/ARCH.md',
+        // Получаем список всех файлов из индекса
+        // Теперь docs/ не исключается из shouldExcludePath(), поэтому все файлы будут доступны
+        let allFiles = await idx.listFiles();
 
-            // JS (42 файла)
-            'core/cfg-app.js',
-            'app/app-ui-root.js',
-            'ui/components/menu-item.js',
-            'ui/utils/coins-favorites-helpers.js',
-            'ui/config/table-columns-config.js',
-            'ui/utils/coins-cd-helpers.js',
-            'ui/components/system-messages.js',
-            'ui/components/sortable-header.js',
-            'ui/components/header-cell.js',
-            'ui/api/coins-manager.js',
-            'ui/utils/ui-element-helper.js',
-            'ui/utils/table-sort-mixin.js',
-            'ui/utils/messages-store.js',
-            'ui/api/perplexity.js',
-            'core/api/market-metrics.js',
-            'ui/api/import-export.js',
-            'ui/interaction/splash.js',
-            'ui/components/button.js',
-            'ui/interaction/header.js',
-            'ui/components/dropdown-menu.js',
-            'core/api/coingecko.js',
-            'ui/components/header-coins.js',
-            'ui/interaction/theme.js',
-            'core/api/perplexity.js',
-            'ui/interaction/chat.js',
-            'ui/components/table-data.js',
-            'ui/components/cell-num.js',
-            'ui/components/horizon-input.js',
-            'mm/median/metrics/cd.js',
-            'ui/components/header-cell-check.js',
-            'ui/utils/hash-generator.js',
-            'ui/components/table-coin-row.js',
-            'ui/components/cell-row-select.js',
-            'ui/components/cell-coin.js',
-            'ui/utils/column-visibility-mixin.js',
-            'mm/median/metrics/cpt.js',
-            'mm/median/core/pv1h-clip.js',
-            'mm/median/core/prc-weights.js',
-            'mm/median/utils/math-helpers.js',
-            'ui/utils/pluralize.js',
-            'ui/interaction/footer.js',
-            'core/security/u-sec-obfuscate.js',
+        // Фильтруем файлы: исключаем только служебные папки
+        // (docs/ теперь включен в индекс, так как убран из shouldExcludePath())
+        allFiles = allFiles.filter(path => {
+            const normalizedPath = String(path || '').replace(/\\/g, '/');
 
-            // CSS (10 файлов)
-            'ui/styles/header.css',
-            'ui/styles/layout.css',
-            'ui/styles/icons.css',
-            'ui/styles/dropdown.css',
-            'ui/styles/theme-colors.css',
-            'ui/styles/button.css',
-            'ui/styles/splash.css',
-            'ui/styles/footer.css',
-            'ui/styles/z-index.css',
-            'ui/styles/chat.css',
+            // Исключаем служебные папки (но НЕ docs/)
+            if (normalizedPath.startsWith('.git/') ||
+                normalizedPath.includes('/.git/') ||
+                normalizedPath.startsWith('node_modules/') ||
+                normalizedPath.includes('/node_modules/') ||
+                normalizedPath.startsWith('do-overs/') ||
+                normalizedPath.includes('/do-overs/') ||
+                normalizedPath.startsWith('drafts/') ||
+                normalizedPath.includes('/drafts/')) {
+                return false;
+            }
 
-            // HTML (1 файл)
-            'index.html',
-
-            // JSON (1 файл)
-            'ui/config/ui-element-mapping.json',
-
-            // MD (4 файла не из docs/)
-            'architect.md',
-            'ui/guide-ii.md',
-            'mm/median.md',
-            'migration-plan.md',
-
-            // SVG (1 файл)
-            'ui/assets/icons/icon-cross.svg'
-        ];
+            return true; // Включаем все остальные файлы, включая docs/, .json, .svg, .png
+        });
 
         const results = [];
         let loaded = 0;
         let failed = 0;
         let totalLines = 0;
 
-        for (const path of allProjectFiles) {
-            try {
-                const url = `${baseUrl}${path}`;
-                const resp = await fetch(url);
-                if (!resp.ok) {
-                    failed++;
-                    continue;
-                }
+        // Обрабатываем каждый файл (включая .json, .svg, .png)
+        for (const path of allFiles) {
+            const normalizedPath = String(path).replace(/\\/g, '/');
 
-                const content = await resp.text();
-                const fileName = path.split('/').pop();
+            try {
+                // Читаем содержимое файла через индекс (все файлы, включая docs/, теперь доступны через индекс)
+                const content = await idx.readText(path);
+
+                const fileName = normalizedPath.split('/').pop();
                 const ext = (fileName.includes('.') ? fileName.split('.').pop() : '').toLowerCase();
 
                 // Определяем тип файла: docs/ → 'docs', иначе по расширению
-                const isFromDocs = path.startsWith('docs/');
-                const fileType = isFromDocs ? (ext || 'docs') : ext;
+                // Для файлов из docs/ тип всегда 'docs' независимо от расширения
+                // Для остальных файлов тип = расширение (.json → 'json', .svg → 'svg', .png → 'png', и т.д.)
+                const isFromDocs = normalizedPath.startsWith('docs/');
+                const fileType = isFromDocs ? 'docs' : (ext || 'other');
 
                 // Подсчитываем строки кода (без комментариев)
+                // Для .json, .svg, .png countCodeLines вернет 0 или корректное значение
                 const lines = this.countCodeLines(content, fileType);
                 totalLines += lines;
 
                 results.push({
-                    path,
+                    path: normalizedPath,
                     type: fileType,
                     size: content.length,
                     lines: lines
                 });
                 loaded++;
             } catch (e) {
+                // Если файл не удалось прочитать, все равно добавляем его в результаты с нулевыми значениями
+                // Это гарантирует, что все файлы из индекса будут учтены в статистике
+                const fileName = normalizedPath.split('/').pop();
+                const ext = (fileName.includes('.') ? fileName.split('.').pop() : '').toLowerCase();
+                const isFromDocs = normalizedPath.startsWith('docs/');
+                const fileType = isFromDocs ? 'docs' : (ext || 'other');
+
+                results.push({
+                    path: normalizedPath,
+                    type: fileType,
+                    size: 0,
+                    lines: 0
+                });
                 failed++;
             }
         }
@@ -2044,12 +2095,315 @@ const ProjectStats = {
             files: results,
             loaded,
             failed,
-            total: allProjectFiles.length,
+            total: allFiles.length,
             totalLines: totalLines
         };
     },
 
     // Статистика типов файлов для popover (полностью независимый подсчет)
+
+    attachSortHandlers() {
+        const table = document.getElementById('files-ranking-table');
+        if (!table) return;
+
+        const headers = table.querySelectorAll('th[data-column]');
+
+        headers.forEach(th => {
+            th.style.cursor = 'pointer';
+            th.addEventListener('click', async () => {
+                const column = th.dataset.column;
+                const currentDir = th.classList.contains('sort-asc') ? 'desc' :
+                                  th.classList.contains('sort-desc') ? null : 'asc';
+
+                // Убираем сортировку с других заголовков
+                headers.forEach(h => h.classList.remove('sort-asc', 'sort-desc'));
+
+                if (currentDir) {
+                    th.classList.add(`sort-${currentDir}`);
+
+                    // Сортируем уже загруженные данные из GitHub (без повторной загрузки)
+                    if (!this.filesData || this.filesData.length === 0) {
+                        // Если данных нет, загружаем из GitHub
+                        await this.renderFilesRanking(false);
+                        return;
+                    }
+
+                    const sorted = [...this.filesData];
+                    sorted.sort((a, b) => {
+                        let valA = a[column];
+                        let valB = b[column];
+
+                        if (column === 'path') {
+                            valA = valA.toLowerCase();
+                            valB = valB.toLowerCase();
+                        }
+
+                        if (valA < valB) return currentDir === 'asc' ? -1 : 1;
+                        if (valA > valB) return currentDir === 'asc' ? 1 : -1;
+                        return 0;
+                    });
+
+                    // Обновляем данные и перерисовываем (используем кешированные данные)
+                    this.filesData = sorted;
+                    await this.renderFilesRanking(true);
+                } else {
+                    // Сбрасываем сортировку - возвращаемся к исходной загрузке из GitHub
+                    await this.renderFilesRanking(false);
+                }
+            });
+        });
+    },
+
+    // Инициализация цветов для бейджей и диаграммы (из CSS переменных)
+    initFileTypesColors() {
+        const root = getComputedStyle(document.documentElement);
+        this.fileTypesColors = {
+            css: root.getPropertyValue('--file-type-css-color').trim() || 'hsl(210, 62%, 36%)',
+            docs: root.getPropertyValue('--file-type-docs-color').trim() || 'hsl(95, 55%, 35%)',
+            js: root.getPropertyValue('--file-type-js-color').trim() || 'hsl(42, 80%, 48%)',
+            html: root.getPropertyValue('--file-type-html-color').trim() || 'hsl(343, 63%, 36%)'
+        };
+    },
+
+    // Отображение диаграмм
+    async renderCharts() {
+        await this.renderFileTypesChart();
+    },
+
+    async renderFileTypesChart() {
+        const canvas = document.getElementById('file-types-chart');
+        if (!canvas) return;
+
+        // Toggle: "Количество / Объём" (кол-во файлов vs суммарный размер)
+        if (!this._fileTypesModeBound) {
+            this._fileTypesModeBound = true;
+            try {
+                const inputs = document.querySelectorAll('input[name="file-types-mode"]');
+                inputs.forEach(inp => {
+                    inp.addEventListener('change', () => {
+                        try { this.renderFileTypesChart(); } catch (_) { /* ignore */ }
+                    });
+                });
+            } catch (_) {
+                // ignore
+            }
+        }
+
+        const mode =
+            (document.querySelector('input[name="file-types-mode"]:checked')?.value === 'size')
+                ? 'size'
+                : 'count';
+
+        // Canvas подстраивается под размеры родительского контейнера.
+        const container = canvas.parentElement;
+        const cssWidth = Math.max(1, Math.floor(container?.clientWidth || 300));
+        const cssHeight = Math.max(1, Math.floor(container?.clientHeight || 300));
+        const dpr = window.devicePixelRatio || 1;
+
+        canvas.style.width = '100%';
+        canvas.style.height = `${cssHeight}px`;
+        canvas.width = Math.floor(cssWidth * dpr);
+        canvas.height = Math.floor(cssHeight * dpr);
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        // Используем независимый метод подсчета (данные из GitHub)
+        const scanResult = await this.scanAllFilesIndependent();
+        const files = scanResult.files || [];
+
+        // Группируем по типам (только для 4 секторов: CSS, DOCS, JS, HTML)
+        const typeStats = {};
+
+        files.forEach(file => {
+            const path = String(file?.path || '').replace(/\\/g, '/');
+            const t = String(file?.type || '').toLowerCase();
+
+            // Все файлы из docs/ → DOCS (независимо от расширения)
+            let key;
+            if (path.startsWith('docs/')) {
+                key = 'docs';
+            } else {
+                key = t || 'other';
+            }
+
+            // Учитываем только 4 основных типа для диаграммы
+            const allowedTypes = ['css', 'docs', 'js', 'html'];
+            if (!allowedTypes.includes(key)) {
+                return; // Пропускаем остальные типы
+            }
+
+            if (!typeStats[key]) typeStats[key] = { count: 0, size: 0 };
+            typeStats[key].count += 1;
+            typeStats[key].size += (file?.size || 0);
+        });
+
+        // Сохраняем данные для popover (полные, со всеми типами)
+        this.fileTypesStats = typeStats;
+
+        // =========================================================================
+        // ФИКСИРОВАННЫЕ ТИПЫ (позиции + цвета) - только 4 сектора
+        // =========================================================================
+        const ANCHORS = ['css', 'docs', 'js', 'html']; // from 12:00 clockwise
+
+        // Инициализируем цвета из CSS переменных (если еще не инициализированы)
+        if (!this.fileTypesColors) {
+            this.initFileTypesColors();
+        }
+
+        // Ensure anchors exist in map (even if 0) so order stays stable
+        for (const a of ANCHORS) {
+            if (!typeStats[a]) typeStats[a] = { count: 0, size: 0 };
+        }
+
+        const metric = (k) => {
+            const v = typeStats[k] || { count: 0, size: 0 };
+            return mode === 'size' ? v.size : v.count;
+        };
+
+        // Только 4 якорных сектора (без дополнительных)
+        const types = [];
+        const colors = [];
+        const values = [];
+
+        for (const a of ANCHORS) {
+            types.push(a);
+            colors.push(this.fileTypesColors[a] || 'hsl(0, 0%, 50%)');
+            values.push(metric(a));
+        }
+
+        const total = values.reduce((a, b) => a + b, 0);
+        if (total === 0) return;
+
+        const w = cssWidth;
+        const h = cssHeight;
+        const centerX = w / 2;
+        const centerY = h / 2;
+        const radius = Math.min(w, h) / 3;
+        let currentAngle = -Math.PI / 2;
+
+        ctx.clearRect(0, 0, w, h);
+
+        types.forEach((type, index) => {
+            const sliceAngle = (values[index] / total) * 2 * Math.PI;
+
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
+            ctx.closePath();
+            ctx.fillStyle = colors[index % colors.length];
+            ctx.fill();
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Подпись
+            const labelAngle = currentAngle + sliceAngle / 2;
+            const labelX = centerX + Math.cos(labelAngle) * (radius + 30);
+            const labelY = centerY + Math.sin(labelAngle) * (radius + 30);
+
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 12px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            const label = (type === 'docs') ? 'DOCS' : String(type || '').toUpperCase();
+            ctx.fillText(label, labelX, labelY);
+
+            // Процент
+            const percent = ((values[index] / total) * 100).toFixed(1);
+            ctx.font = '10px Arial';
+            ctx.fillText(`${percent}%`, labelX, labelY + 15);
+
+            currentAngle += sliceAngle;
+        });
+
+        // Перерисовка при изменении размеров окна (bind once)
+        if (!this._fileTypesResizeHandler) {
+            this._fileTypesResizeHandler = () => {
+                try { this.renderFileTypesChart(); } catch (_) { /* ignore */ }
+            };
+            window.addEventListener('resize', this._fileTypesResizeHandler, { passive: true });
+        }
+
+        // Инициализируем popover после того, как данные готовы
+        this.initFileTypesPopover();
+    },
+
+    // Инициализация кастомного popover для диаграммы типов файлов
+    initFileTypesPopover() {
+        const fileTypesCard = document.getElementById('file-types-chart-card');
+        const filesStatCard = document.getElementById('files-stat-card');
+        const popover = document.getElementById('file-types-popover');
+        const popoverBody = document.getElementById('file-types-popover-body');
+        const chartContainer = document.querySelector('.chart-container');
+
+        if (!fileTypesCard || !popover || !popoverBody) return;
+
+        // Общая функция для показа popover
+        const showPopover = async () => {
+            // Показываем индикатор загрузки
+            popoverBody.innerHTML = '<div class="p-3 text-center">Загрузка...</div>';
+            popover.style.display = 'block';
+
+            // Используем независимый метод подсчета
+            const content = await this.renderFileTypesStatsIndependent();
+            if (!content) return;
+
+            popoverBody.innerHTML = content;
+
+            // Добавляем обработчик закрытия по клику на popover
+            // Используем setTimeout чтобы не закрыть сразу при открытии
+            setTimeout(() => {
+                const closeHandler = (e) => {
+                    e.stopPropagation();
+                    this.hideFileTypesPopover();
+                    popover.removeEventListener('click', closeHandler);
+                };
+                popover.addEventListener('click', closeHandler);
+            }, 100);
+        };
+
+        // Обработчик для карточки диаграммы
+        if (fileTypesCard.dataset.popoverInitialized !== '1') {
+            fileTypesCard.addEventListener('click', async (e) => {
+                // Игнорируем клики на кнопки переключения режима
+                if (e.target.closest('.btn-group') || e.target.closest('.chart-title')) {
+                    return;
+                }
+                await showPopover();
+            });
+            fileTypesCard.dataset.popoverInitialized = '1';
+        }
+
+        // Обработчик для карточки с числом файлов
+        if (filesStatCard && filesStatCard.dataset.popoverInitialized !== '1') {
+            filesStatCard.addEventListener('click', async () => {
+                await showPopover();
+            });
+            filesStatCard.dataset.popoverInitialized = '1';
+        }
+
+        // Закрытие по Escape (только один раз)
+        if (!this._fileTypesEscapeHandler) {
+            this._fileTypesEscapeHandler = (e) => {
+                if (e.key === 'Escape' && popover.style.display === 'block') {
+                    this.hideFileTypesPopover();
+                }
+            };
+            document.addEventListener('keydown', this._fileTypesEscapeHandler);
+        }
+    },
+
+    // Скрытие кастомного popover
+    hideFileTypesPopover() {
+        const popover = document.getElementById('file-types-popover');
+        if (popover) {
+            popover.style.display = 'none';
+        }
+    },
+
+    // Отображение статистики типов файлов для popover (независимый подсчет)
     async renderFileTypesStatsIndependent() {
         const scanResult = await this.scanAllFilesIndependent();
         const files = scanResult.files || [];
@@ -2119,295 +2473,6 @@ const ProjectStats = {
         return html;
     },
 
-    attachSortHandlers() {
-        const table = document.getElementById('files-ranking-table');
-        if (!table) return;
-
-        const headers = table.querySelectorAll('th[data-column]');
-
-        headers.forEach(th => {
-            th.style.cursor = 'pointer';
-            th.addEventListener('click', async () => {
-                const column = th.dataset.column;
-                const currentDir = th.classList.contains('sort-asc') ? 'desc' :
-                                  th.classList.contains('sort-desc') ? null : 'asc';
-
-                // Убираем сортировку с других заголовков
-                headers.forEach(h => h.classList.remove('sort-asc', 'sort-desc'));
-
-                if (currentDir) {
-                    th.classList.add(`sort-${currentDir}`);
-
-                    // Сортируем данные
-                    const sorted = [...this.filesData];
-                    sorted.sort((a, b) => {
-                        let valA = a[column];
-                        let valB = b[column];
-
-                        if (column === 'path') {
-                            valA = valA.toLowerCase();
-                            valB = valB.toLowerCase();
-                        }
-
-                        if (valA < valB) return currentDir === 'asc' ? -1 : 1;
-                        if (valA > valB) return currentDir === 'asc' ? 1 : -1;
-                        return 0;
-                    });
-
-                    this.filesData = sorted;
-                    await this.renderFilesRanking();
-                }
-            });
-        });
-    },
-
-    // Отображение диаграмм
-    async renderCharts() {
-        await this.renderFileTypesChart();
-    },
-
-    async renderFileTypesChart() {
-        const canvas = document.getElementById('file-types-chart');
-        if (!canvas) return;
-
-        // Toggle: "Количество / Объём" (кол-во файлов vs суммарный размер)
-        if (!this._fileTypesModeBound) {
-            this._fileTypesModeBound = true;
-            try {
-                const inputs = document.querySelectorAll('input[name="file-types-mode"]');
-                inputs.forEach(inp => {
-                    inp.addEventListener('change', () => {
-                        try { this.renderFileTypesChart(); } catch (_) { /* ignore */ }
-                    });
-                });
-            } catch (_) {
-                // ignore
-            }
-        }
-
-        const mode =
-            (document.querySelector('input[name="file-types-mode"]:checked')?.value === 'size')
-                ? 'size'
-                : 'count';
-
-        // Canvas подстраивается под размеры родительского контейнера.
-        const container = canvas.parentElement;
-        const cssWidth = Math.max(1, Math.floor(container?.clientWidth || 300));
-        const cssHeight = Math.max(1, Math.floor(container?.clientHeight || 300));
-        const dpr = window.devicePixelRatio || 1;
-
-        canvas.style.width = '100%';
-        canvas.style.height = `${cssHeight}px`;
-        canvas.width = Math.floor(cssWidth * dpr);
-        canvas.height = Math.floor(cssHeight * dpr);
-
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-        // Используем независимый метод подсчета
-        const scanResult = await this.scanAllFilesIndependent();
-        const files = scanResult.files || [];
-
-        // Группируем по типам (только для 4 секторов: CSS, DOCS, JS, HTML)
-        const typeStats = {};
-
-        files.forEach(file => {
-            const path = String(file?.path || '').replace(/\\/g, '/');
-            const t = String(file?.type || '').toLowerCase();
-
-            // Все файлы из docs/ → DOCS (независимо от расширения)
-            let key;
-            if (path.startsWith('docs/')) {
-                key = 'docs';
-            } else {
-                key = t || 'other';
-            }
-
-            // Учитываем только 4 основных типа для диаграммы
-            const allowedTypes = ['css', 'docs', 'js', 'html'];
-            if (!allowedTypes.includes(key)) {
-                return; // Пропускаем остальные типы
-            }
-
-            if (!typeStats[key]) typeStats[key] = { count: 0, size: 0 };
-            typeStats[key].count += 1;
-            typeStats[key].size += (file?.size || 0);
-        });
-
-        // Сохраняем данные для popover (полные, со всеми типами - будет пересчитан в popover)
-        this.fileTypesStats = typeStats;
-
-        // =========================================================================
-        // ФИКСИРОВАННЫЕ ТИПЫ (позиции + цвета) - только 4 сектора
-        // =========================================================================
-        const ANCHORS = ['css', 'docs', 'js', 'html']; // from 12:00 clockwise
-        const BASE = {
-            cherry: { h: 343, s: 63, l: 36 }, // HTML
-            ochre:  { h: 42,  s: 80, l: 48 }, // JS
-            lime:   { h: 95,  s: 55, l: 35 }, // DOCS
-            blue:   { h: 210, s: 62, l: 36 }  // CSS
-        };
-        const fixedByType = {
-            css: BASE.blue,
-            docs: BASE.lime,
-            js: BASE.ochre,
-            html: BASE.cherry
-        };
-
-        // Ensure anchors exist in map (even if 0) so order stays stable
-        for (const a of ANCHORS) {
-            if (!typeStats[a]) typeStats[a] = { count: 0, size: 0 };
-        }
-
-        const metric = (k) => {
-            const v = typeStats[k] || { count: 0, size: 0 };
-            return mode === 'size' ? v.size : v.count;
-        };
-
-        const hsl = (c) => `hsl(${c.h} ${c.s}% ${c.l}%)`;
-
-        // Сохраняем цвета для использования в бейджах
-        this.fileTypesColors = {};
-        for (const [type, color] of Object.entries(fixedByType)) {
-            this.fileTypesColors[type] = hsl(color);
-        }
-
-        // Только 4 якорных сектора (без дополнительных)
-        const types = [];
-        const colors = [];
-        const values = [];
-
-        for (const a of ANCHORS) {
-            types.push(a);
-            colors.push(hsl(fixedByType[a]));
-            values.push(metric(a));
-        }
-
-        const total = values.reduce((a, b) => a + b, 0);
-        if (total === 0) return;
-
-        const w = cssWidth;
-        const h = cssHeight;
-        const centerX = w / 2;
-        const centerY = h / 2;
-        const radius = Math.min(w, h) / 3;
-        let currentAngle = -Math.PI / 2;
-
-        ctx.clearRect(0, 0, w, h);
-
-        types.forEach((type, index) => {
-            const sliceAngle = (values[index] / total) * 2 * Math.PI;
-
-            ctx.beginPath();
-            ctx.moveTo(centerX, centerY);
-            ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
-            ctx.closePath();
-            ctx.fillStyle = colors[index % colors.length];
-            ctx.fill();
-            ctx.strokeStyle = '#fff';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-
-            // Подпись
-            const labelAngle = currentAngle + sliceAngle / 2;
-            const labelX = centerX + Math.cos(labelAngle) * (radius + 30);
-            const labelY = centerY + Math.sin(labelAngle) * (radius + 30);
-
-            ctx.fillStyle = '#333';
-            ctx.font = 'bold 12px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            const label = (type === 'docs') ? 'DOCS' : String(type || '').toUpperCase();
-            ctx.fillText(label, labelX, labelY);
-
-            // Процент
-            const percent = ((values[index] / total) * 100).toFixed(1);
-            ctx.font = '10px Arial';
-            ctx.fillText(`${percent}%`, labelX, labelY + 15);
-
-            currentAngle += sliceAngle;
-        });
-
-        // Перерисовка при изменении размеров окна (bind once)
-        if (!this._fileTypesResizeHandler) {
-            this._fileTypesResizeHandler = () => {
-                try { this.renderFileTypesChart(); } catch (_) { /* ignore */ }
-            };
-            window.addEventListener('resize', this._fileTypesResizeHandler, { passive: true });
-        }
-
-        // Инициализируем popover после того, как данные готовы
-        this.initFileTypesPopover();
-    },
-
-    // Инициализация кастомного popover для диаграммы типов файлов
-    initFileTypesPopover() {
-        const fileTypesCard = document.getElementById('file-types-chart-card');
-        const popover = document.getElementById('file-types-popover');
-        const popoverBody = document.getElementById('file-types-popover-body');
-        const chartContainer = document.querySelector('.chart-container');
-
-        if (!fileTypesCard || !popover || !popoverBody) return;
-
-        // Проверяем, не инициализирован ли уже обработчик
-        if (fileTypesCard.dataset.popoverInitialized === '1') {
-            // Обновляем содержимое
-            const content = this.renderFileTypesStats();
-            if (content) {
-                popoverBody.innerHTML = content;
-            }
-            return;
-        }
-
-        // Обработчик клика на карточку
-        const self = this;
-        fileTypesCard.addEventListener('click', async function(e) {
-            // Игнорируем клики на кнопки переключения режима
-            if (e.target.closest('.btn-group') || e.target.closest('.chart-title')) {
-                return;
-            }
-
-            // Показываем индикатор загрузки
-            popoverBody.innerHTML = '<div class="p-3 text-center">Загрузка...</div>';
-            popover.style.display = 'block';
-
-            // Используем независимый метод подсчета
-            const content = await self.renderFileTypesStatsIndependent();
-            if (!content) return;
-
-            popoverBody.innerHTML = content;
-
-            // Добавляем обработчик закрытия по клику на popover
-            // Используем setTimeout чтобы не закрыть сразу при открытии
-            setTimeout(function() {
-                const closeHandler = function(e) {
-                    e.stopPropagation();
-                    self.hideFileTypesPopover();
-                    popover.removeEventListener('click', closeHandler);
-                };
-                popover.addEventListener('click', closeHandler);
-            }, 100);
-        });
-
-        // Закрытие по Escape
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && popover.style.display === 'block') {
-                this.hideFileTypesPopover();
-            }
-        });
-
-        fileTypesCard.dataset.popoverInitialized = '1';
-    },
-
-    // Скрытие кастомного popover
-    hideFileTypesPopover() {
-        const popover = document.getElementById('file-types-popover');
-        if (popover) {
-            popover.style.display = 'none';
-        }
-    },
-
     // Отображение статистики иконок (для popover)
     renderIconsStats() {
         if (!this.iconsStats) return '';
@@ -2452,52 +2517,6 @@ const ProjectStats = {
         return html;
     },
 
-    // Отображение статистики типов файлов (для popover)
-    renderFileTypesStats() {
-        if (!this.fileTypesStats || Object.keys(this.fileTypesStats).length === 0) {
-            return '<div style="padding: 0.5rem;">Данные не загружены</div>';
-        }
-
-        let html = `
-            <div class="p-3" style="min-width: 300px;">
-                <table class="table table-sm mb-0 me-2" style="font-size: 0.875rem;">
-                    <thead>
-                        <tr>
-                            <th>Тип</th>
-                            <th class="text-center">Количество</th>
-                            <th class="text-end">Объём</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-        `;
-
-        // Сортируем по убыванию количества файлов
-        const sorted = Object.entries(this.fileTypesStats)
-            .map(([type, stats]) => ({
-                type: type === 'docs' ? 'DOCS' : type.toUpperCase(),
-                count: stats.count || 0,
-                size: stats.size || 0
-            }))
-            .sort((a, b) => b.count - a.count);
-
-        sorted.forEach(({ type, count, size }) => {
-            html += `
-                <tr>
-                    <td><strong>${type}</strong></td>
-                    <td class="text-center">${count.toLocaleString()}</td>
-                    <td class="text-end">${this.formatFileSize(size)}</td>
-                </tr>
-            `;
-        });
-
-        html += `
-                    </tbody>
-                </table>
-            </div>
-        `;
-
-        return html;
-    },
 
     // Инициализация статистики (только для r-app.html)
     async init() {
@@ -2513,6 +2532,8 @@ const ProjectStats = {
         await this.loadColorsStats();
 
         await this.renderMainStats();
+        // Инициализируем цвета для бейджей и диаграммы
+        this.initFileTypesColors();
         // Сначала рендерим диаграмму, чтобы заполнить fileTypesColors
         await this.renderCharts();
         // Потом рендерим таблицу, чтобы использовать цвета из диаграммы
@@ -2558,8 +2579,6 @@ const ProjectStats = {
             }
         }
 
-        // Popover для диаграммы типов файлов инициализируется в initFileTypesPopover()
-        // после того, как данные готовы (вызывается из renderFileTypesChart())
     }
 };
 

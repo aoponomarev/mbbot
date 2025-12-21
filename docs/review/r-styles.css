@@ -755,7 +755,7 @@ body {
 }
 
 .file-types-custom-popover .table tbody tr:last-child td {
-    border-bottom: none;
+    border-bottom: none !important;
 }
 
 .file-types-custom-popover .table tbody tr:hover {
@@ -1039,5 +1039,20 @@ button:disabled .icon-cross,
 a[aria-disabled="true"] .icon-cross {
     --icon-cross-color: var(--icon-action-disabled-color);
     opacity: 0.6;
+}
+
+/* Цвета секторов диаграммы типов файлов (сохранены для использования в бейджах) */
+:root {
+    --file-type-css-color: hsl(210, 62%, 36%);
+    --file-type-docs-color: hsl(95, 55%, 35%);
+    --file-type-js-color: hsl(42, 80%, 48%);
+    --file-type-html-color: hsl(343, 63%, 36%);
+}
+
+/* Нумерация строк в таблице рейтинга файлов */
+.file-ranking-number {
+    color: rgba(153, 153, 153, 0.6);
+    font-weight: 300;
+    font-size: 0.9em;
 }
 
